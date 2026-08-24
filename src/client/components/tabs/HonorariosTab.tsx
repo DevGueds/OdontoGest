@@ -250,14 +250,13 @@ export const HonorariosTab: React.FC<Props> = ({
                 </div>
 
                 <div className="form-group margin-top-sm">
-                  <label>Registro Profissional (CRO) *</label>
+                  <label>Registro Profissional (CRO) (Opcional)</label>
                   <input 
                     type="text" 
                     className="form-control" 
                     placeholder="Ex: CRO/PA 0592"
                     value={cro}
                     onChange={e => setCro(e.target.value)}
-                    required
                   />
                 </div>
 

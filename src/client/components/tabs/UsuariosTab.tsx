@@ -325,7 +325,7 @@ export const UsuariosTab: React.FC<Props> = ({
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="usr_registro">Registro Profissional / CRO *</label>
+                    <label htmlFor="usr_registro">Registro Profissional / CRO (Opcional)</label>
                     <input 
                       type="text" 
                       id="usr_registro"
@@ -333,7 +333,6 @@ export const UsuariosTab: React.FC<Props> = ({
                       placeholder="Ex: CRO/PA 0592 ou SMS-1020"
                       value={registro}
                       onChange={e => setRegistro(e.target.value)}
-                      required
                     />
                   </div>
                 </div>

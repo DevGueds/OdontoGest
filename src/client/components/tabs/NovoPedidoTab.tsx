@@ -340,7 +340,7 @@ export const NovoPedidoTab: React.FC<Props> = ({
             </div>
 
             <div className="form-group">
-              <label htmlFor="responsavel_registro">Registro Profissional</label>
+              <label htmlFor="responsavel_registro">Registro Profissional (Opcional)</label>
               <input 
                 type="text" 
                 id="responsavel_registro" 
