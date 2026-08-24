@@ -19,8 +19,8 @@ export const Header: React.FC<HeaderProps> = ({ perfilAtual, onExportarSQL, onAb
             <i className="fa-solid fa-hospital-user"></i>
           </div>
           <div className="brand-text">
-            <h1>ALMOXARIFADO DE SAÚDE</h1>
-            <span>Sistema de Pedidos de Bens e Serviços (PBS)</span>
+            <h1>ODONTOGEST</h1>
+            <span>Sistema de Gestão Odontológica</span>
           </div>
         </div>
 
@@ -83,14 +83,16 @@ export const Header: React.FC<HeaderProps> = ({ perfilAtual, onExportarSQL, onAb
             </button>
           )}
 
-          <button 
-            className="btn btn-secondary btn-sm" 
-            onClick={onExportarSQL} 
-            title="Exportar DUMP MySQL"
-            style={{ borderRadius: '9999px', padding: '0.45rem 0.9rem', fontSize: '0.8rem' }}
-          >
-            <i className="fa-solid fa-database"></i> Exportar SQL
-          </button>
+          {perfilAtual === 'ADMINISTRADOR' && (
+            <button 
+              className="btn btn-secondary btn-sm" 
+              onClick={onExportarSQL} 
+              title="Exportar DUMP MySQL"
+              style={{ borderRadius: '9999px', padding: '0.45rem 0.9rem', fontSize: '0.8rem' }}
+            >
+              <i className="fa-solid fa-database"></i> Exportar SQL
+            </button>
+          )}
 
           <button 
             className="btn btn-secondary btn-sm" 

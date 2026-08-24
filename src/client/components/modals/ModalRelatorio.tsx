@@ -198,7 +198,7 @@ export const ModalRelatorio: React.FC<Props> = ({
       <html lang="pt-BR">
       <head>
         <meta charset="UTF-8" />
-        <title>Relatório - Almoxarifado de Saúde</title>
+        <title>Relatório - OdontoGest</title>
         <style>
           body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 12px; color: #1e293b; padding: 20px; line-height: 1.5; }
           .header { text-align: center; border-bottom: 2px solid #0284c7; padding-bottom: 12px; margin-bottom: 20px; }
@@ -232,7 +232,7 @@ export const ModalRelatorio: React.FC<Props> = ({
         </div>
 
         <div class="header">
-          <h1>PREFEITURA MUNICIPAL DE SAÚDE — ALMOXARIFADO DE SAÚDE</h1>
+          <h1>ODONTOGEST — SISTEMA DE GESTÃO</h1>
           <h2>RELATÓRIO GERENCIAL DE FLUXO FINANCEIRO & GESTÃO OPERACIONAL</h2>
         </div>
 

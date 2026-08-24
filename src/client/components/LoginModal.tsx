@@ -3,8 +3,8 @@ import { useAuth } from '../context/AuthContext';
 
 export const LoginModal: React.FC = () => {
   const { login, loading } = useAuth();
-  const [email, setEmail] = useState<string>('admin@saude.gov.br');
-  const [senha, setSenha] = useState<string>('123456');
+  const [email, setEmail] = useState<string>('');
+  const [senha, setSenha] = useState<string>('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const [showSenha, setShowSenha] = useState<boolean>(false);
@@ -23,12 +23,6 @@ export const LoginModal: React.FC = () => {
     } catch (err: any) {
       setErrorMsg(err.message || 'E-mail ou senha incorretos.');
     }
-  };
-
-  const fillCredentials = (userEmail: string) => {
-    setEmail(userEmail);
-    setSenha('123456');
-    setErrorMsg(null);
   };
 
   return (
@@ -54,12 +48,12 @@ export const LoginModal: React.FC = () => {
 
           <form onSubmit={handleLogin}>
             <div className="form-group margin-bottom-sm">
-              <label htmlFor="loginEmail">E-mail Corporativo *</label>
+              <label htmlFor="loginEmail">Email *</label>
               <input 
                 type="email"
                 id="loginEmail" 
                 className="form-control"
-                placeholder="seu.email@saude.gov.br"
+                placeholder="exemplo@dominio.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -97,20 +91,6 @@ export const LoginModal: React.FC = () => {
                   <i className={`fa-solid ${showSenha ? 'fa-eye-slash' : 'fa-eye'}`}></i>
                 </button>
               </div>
-            </div>
-
-            <div style={{ background: 'var(--bg-app)', padding: '0.75rem', borderRadius: 'var(--radius-md)', marginBottom: '1rem' }}>
-              <span className="text-xs text-muted" style={{ display: 'block', fontWeight: 600, marginBottom: '0.4rem' }}>
-                Acesso Inicial do Sistema:
-              </span>
-              <button 
-                type="button" 
-                className="btn btn-outline btn-sm" 
-                onClick={() => fillCredentials('admin@saude.gov.br')}
-                style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem', width: '100%', textAlign: 'center' }}
-              >
-                👑 <strong>Administrador Geral (admin@saude.gov.br)</strong>
-              </button>
             </div>
 
             <div className="form-actions margin-top-md">

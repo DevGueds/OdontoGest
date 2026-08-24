@@ -1,5 +1,5 @@
 {
-  "name": "almoxarifado-saude",
+  "name": "odontogest",
   "version": "2.0.0",
   "description": "Sistema de Pedidos de Bens e Serviços (PBS) - React + TypeScript + Fastify (Prisma ORM + MySQL)",
   "main": "dist/server/server.js",

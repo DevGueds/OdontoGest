@@ -119,7 +119,7 @@ async function bootstrap() {
   fastify.get('/api/status', async () => {
     return {
       status: 'OK',
-      system: 'Almoxarifado de Saúde - PBS',
+      system: 'OdontoGest',
       security: 'OWASP Top 10 Compliant (HttpOnly Cookies + CSRF + OAuth 2.0 PKCE)',
       timestamp: new Date().toISOString()
     };
