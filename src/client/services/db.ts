@@ -139,6 +139,12 @@ class ApiService {
     }, csrfToken);
   }
 
+  async cancelarPedido(pedidoId: number, csrfToken?: string | null): Promise<PedidoPBS> {
+    return this.request<PedidoPBS>(`/api/pedidos/${pedidoId}/cancelar`, {
+      method: 'PUT'
+    }, csrfToken);
+  }
+
   // Estatísticas
   getEstatisticasGastos(pedidos: PedidoPBS[]) {
     const pedidosValidos = pedidos.filter(p => p.status !== 'CANCELADO');

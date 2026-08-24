@@ -193,6 +193,17 @@ export const AppContent: React.FC = () => {
     }
   };
 
+  const handleCancelarPedido = async (pedidoId: number) => {
+    if (!window.confirm('Tem certeza que deseja cancelar este pedido? Esta ação não pode ser desfeita.')) return;
+    try {
+      await dbService.cancelarPedido(pedidoId, csrfToken);
+      showToast('Pedido cancelado com sucesso!', 'info');
+      await reloadData();
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    }
+  };
+
   const handleConfirmarMaterial = async (desc: string, un: string, val: number, est: number, limiteMax?: number | null, fornecedor?: string | null, natureza?: NaturezaDespesa) => {
     try {
       await dbService.addMaterial(desc, un, val, est, limiteMax ?? null, fornecedor ?? null, natureza || 'CUSTEIO', csrfToken);
@@ -428,6 +439,7 @@ export const AppContent: React.FC = () => {
               onAbrirRecebimento={(p) => { setSelectedPedido(p); setModalRecOpen(true); }}
               onAbrirAtendimento={(p) => { setSelectedPedido(p); setModalAtendOpen(true); }}
               onAbrirEnvio={(p) => { setSelectedPedido(p); setModalEnvioOpen(true); }}
+              onCancelarPedido={(p) => handleCancelarPedido(p.id)}
               formatarData={formatarData}
             />
           </div>

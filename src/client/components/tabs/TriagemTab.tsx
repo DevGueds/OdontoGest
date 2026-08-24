@@ -9,6 +9,7 @@ interface Props {
   onAbrirRecebimento: (pedido: PedidoPBS) => void;
   onAbrirAtendimento: (pedido: PedidoPBS) => void;
   onAbrirEnvio: (pedido: PedidoPBS) => void;
+  onCancelarPedido: (pedido: PedidoPBS) => void;
   formatarData: (d?: string | null) => string;
 }
 
@@ -20,6 +21,7 @@ export const TriagemTab: React.FC<Props> = ({
   onAbrirRecebimento,
   onAbrirAtendimento,
   onAbrirEnvio,
+  onCancelarPedido,
   formatarData
 }) => {
   const isGestor = perfilAtual === 'GESTOR';
@@ -164,6 +166,11 @@ export const TriagemTab: React.FC<Props> = ({
 
                           {isAdmin ? (
                             <>
+                              {(p.status === 'SOLICITADO' || p.status === 'RECEBIDO') && (
+                                <button className="btn btn-rose btn-sm" onClick={() => onCancelarPedido(p)}>
+                                  <i className="fa-solid fa-ban"></i> Cancelar
+                                </button>
+                              )}
                               {p.status === 'SOLICITADO' && (
                                 <button className="btn btn-success btn-sm" onClick={() => onAbrirRecebimento(p)}>
                                   <i className="fa-solid fa-clipboard-check"></i> 1. Confirmar Recebimento
@@ -194,6 +201,11 @@ export const TriagemTab: React.FC<Props> = ({
                             </>
                           ) : (
                             <>
+                              {p.status === 'SOLICITADO' && (
+                                <button className="btn btn-rose btn-sm" onClick={() => onCancelarPedido(p)} style={{ marginRight: '8px' }}>
+                                  <i className="fa-solid fa-ban"></i> Cancelar
+                                </button>
+                              )}
                               {p.status === 'SOLICITADO' && (
                                 <span className="badge badge-amber"><i className="fa-solid fa-hourglass-half"></i> Aguardando Almoxarifado</span>
                               )}

@@ -391,6 +391,16 @@ async function bootstrap() {
     }
   });
 
+  fastify.put('/api/pedidos/:id/cancelar', { preHandler: [authenticate] }, async (req, reply) => {
+    const { id } = req.params as any;
+    try {
+      const ped = await dataStore.cancelarPedido(Number(id));
+      return ped;
+    } catch (err: any) {
+      return reply.status(400).send({ error: err.message });
+    }
+  });
+
   // Honorários & Salários Odontológicos
   fastify.get('/api/honorarios', async () => {
     return await dataStore.getHonorarios();

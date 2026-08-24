@@ -782,6 +782,55 @@ class DataStore {
     }
   }
 
+  async cancelarPedido(pedidoId: number): Promise<PedidoPBS> {
+    try {
+      const p = await prisma.pedidoPBS.update({
+        where: { id: Number(pedidoId) },
+        data: {
+          status: 'CANCELADO'
+        },
+        include: { itens: true }
+      });
+
+      return {
+        id: p.id,
+        numero_pbs: p.numeroPbs || '',
+        unidade_emitente_id: p.unidadeEmitenteId,
+        data_pedido: p.dataPedido.toISOString().substring(0, 10),
+        responsavel_nome: p.responsavelNome,
+        responsavel_funcao: p.responsavelFuncao || undefined,
+        responsavel_registro: p.responsavelRegistro || undefined,
+        atividade_programa: p.atividadePrograma || undefined,
+        elemento_despesa: p.elementoDespesa || undefined,
+        observacoes: p.observacoes || undefined,
+        status: p.status as any,
+        valor_total_estimado: Number(p.valorTotalEstimado),
+        apontador_envio_nome: p.apontadorEnvioNome,
+        data_envio: p.dataEnvio ? p.dataEnvio.toISOString().substring(0, 10) : null,
+        apontador_recebimento_nome: p.apontadorRecebimentoNome,
+        data_recebimento: p.dataRecebimento ? p.dataRecebimento.toISOString().substring(0, 10) : null,
+        itens: p.itens.map(it => ({
+          id: it.id,
+          pedido_id: it.pedidoId,
+          numero_item: it.numeroItem,
+          material_id: it.materialId,
+          qtd_pedida: it.qtdPedida,
+          qtd_atendida: it.qtdAtendida,
+          valor_unitario: Number(it.valorUnitario || 0),
+          valor_total: Number(it.valorTotal || 0)
+        }))
+      };
+    } catch (err) {
+      const pIndex = this.inMemoryPedidos.findIndex(p => p.id === Number(pedidoId));
+      if (pIndex === -1) throw new Error("Pedido não encontrado.");
+
+      this.inMemoryPedidos[pIndex].status = "CANCELADO";
+      this.inMemoryPedidos[pIndex].atualizado_em = new Date().toISOString();
+
+      return this.inMemoryPedidos[pIndex];
+    }
+  }
+
   // Estatísticas
   getEstatisticasGastos(pedidos: PedidoPBS[]) {
     const pedidosValidos = pedidos.filter(p => p.status !== 'CANCELADO');
