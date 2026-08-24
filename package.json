@@ -1,0 +1,52 @@
+{
+  "name": "almoxarifado-saude",
+  "version": "2.0.0",
+  "description": "Sistema de Pedidos de Bens e Serviços (PBS) - React + TypeScript + Fastify (Prisma ORM + MySQL)",
+  "main": "dist/server/server.js",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"vite\" \"tsx watch src/server/server.ts\"",
+    "build": "prisma generate && tsc && vite build",
+    "start": "node dist/server/server.js",
+    "serve": "tsx src/server/server.ts",
+    "prisma:generate": "prisma generate",
+    "prisma:db-push": "prisma db push"
+  },
+  "keywords": [
+    "almoxarifado",
+    "saude",
+    "usf",
+    "pbs",
+    "pedidos",
+    "react",
+    "fastify",
+    "typescript",
+    "owasp",
+    "oauth",
+    "prisma",
+    "mysql"
+  ],
+  "author": "Antigravity AI",
+  "license": "MIT",
+  "dependencies": {
+    "@fastify/cookie": "^11.0.2",
+    "@fastify/cors": "^10.0.1",
+    "@fastify/csrf-protection": "^7.0.2",
+    "@fastify/static": "^8.0.3",
+    "@prisma/client": "^6.3.0",
+    "fastify": "^5.2.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.10",
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
+    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.2",
+    "prisma": "^6.3.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.11"
+  }
+}

@@ -1,0 +1,185 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum PerfilUsuario {
+  SOLICITANTE
+  GESTOR
+  ADMINISTRADOR
+  TECNICO
+}
+
+enum StatusPedido {
+  SOLICITADO
+  RECEBIDO
+  ENVIADO
+  ATENDIDO_PARCIAL
+  ATENDIDO_TOTAL
+  CANCELADO
+}
+
+enum NaturezaDespesa {
+  CUSTEIO
+  INVESTIMENTO
+}
+
+model UnidadeSaude {
+  id                   Int                   @id @default(autoincrement())
+  nome                 String                @unique @db.VarChar(150)
+  tipo                 String                @default("USF") @db.VarChar(50)
+  orcamentoCusteio     Decimal               @default(100000.00) @map("orcamento_custeio") @db.Decimal(12, 2)
+  orcamentoInvestimento Decimal              @default(50000.00) @map("orcamento_investimento") @db.Decimal(12, 2)
+  criadoEm             DateTime              @default(now()) @map("criado_em")
+  usuarios             Usuario[]
+  pedidos              PedidoPBS[]
+  honorarios           HonorarioOdontologo[]
+  equipamentos         Equipamento[]
+  chamados             ChamadoManutencao[]
+
+  @@map("unidades_saude")
+}
+
+model Usuario {
+  id           Int           @id @default(autoincrement())
+  email        String        @unique @db.VarChar(150)
+  senhaHash    String        @map("senha_hash") @db.VarChar(255)
+  nome         String        @db.VarChar(150)
+  funcao       String?       @db.VarChar(100)
+  registro     String?       @db.VarChar(50)
+  perfil       PerfilUsuario @default(SOLICITANTE)
+  unidadeId    Int?          @map("unidade_id")
+  criadoEm     DateTime      @default(now()) @map("criado_em")
+  atualizadoEm DateTime      @default(now()) @updatedAt @map("atualizado_em")
+  unidade      UnidadeSaude? @relation(fields: [unidadeId], references: [id], onDelete: SetNull)
+
+  @@map("usuarios")
+}
+
+model Material {
+  id              Int             @id @default(autoincrement())
+  descricao       String          @db.VarChar(255)
+  fornecedor      String?         @db.VarChar(150)
+  unidadeMedida   String          @map("unidade_medida") @db.VarChar(20)
+  valorEstimado   Decimal         @default(0.00) @map("valor_estimado") @db.Decimal(10, 2)
+  qtdEstoque      Int             @default(100) @map("qtd_estoque")
+  limiteMaxPedido Int?            @map("limite_max_pedido")
+  natureza        NaturezaDespesa @default(CUSTEIO)
+  criadoEm        DateTime        @default(now()) @map("criado_em")
+  itensPedido     ItemPedidoPBS[]
+
+  @@map("materiais")
+}
+
+model PedidoPBS {
+  id                       Int             @id @default(autoincrement())
+  numeroPbs                String?         @unique @map("numero_pbs") @db.VarChar(50)
+  unidadeEmitenteId        Int             @map("unidade_emitente_id")
+  dataPedido               DateTime        @map("data_pedido") @db.Date
+  responsavelNome          String          @map("responsavel_nome") @db.VarChar(150)
+  responsavelFuncao        String?         @map("responsavel_funcao") @db.VarChar(100)
+  responsavelRegistro      String?         @map("responsavel_registro") @db.VarChar(50)
+  atividadePrograma        String?         @map("atividade_programa") @db.VarChar(150)
+  elementoDespesa          String?         @map("elemento_despesa") @db.VarChar(100)
+  observacoes              String?         @db.Text
+  status                   StatusPedido    @default(SOLICITADO)
+  valorTotalEstimado       Decimal         @default(0.00) @map("valor_total_estimado") @db.Decimal(10, 2)
+  apontadorEnvioNome       String?         @map("apontador_envio_nome") @db.VarChar(150)
+  dataEnvio                DateTime?       @map("data_envio") @db.Date
+  apontadorRecebimentoNome String?         @map("apontador_recebimento_nome") @db.VarChar(150)
+  dataRecebimento          DateTime?       @map("data_recebimento") @db.Date
+  criadoEm                 DateTime        @default(now()) @map("criado_em")
+  atualizadoEm             DateTime        @default(now()) @updatedAt @map("atualizado_em")
+  unidade                  UnidadeSaude    @relation(fields: [unidadeEmitenteId], references: [id])
+  itens                    ItemPedidoPBS[]
+
+  @@map("pedidos_pbs")
+}
+
+model ItemPedidoPBS {
+  id            Int       @id @default(autoincrement())
+  pedidoId      Int       @map("pedido_id")
+  numeroItem    Int       @map("numero_item")
+  materialId    Int       @map("material_id")
+  qtdPedida     Int       @map("qtd_pedida")
+  qtdAtendida   Int       @default(0) @map("qtd_atendida")
+  valorUnitario Decimal?  @map("valor_unitario") @db.Decimal(10, 2)
+  valorTotal    Decimal?  @map("valor_total") @db.Decimal(10, 2)
+  pedido        PedidoPBS @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  material      Material  @relation(fields: [materialId], references: [id])
+
+  @@map("itens_pedido_pbs")
+}
+
+model HonorarioOdontologo {
+  id            Int          @id @default(autoincrement())
+  unidadeId     Int          @map("unidade_id")
+  nomeDentista  String       @map("nome_dentista") @db.VarChar(150)
+  cro           String       @db.VarChar(50)
+  tipoContrato  String       @map("tipo_contrato") @db.VarChar(50)
+  mesReferencia String       @map("mes_referencia") @db.VarChar(10)
+  valorFixo     Decimal      @default(0.00) @map("valor_fixo") @db.Decimal(10, 2)
+  valorComissao Decimal      @default(0.00) @map("valor_comissao") @db.Decimal(10, 2)
+  valorTotal    Decimal      @default(0.00) @map("valor_total") @db.Decimal(10, 2)
+  observacoes   String?      @db.Text
+  criadoEm      DateTime     @default(now()) @map("criado_em")
+  unidade       UnidadeSaude @relation(fields: [unidadeId], references: [id])
+
+  @@map("honorarios_odontologos")
+}
+
+model Equipamento {
+  id                   Int                 @id @default(autoincrement())
+  unidadeId            Int                 @map("unidade_id")
+  nome                 String              @db.VarChar(150)
+  numeroSerie          String              @map("numero_serie") @db.VarChar(100)
+  categoria            String              @db.VarChar(100)
+  dataUltimaPreventiva DateTime?           @map("data_ultima_preventiva") @db.Date
+  criadoEm             DateTime            @default(now()) @map("criado_em")
+  unidade              UnidadeSaude        @relation(fields: [unidadeId], references: [id])
+  chamados             ChamadoManutencao[]
+
+  @@map("equipamentos")
+}
+
+model ChamadoManutencao {
+  id              Int          @id @default(autoincrement())
+  unidadeId       Int          @map("unidade_id")
+  equipamentoId   Int          @map("equipamento_id")
+  tipo            String       @default("CORRETIVA") @db.VarChar(20)
+  descricaoDefeito String       @map("descricao_defeito") @db.Text
+  custoReparo     Decimal      @default(0.00) @map("custo_reparo") @db.Decimal(10, 2)
+  status          String       @default("ABERTO") @db.VarChar(20)
+  dataAbertura    DateTime     @default(now()) @map("data_abertura") @db.Date
+  dataConclusao   DateTime?    @map("data_conclusao") @db.Date
+  observacoes     String?      @db.Text
+  criadoEm        DateTime     @default(now()) @map("criado_em")
+  unidade         UnidadeSaude @relation(fields: [unidadeId], references: [id])
+  equipamento     Equipamento  @relation(fields: [equipamentoId], references: [id], onDelete: Cascade)
+
+  @@map("chamados_manutencao")
+}
+
+enum TipoRecorrencia {
+  RECORRENTE
+  PARCELA_UNICA
+}
+
+model EntradaRecurso {
+  id              Int             @id @default(autoincrement())
+  unidadeId       Int?            @map("unidade_id")
+  natureza        NaturezaDespesa @default(CUSTEIO)
+  tipoRecorrencia TipoRecorrencia @default(RECORRENTE) @map("tipo_recorrencia")
+  descricao       String          @db.VarChar(255)
+  valor           Decimal         @default(0.00) @db.Decimal(12, 2)
+  dataCredito     DateTime        @default(now()) @map("data_credito") @db.Date
+  mesReferencia   String          @map("mes_referencia") @db.VarChar(10)
+  observacoes     String?         @db.Text
+  criadoEm        DateTime        @default(now()) @map("criado_em")
+
+  @@map("entradas_recursos")
+}
