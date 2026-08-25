@@ -250,7 +250,9 @@ class DataStore {
   // Materiais
   async getMateriais(): Promise<Material[]> {
     try {
-      const list = await prisma.material.findMany();
+      const list = await prisma.material.findMany({
+        orderBy: { descricao: 'asc' }
+      });
       if (list) {
         return list.map(m => ({
           id: m.id,

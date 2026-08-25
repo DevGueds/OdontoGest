@@ -1,5 +1,6 @@
 import React from 'react';
 import { UnidadeSaude, Material, PerfilUsuario } from '../../types';
+import { useSortableData } from '../hooks/useSortableData';
 
 interface Props {
   unidades: UnidadeSaude[];
@@ -30,6 +31,9 @@ export const CatalogoTab: React.FC<Props> = ({
 }) => {
   const isReadOnly = perfilAtual === 'GESTOR';
 
+  const { items: sortedUnidades, requestSort: requestSortUnidades, getSortIndicator: getSortUnidades } = useSortableData(unidades, { key: 'id', direction: 'asc' });
+  const { items: sortedMateriais, requestSort: requestSortMateriais, getSortIndicator: getSortMateriais } = useSortableData(materiais, { key: 'descricao', direction: 'asc' });
+
   return (
     <div className="panel-stack">
       {/* Unidades / Estabelecimentos de Saúde */}
@@ -50,14 +54,14 @@ export const CatalogoTab: React.FC<Props> = ({
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>Nome do Estabelecimento</th>
-                  <th>Data Cadastro</th>
+                  <th onClick={() => requestSortUnidades('id')} style={{cursor: 'pointer'}}>ID{getSortUnidades('id')}</th>
+                  <th onClick={() => requestSortUnidades('nome')} style={{cursor: 'pointer'}}>Nome do Estabelecimento{getSortUnidades('nome')}</th>
+                  <th onClick={() => requestSortUnidades('criado_em')} style={{cursor: 'pointer'}}>Data Cadastro{getSortUnidades('criado_em')}</th>
                   <th className="text-center">Ações</th>
                 </tr>
               </thead>
               <tbody>
-                {unidades.map(u => (
+                {sortedUnidades.map(u => (
                   <tr key={u.id}>
                     <td><strong>#{u.id}</strong></td>
                     <td><strong>{u.nome}</strong></td>
@@ -114,19 +118,19 @@ export const CatalogoTab: React.FC<Props> = ({
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>Descrição do Material / Insumo</th>
-                  <th>Natureza</th>
-                  <th>Fornecedor / Distribuidor</th>
-                  <th>Unidade Medida</th>
-                  <th>Val. Estimado</th>
-                  <th>Estoque Atual</th>
-                  <th>Limite Máx. p/ Pedido</th>
+                  <th onClick={() => requestSortMateriais('id')} style={{cursor: 'pointer'}}>ID{getSortMateriais('id')}</th>
+                  <th onClick={() => requestSortMateriais('descricao')} style={{cursor: 'pointer'}}>Descrição do Material / Insumo{getSortMateriais('descricao')}</th>
+                  <th onClick={() => requestSortMateriais('natureza')} style={{cursor: 'pointer'}}>Natureza{getSortMateriais('natureza')}</th>
+                  <th onClick={() => requestSortMateriais('fornecedor')} style={{cursor: 'pointer'}}>Fornecedor / Distribuidor{getSortMateriais('fornecedor')}</th>
+                  <th onClick={() => requestSortMateriais('unidade_medida')} style={{cursor: 'pointer'}}>Unidade Medida{getSortMateriais('unidade_medida')}</th>
+                  <th onClick={() => requestSortMateriais('valor_estimado')} style={{cursor: 'pointer'}}>Val. Estimado{getSortMateriais('valor_estimado')}</th>
+                  <th onClick={() => requestSortMateriais('qtd_estoque')} style={{cursor: 'pointer'}}>Estoque Atual{getSortMateriais('qtd_estoque')}</th>
+                  <th onClick={() => requestSortMateriais('limite_max_pedido')} style={{cursor: 'pointer'}}>Limite Máx. p/ Pedido{getSortMateriais('limite_max_pedido')}</th>
                   <th>Ação</th>
                 </tr>
               </thead>
               <tbody>
-                {materiais.map(m => {
+                {sortedMateriais.map(m => {
                   const est = m.qtd_estoque ?? 0;
                   let badgeEstoque = <span className="badge badge-emerald"><i className="fa-solid fa-circle-check"></i> {est} {m.unidade_medida}</span>;
                   if (est <= 0) {

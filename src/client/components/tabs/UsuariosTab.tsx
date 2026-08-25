@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { UnidadeSaude, UserSistema, PerfilUsuario } from '../../types';
+import { useSortableData } from '../hooks/useSortableData';
 
 interface Props {
   unidades: UnidadeSaude[];
@@ -18,6 +19,8 @@ export const UsuariosTab: React.FC<Props> = ({
 }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [usuarioEdicao, setUsuarioEdicao] = useState<UserSistema | null>(null);
+
+  const { items: sortedUsuarios, requestSort, getSortIndicator } = useSortableData(usuarios, { key: 'nome', direction: 'asc' });
 
   // Form State
   const [nome, setNome] = useState('');
@@ -131,26 +134,26 @@ export const UsuariosTab: React.FC<Props> = ({
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>Nome Completo</th>
-                  <th>Cargo / Função</th>
-                  <th>E-mail Corporativo</th>
+                  <th onClick={() => requestSort('id')} style={{cursor: 'pointer'}}>ID {getSortIndicator('id')}</th>
+                  <th onClick={() => requestSort('nome')} style={{cursor: 'pointer'}}>Nome Completo {getSortIndicator('nome')}</th>
+                  <th onClick={() => requestSort('funcao')} style={{cursor: 'pointer'}}>Cargo / Função {getSortIndicator('funcao')}</th>
+                  <th onClick={() => requestSort('email')} style={{cursor: 'pointer'}}>E-mail Corporativo {getSortIndicator('email')}</th>
                   <th>Senha Cadastrada</th>
-                  <th>Registro Profissional / CRO</th>
-                  <th>Perfil de Acesso</th>
-                  <th>Unidade de Saúde Alocada</th>
+                  <th onClick={() => requestSort('registro')} style={{cursor: 'pointer'}}>Registro Profissional / CRO {getSortIndicator('registro')}</th>
+                  <th onClick={() => requestSort('perfil')} style={{cursor: 'pointer'}}>Perfil de Acesso {getSortIndicator('perfil')}</th>
+                  <th onClick={() => requestSort('unidade_id')} style={{cursor: 'pointer'}}>Unidade de Saúde Alocada {getSortIndicator('unidade_id')}</th>
                   <th className="text-center">Ações</th>
                 </tr>
               </thead>
               <tbody>
-                {usuarios.length === 0 ? (
+                {sortedUsuarios.length === 0 ? (
                   <tr>
                     <td colSpan={9} className="text-center text-muted" style={{ padding: '2rem' }}>
                       Nenhum usuário cadastrado.
                     </td>
                   </tr>
                 ) : (
-                  usuarios.map(u => {
+                  sortedUsuarios.map(u => {
                     const uni = unidades.find(un => un.id === u.unidade_id);
                     return (
                       <tr key={u.id}>
