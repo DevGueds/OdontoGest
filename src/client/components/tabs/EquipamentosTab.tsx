@@ -377,13 +377,15 @@ export const EquipamentosTab: React.FC<Props> = ({
                         </td>
                         <td>
                           <div style={{ display: 'flex', gap: '0.4rem' }}>
-                            <button 
-                              className="btn btn-outline btn-sm"
-                              title="Editar dados do equipamento / patrimônio"
-                              onClick={() => handleAbrirEditarEquipamento(eq)}
-                            >
-                              <i className="fa-solid fa-pen-to-square"></i> Editar
-                            </button>
+                            {(isAdmin || isGestor) && (
+                              <button 
+                                className="btn btn-outline btn-sm"
+                                title="Editar dados do equipamento / patrimônio"
+                                onClick={() => handleAbrirEditarEquipamento(eq)}
+                              >
+                                <i className="fa-solid fa-pen-to-square"></i> Editar
+                              </button>
+                            )}
                             {!isGestor && !isTecnico && (
                               <button 
                                 className="btn btn-outline btn-sm"
@@ -664,7 +666,7 @@ export const EquipamentosTab: React.FC<Props> = ({
                         const uni = unidades.find(u => u.id === eq.unidade_id);
                         return (
                           <option key={eq.id} value={eq.id}>
-                            [{uni?.nome}] {eq.nome}{eq.numero_serie ? ` (Patrimônio: ${eq.numero_serie})` : ''}
+                            {!isSolicitante && uni?.nome ? `[${uni.nome}] ` : ''}{eq.nome}{eq.numero_serie ? ` (Patrimônio: ${eq.numero_serie})` : ''}
                           </option>
                         );
                       })}
@@ -707,17 +709,19 @@ export const EquipamentosTab: React.FC<Props> = ({
                       required
                     />
                   </div>
-                  <div className="form-group">
-                    <label>Estimativa de Custo do Reparo (R$)</label>
-                    <input 
-                      type="number"
-                      step="0.01"
-                      className="form-control"
-                      placeholder="0.00"
-                      value={chCustoReparo}
-                      onChange={e => setChCustoReparo(e.target.value)}
-                    />
-                  </div>
+                  {!isSolicitante && (
+                    <div className="form-group">
+                      <label>Estimativa de Custo do Reparo (R$)</label>
+                      <input 
+                        type="number"
+                        step="0.01"
+                        className="form-control"
+                        placeholder="0.00"
+                        value={chCustoReparo}
+                        onChange={e => setChCustoReparo(e.target.value)}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div className="form-actions margin-top-md">
