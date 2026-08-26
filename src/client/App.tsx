@@ -315,6 +315,16 @@ export const AppContent: React.FC = () => {
     }
   };
 
+  const handleEditarEquipamento = async (id: number, dados: Partial<Equipamento>) => {
+    try {
+      const eq = await dbService.atualizarEquipamento(id, dados, csrfToken);
+      showToast(`Equipamento "${eq.nome}" atualizado com sucesso!`, 'success');
+      await reloadData();
+    } catch (err: any) {
+      showToast(err.message || 'Erro ao atualizar equipamento', 'error');
+    }
+  };
+
   const handleAddChamado = async (dados: Omit<ChamadoManutencao, 'id'>) => {
     try {
       const novo = await dbService.addChamado(dados, csrfToken);
@@ -479,6 +489,7 @@ export const AppContent: React.FC = () => {
               chamados={chamados}
               perfilAtual={perfilAtual}
               onAddEquipamento={handleAddEquipamento}
+              onUpdateEquipamento={handleEditarEquipamento}
               onAddChamado={handleAddChamado}
               onUpdateStatusChamado={handleUpdateStatusChamado}
               onAprovarChamado={handleAprovarChamado}

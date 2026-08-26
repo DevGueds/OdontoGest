@@ -261,6 +261,13 @@ class ApiService {
     }, csrfToken);
   }
 
+  async atualizarEquipamento(id: number, dados: Partial<Equipamento>, csrfToken?: string | null): Promise<Equipamento> {
+    return this.request<Equipamento>(`/api/equipamentos/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(dados)
+    }, csrfToken);
+  }
+
   // Chamados de Manutenção
   async getChamados(): Promise<ChamadoManutencao[]> {
     return this.request<ChamadoManutencao[]>('/api/chamados');

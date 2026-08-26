@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   UnidadeSaude, 
   Equipamento, 
@@ -7,6 +7,7 @@ import {
   TipoChamado,
   PerfilUsuario 
 } from '../../types';
+import { useAuth } from '../../context/AuthContext';
 
 interface Props {
   unidades: UnidadeSaude[];
@@ -14,6 +15,7 @@ interface Props {
   chamados: ChamadoManutencao[];
   perfilAtual: PerfilUsuario;
   onAddEquipamento: (dados: Omit<Equipamento, 'id'>) => void;
+  onUpdateEquipamento: (id: number, dados: Partial<Equipamento>) => void;
   onAddChamado: (dados: Omit<ChamadoManutencao, 'id'>) => void;
   onUpdateStatusChamado: (chamadoId: number, status: StatusChamado, custoReparo?: number) => void;
   onAprovarChamado?: (chamadoId: number, aprovar: boolean) => void;
@@ -26,30 +28,49 @@ export const EquipamentosTab: React.FC<Props> = ({
   chamados,
   perfilAtual,
   onAddEquipamento,
+  onUpdateEquipamento,
   onAddChamado,
   onUpdateStatusChamado,
   onAprovarChamado,
   formatarMoeda
 }) => {
+  const { user } = useAuth();
   const isSolicitante = perfilAtual === 'SOLICITANTE';
   const isGestor = perfilAtual === 'GESTOR';
   const isAdmin = perfilAtual === 'ADMINISTRADOR';
   const isTecnico = perfilAtual === 'TECNICO';
+
+  useEffect(() => {
+    if (isSolicitante && user?.unidade_id) {
+      setUnidadeFiltro(user.unidade_id);
+    }
+  }, [isSolicitante, user]);
 
   const [unidadeFiltro, setUnidadeFiltro] = useState<number | 'TODAS'>('TODAS');
   const [equipamentoSelecionadoId, setEquipamentoSelecionadoId] = useState<number | 'TODOS'>('TODOS');
   
   // Modais
   const [modalEquipamentoOpen, setModalEquipamentoOpen] = useState(false);
+  const [modalEditEquipamentoOpen, setModalEditEquipamentoOpen] = useState(false);
   const [modalChamadoOpen, setModalChamadoOpen] = useState(false);
   const [modalPreventivaOpen, setModalPreventivaOpen] = useState(false);
   const [equipamentoPreventiva, setEquipamentoPreventiva] = useState<Equipamento | null>(null);
 
-  // Form Equipamento
+  // Form Equipamento (Novo)
   const [eqUnidadeId, setEqUnidadeId] = useState<number>(unidades[0]?.id || 1);
   const [eqNome, setEqNome] = useState('');
   const [eqNumeroSerie, setEqNumeroSerie] = useState('');
   const [eqDataPreventiva, setEqDataPreventiva] = useState('');
+
+  // Form Equipamento (Edição)
+  const [equipamentoEdicao, setEquipamentoEdicao] = useState<Equipamento | null>(null);
+  const [editUnidadeId, setEditUnidadeId] = useState<number | ''>('');
+  const [editNome, setEditNome] = useState('');
+  const [editNumeroSerie, setEditNumeroSerie] = useState('');
+  const [editDataPreventiva, setEditDataPreventiva] = useState('');
+
+  // Estado para colapsar/expandir alertas de preventiva
+  const [alertasExpandidos, setAlertasExpandidos] = useState(false);
 
   // Form Chamado Corretiva/Preventiva
   const [chEquipamentoId, setChEquipamentoId] = useState<number>(equipamentos[0]?.id || 1);
@@ -65,12 +86,14 @@ export const EquipamentosTab: React.FC<Props> = ({
   const [novoCusto, setNovoCusto] = useState('');
 
   const equipamentosFiltrados = equipamentos.filter(eq => {
+    if (isSolicitante && user?.unidade_id && eq.unidade_id !== user.unidade_id) return false;
     if (unidadeFiltro !== 'TODAS' && eq.unidade_id !== unidadeFiltro) return false;
     if (equipamentoSelecionadoId !== 'TODOS' && eq.id !== equipamentoSelecionadoId) return false;
     return true;
   });
 
   const chamadosFiltrados = chamados.filter(ch => {
+    if (isSolicitante && user?.unidade_id && ch.unidade_id !== user.unidade_id) return false;
     if (unidadeFiltro !== 'TODAS' && ch.unidade_id !== unidadeFiltro) return false;
     if (equipamentoSelecionadoId !== 'TODOS' && ch.equipamento_id !== equipamentoSelecionadoId) return false;
     
@@ -83,18 +106,49 @@ export const EquipamentosTab: React.FC<Props> = ({
   });
 
   // Regra Automatizada de Manutenção Preventiva:
-  const alertasPreventivaAutomated = equipamentosFiltrados.map(eq => {
-    const chamadosDoEq = chamados.filter(c => c.equipamento_id === eq.id && (c.status === 'ABERTO' || c.status === 'APROVADO_ADM' || c.status === 'EM_ANDAMENTO'));
-    const temPendencias = chamadosDoEq.length > 0;
-    const uni = unidades.find(u => u.id === eq.unidade_id);
+  // Alerta apenas equipamentos que não possuem chamados ativos E que nunca fizeram preventiva ou estão há mais de 180 dias sem preventiva
+  const alertasPreventivaAutomated = React.useMemo(() => {
+    const hoje = new Date();
+    return equipamentosFiltrados.filter(eq => {
+      const chamadosDoEq = chamados.filter(c => c.equipamento_id === eq.id && c.status !== 'CONCLUIDO' && c.status !== 'RECUSADO');
+      if (chamadosDoEq.length > 0) return false;
 
-    return {
-      equipamento: eq,
-      unidade: uni,
-      temPendencias,
-      mensagem: `O equipamento ${eq.nome} (#${eq.numero_serie}) na ${uni ? uni.nome : 'Unidade'} não possui chamados de reparo/defeito pendentes. Recomenda-se agendar a Manutenção Preventiva periódica.`
-    };
-  });
+      if (!eq.data_ultima_preventiva) return true;
+
+      const dataPrev = new Date(eq.data_ultima_preventiva);
+      const diffDias = Math.floor((hoje.getTime() - dataPrev.getTime()) / (1000 * 3600 * 24));
+      return diffDias >= 180;
+    }).map(eq => {
+      const uni = unidades.find(u => u.id === eq.unidade_id);
+      return {
+        equipamento: eq,
+        unidade: uni,
+        mensagem: `O equipamento ${eq.nome}${eq.numero_serie ? ` (Patrimônio: ${eq.numero_serie})` : ''} na ${uni ? uni.nome : 'Unidade'} ${!eq.data_ultima_preventiva ? 'não possui preventiva registrada' : 'está há mais de 6 meses sem preventiva'}.`
+      };
+    });
+  }, [equipamentosFiltrados, chamados, unidades]);
+
+  const handleAbrirEditarEquipamento = (eq: Equipamento) => {
+    setEquipamentoEdicao(eq);
+    setEditUnidadeId(eq.unidade_id);
+    setEditNome(eq.nome);
+    setEditNumeroSerie(eq.numero_serie || '');
+    setEditDataPreventiva(eq.data_ultima_preventiva || '');
+    setModalEditEquipamentoOpen(true);
+  };
+
+  const handleConfirmarEdicaoEquipamento = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!equipamentoEdicao) return;
+    onUpdateEquipamento(equipamentoEdicao.id, {
+      unidade_id: Number(editUnidadeId),
+      nome: editNome,
+      numero_serie: editNumeroSerie,
+      data_ultima_preventiva: editDataPreventiva || null
+    });
+    setModalEditEquipamentoOpen(false);
+    setEquipamentoEdicao(null);
+  };
 
   const handleSubmitEquipamento = (e: React.FormEvent) => {
     e.preventDefault();
@@ -155,52 +209,61 @@ export const EquipamentosTab: React.FC<Props> = ({
 
   return (
     <div className="panel-stack">
-      {/* Alertas Automatizados de Manutenção Preventiva */}
-      {alertasPreventivaAutomated.filter(a => !a.temPendencias).length > 0 && (
-        <div className="card" style={{ borderLeft: '5px solid var(--cyan)', background: 'rgba(6, 182, 212, 0.05)' }}>
-          <div className="card-header flex-between" style={{ paddingBottom: '0.5rem' }}>
-            <h3 style={{ color: 'var(--cyan)' }}>
-              <i className="fa-solid fa-shield-heart"></i> Regra Automatizada: Alertas de Manutenção Preventiva
-            </h3>
-            <span className="badge badge-cyan">
-              {alertasPreventivaAutomated.filter(a => !a.temPendencias).length} Equipamentos sem defeitos pendentes
-            </span>
+      {/* Alertas Automatizados de Manutenção Preventiva (Compacto e Colapsável) */}
+      {alertasPreventivaAutomated.length > 0 && (
+        <div className="card" style={{ borderLeft: '4px solid var(--cyan)', background: 'rgba(6, 182, 212, 0.04)', padding: '0.8rem 1.2rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.6rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              <i className="fa-solid fa-shield-heart text-cyan" style={{ fontSize: '1.2rem' }}></i>
+              <strong style={{ color: 'var(--cyan)', fontSize: '0.95rem' }}>
+                Sugestões de Manutenção Preventiva ({alertasPreventivaAutomated.length} equipamento{alertasPreventivaAutomated.length > 1 ? 's' : ''})
+              </strong>
+            </div>
+            <button 
+              type="button" 
+              className="btn btn-outline btn-sm"
+              style={{ borderColor: 'var(--cyan)', color: 'var(--cyan)', padding: '0.3rem 0.8rem' }}
+              onClick={() => setAlertasExpandidos(!alertasExpandidos)}
+            >
+              <i className={`fa-solid fa-chevron-${alertasExpandidos ? 'up' : 'down'}`}></i>{' '}
+              {alertasExpandidos ? 'Ocultar Sugestões' : 'Ver Sugestões'}
+            </button>
           </div>
 
-          <div className="card-body">
-            <div style={{ display: 'grid', gap: '0.8rem' }}>
-              {alertasPreventivaAutomated.filter(a => !a.temPendencias).slice(0, 3).map((item, idx) => (
+          {alertasExpandidos && (
+            <div style={{ marginTop: '0.8rem', maxHeight: '220px', overflowY: 'auto', display: 'grid', gap: '0.5rem', paddingRight: '4px' }}>
+              {alertasPreventivaAutomated.map((item, idx) => (
                 <div key={idx} style={{ 
                   background: 'var(--bg-card)', 
-                  padding: '0.9rem 1.2rem', 
-                  borderRadius: '8px', 
+                  padding: '0.6rem 0.9rem', 
+                  borderRadius: '6px', 
                   border: '1px solid var(--border-color)',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  gap: '1rem',
+                  gap: '0.8rem',
                   flexWrap: 'wrap'
                 }}>
                   <div>
-                    <strong style={{ color: 'var(--text-primary)' }}>
-                      <i className="fa-solid fa-hospital text-muted"></i> {item.unidade?.nome} — {item.equipamento.nome} ({item.equipamento.numero_serie})
+                    <strong style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+                      <i className="fa-solid fa-hospital text-muted"></i> {item.unidade?.nome} — {item.equipamento.nome}{item.equipamento.numero_serie ? ` (Patrimônio: ${item.equipamento.numero_serie})` : ''}
                     </strong>
-                    <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    <p style={{ margin: '0.1rem 0 0 0', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
                       {item.mensagem}
                     </p>
                   </div>
 
                   <button 
                     className="btn btn-outline btn-sm"
-                    style={{ borderColor: 'var(--cyan)', color: 'var(--cyan)' }}
+                    style={{ borderColor: 'var(--cyan)', color: 'var(--cyan)', fontSize: '0.75rem', padding: '0.2rem 0.6rem' }}
                     onClick={() => handleAbrirAgendamentoPreventiva(item.equipamento)}
                   >
-                    <i className="fa-solid fa-calendar-check"></i> Agendar Checkup Preventivo
+                    <i className="fa-solid fa-calendar-check"></i> Agendar Checkup
                   </button>
                 </div>
               ))}
             </div>
-          </div>
+          )}
         </div>
       )}
 
@@ -213,17 +276,15 @@ export const EquipamentosTab: React.FC<Props> = ({
           </div>
 
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            {!isGestor && !isTecnico && (
-              <>
-                {(isAdmin || isSolicitante) && (
-                  <button className="btn btn-secondary" onClick={() => setModalEquipamentoOpen(true)}>
-                    <i className="fa-solid fa-plus"></i> Cadastrar Equipamento
-                  </button>
-                )}
-                <button className="btn btn-primary" onClick={() => setModalChamadoOpen(true)}>
-                  <i className="fa-solid fa-triangle-exclamation"></i> Abrir Chamado de Reparo
-                </button>
-              </>
+            {(isAdmin || isGestor) && (
+              <button className="btn btn-secondary" onClick={() => setModalEquipamentoOpen(true)}>
+                <i className="fa-solid fa-plus"></i> Cadastrar Equipamento
+              </button>
+            )}
+            {!isTecnico && (
+              <button className="btn btn-primary" onClick={() => setModalChamadoOpen(true)}>
+                <i className="fa-solid fa-triangle-exclamation"></i> Abrir Chamado de Reparo
+              </button>
             )}
             {isGestor && (
               <span className="badge badge-cyan" style={{ padding: '0.5rem 1rem' }}>
@@ -240,17 +301,26 @@ export const EquipamentosTab: React.FC<Props> = ({
               <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '0.3rem' }}>Filtrar por Unidade:</label>
               <select 
                 className="form-control"
-                value={unidadeFiltro}
+                value={isSolicitante && user?.unidade_id ? user.unidade_id : unidadeFiltro}
                 onChange={e => {
                   setUnidadeFiltro(e.target.value === 'TODAS' ? 'TODAS' : Number(e.target.value));
                   setEquipamentoSelecionadoId('TODOS');
                 }}
+                disabled={isSolicitante && Boolean(user?.unidade_id)}
               >
-                <option value="TODAS">🏥 Todas as Unidades de Saúde</option>
-                {unidades.map(u => (
-                  <option key={u.id} value={u.id}>{u.nome} ({u.tipo})</option>
-                ))}
+                {!isSolicitante && <option value="TODAS">🏥 Todas as Unidades de Saúde</option>}
+                {unidades
+                  .filter(u => !isSolicitante || !user?.unidade_id || u.id === user.unidade_id)
+                  .map(u => (
+                    <option key={u.id} value={u.id}>{u.nome} ({u.tipo})</option>
+                  ))}
               </select>
+              {isSolicitante && Boolean(user?.unidade_id) && (
+                <small className="text-muted" style={{ display: 'block', marginTop: '3px' }}>
+                  <i className="fa-solid fa-lock" style={{ marginRight: '4px' }}></i>
+                  Unidade fixada conforme seu cadastro.
+                </small>
+              )}
             </div>
 
             <div style={{ minWidth: '240px' }}>
@@ -262,7 +332,7 @@ export const EquipamentosTab: React.FC<Props> = ({
               >
                 <option value="TODOS">🛠️ Todos os Equipamentos</option>
                 {equipamentos.filter(eq => unidadeFiltro === 'TODAS' || eq.unidade_id === unidadeFiltro).map(eq => (
-                  <option key={eq.id} value={eq.id}>{eq.nome} ({eq.numero_serie})</option>
+                  <option key={eq.id} value={eq.id}>{eq.nome}{eq.numero_serie ? ` (Patrimônio: ${eq.numero_serie})` : ''}</option>
                 ))}
               </select>
             </div>
@@ -276,10 +346,10 @@ export const EquipamentosTab: React.FC<Props> = ({
                 <tr>
                   <th>Unidade de Saúde</th>
                   <th>Equipamento</th>
-                  <th>Nº de Série / Identificador</th>
+                  <th>Número de Patrimônio</th>
                   <th>Última Preventiva</th>
                   <th>Status de Manutenção</th>
-                  {!isGestor && !isTecnico && <th>Ações</th>}
+                  <th>Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -296,7 +366,7 @@ export const EquipamentosTab: React.FC<Props> = ({
                       <tr key={eq.id}>
                         <td><strong>{uni ? uni.nome : `Unidade #${eq.unidade_id}`}</strong></td>
                         <td><strong>{eq.nome}</strong></td>
-                        <td><span className="badge badge-secondary">{eq.numero_serie}</span></td>
+                        <td><span className="badge badge-secondary">{eq.numero_serie || 'Sem Patrimônio'}</span></td>
                         <td>{eq.data_ultima_preventiva || 'Não registrada'}</td>
                         <td>
                           {chamadosAbertosEq.length > 0 ? (
@@ -305,16 +375,26 @@ export const EquipamentosTab: React.FC<Props> = ({
                             <span className="badge badge-emerald"><i className="fa-solid fa-check"></i> Operacional</span>
                           )}
                         </td>
-                        {!isGestor && !isTecnico && (
-                          <td>
+                        <td>
+                          <div style={{ display: 'flex', gap: '0.4rem' }}>
                             <button 
                               className="btn btn-outline btn-sm"
-                              onClick={() => handleAbrirAgendamentoPreventiva(eq)}
+                              title="Editar dados do equipamento / patrimônio"
+                              onClick={() => handleAbrirEditarEquipamento(eq)}
                             >
-                              <i className="fa-solid fa-calendar-check"></i> Preventiva
+                              <i className="fa-solid fa-pen-to-square"></i> Editar
                             </button>
-                          </td>
-                        )}
+                            {!isGestor && !isTecnico && (
+                              <button 
+                                className="btn btn-outline btn-sm"
+                                title="Agendar manutenção preventiva"
+                                onClick={() => handleAbrirAgendamentoPreventiva(eq)}
+                              >
+                                <i className="fa-solid fa-calendar-check"></i> Preventiva
+                              </button>
+                            )}
+                          </div>
+                        </td>
                       </tr>
                     );
                   })
@@ -458,14 +538,13 @@ export const EquipamentosTab: React.FC<Props> = ({
                 </div>
 
                 <div className="form-group margin-top-sm">
-                  <label>Número de Série / Tombamento *</label>
+                  <label>Número de Patrimônio</label>
                   <input 
                     type="text" 
                     className="form-control"
-                    placeholder="Ex: SN-KAV-2024-001 ou TOM-09823"
+                    placeholder="Ex: PAT-2024-001 ou 09823 (Opcional)"
                     value={eqNumeroSerie}
                     onChange={e => setEqNumeroSerie(e.target.value)}
-                    required
                   />
                 </div>
 
@@ -482,6 +561,75 @@ export const EquipamentosTab: React.FC<Props> = ({
                 <div className="form-actions margin-top-md">
                   <button type="button" className="btn btn-secondary" onClick={() => setModalEquipamentoOpen(false)}>Cancelar</button>
                   <button type="submit" className="btn btn-primary">Cadastrar Equipamento</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Editar Equipamento */}
+      {modalEditEquipamentoOpen && equipamentoEdicao && (
+        <div className="modal active">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h3><i className="fa-solid fa-pen-to-square text-primary"></i> Editar Equipamento #{equipamentoEdicao.id}</h3>
+              <button className="modal-close" onClick={() => setModalEditEquipamentoOpen(false)}>&times;</button>
+            </div>
+            <div className="modal-body">
+              <form onSubmit={handleConfirmarEdicaoEquipamento}>
+                <div className="form-group">
+                  <label>Unidade de Saúde Alocada *</label>
+                  <select 
+                    className="form-control"
+                    value={editUnidadeId}
+                    onChange={e => setEditUnidadeId(Number(e.target.value))}
+                    required
+                  >
+                    {unidades.map(u => (
+                      <option key={u.id} value={u.id}>{u.nome} ({u.tipo})</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group margin-top-sm">
+                  <label>Nome / Modelo do Equipamento *</label>
+                  <input 
+                    type="text" 
+                    className="form-control"
+                    value={editNome}
+                    onChange={e => setEditNome(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="form-group margin-top-sm">
+                  <label>Número de Patrimônio (Opcional)</label>
+                  <input 
+                    type="text" 
+                    className="form-control"
+                    placeholder="Ex: PAT-2024-001 ou 09823 (Opcional)"
+                    value={editNumeroSerie}
+                    onChange={e => setEditNumeroSerie(e.target.value)}
+                  />
+                  <small className="text-muted" style={{ display: 'block', marginTop: '4px' }}>
+                    Cadastre ou atualize o número de patrimônio deste equipamento.
+                  </small>
+                </div>
+
+                <div className="form-group margin-top-sm">
+                  <label>Data da Última Manutenção Preventiva</label>
+                  <input 
+                    type="date" 
+                    className="form-control"
+                    value={editDataPreventiva}
+                    onChange={e => setEditDataPreventiva(e.target.value)}
+                  />
+                </div>
+
+                <div className="form-actions margin-top-md">
+                  <button type="button" className="btn btn-secondary" onClick={() => setModalEditEquipamentoOpen(false)}>Cancelar</button>
+                  <button type="submit" className="btn btn-primary">Salvar Alterações</button>
                 </div>
               </form>
             </div>
@@ -510,14 +658,16 @@ export const EquipamentosTab: React.FC<Props> = ({
                     onChange={e => setChEquipamentoId(Number(e.target.value))}
                     required
                   >
-                    {equipamentos.map(eq => {
-                      const uni = unidades.find(u => u.id === eq.unidade_id);
-                      return (
-                        <option key={eq.id} value={eq.id}>
-                          [{uni?.nome}] {eq.nome} ({eq.numero_serie})
-                        </option>
-                      );
-                    })}
+                    {equipamentos
+                      .filter(eq => !isSolicitante || !user?.unidade_id || eq.unidade_id === user.unidade_id)
+                      .map(eq => {
+                        const uni = unidades.find(u => u.id === eq.unidade_id);
+                        return (
+                          <option key={eq.id} value={eq.id}>
+                            [{uni?.nome}] {eq.nome}{eq.numero_serie ? ` (Patrimônio: ${eq.numero_serie})` : ''}
+                          </option>
+                        );
+                      })}
                   </select>
                 </div>
 

@@ -437,6 +437,15 @@ async function bootstrap() {
     }
   });
 
+  fastify.put('/api/equipamentos/:id', { preHandler: [authenticate] }, async (req, reply) => {
+    try {
+      const { id } = req.params as { id: string };
+      return await dataStore.updateEquipamento(Number(id), req.body as any);
+    } catch (err: any) {
+      return reply.status(400).send({ error: err.message });
+    }
+  });
+
   // Chamados de Manutenção Corretiva & Preventiva
   fastify.get('/api/chamados', async () => {
     return await dataStore.getChamados();

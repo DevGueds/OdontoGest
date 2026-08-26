@@ -1041,6 +1041,47 @@ class DataStore {
     }
   }
 
+  async updateEquipamento(id: number, dados: Partial<Equipamento>): Promise<Equipamento> {
+    try {
+      const updateData: any = {};
+      if (dados.unidade_id !== undefined) updateData.unidadeId = Number(dados.unidade_id);
+      if (dados.nome !== undefined) updateData.nome = dados.nome;
+      if (dados.numero_serie !== undefined) updateData.numeroSerie = dados.numero_serie;
+      if (dados.categoria !== undefined) updateData.categoria = dados.categoria;
+      if (dados.data_ultima_preventiva !== undefined) {
+        updateData.dataUltimaPreventiva = dados.data_ultima_preventiva ? new Date(dados.data_ultima_preventiva) : null;
+      }
+
+      const e = await (prisma as any).equipamento.update({
+        where: { id: Number(id) },
+        data: updateData
+      });
+      const updated: Equipamento = {
+        id: e.id,
+        unidade_id: e.unidadeId,
+        nome: e.nome,
+        numero_serie: e.numeroSerie,
+        categoria: e.categoria,
+        data_ultima_preventiva: e.dataUltimaPreventiva ? e.dataUltimaPreventiva.toISOString().substring(0, 10) : null
+      };
+      const idx = this.inMemoryEquipamentos.findIndex(item => item.id === id);
+      if (idx !== -1) {
+        this.inMemoryEquipamentos[idx] = updated;
+      }
+      return updated;
+    } catch (err) {
+      const idx = this.inMemoryEquipamentos.findIndex(item => item.id === id);
+      if (idx !== -1) {
+        this.inMemoryEquipamentos[idx] = {
+          ...this.inMemoryEquipamentos[idx],
+          ...dados
+        };
+        return this.inMemoryEquipamentos[idx];
+      }
+      throw new Error("Equipamento não encontrado.");
+    }
+  }
+
   // Chamados de Manutenção & Regra de Manutenção Preventiva Automática
   async getChamados(): Promise<ChamadoManutencao[]> {
     try {

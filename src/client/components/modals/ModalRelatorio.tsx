@@ -160,7 +160,7 @@ export const ModalRelatorio: React.FC<Props> = ({
       csvLines.push(`"RELATÓRIO DE GESTÃO DE EQUIPAMENTOS & MANUTENÇÃO"`);
       csvLines.push(`"Período: ${nomeMes}";"Data de Emissão: ${dataEmissao}"`);
       csvLines.push(``);
-      csvLines.push(`"ID Chamado";"Unidade de Saúde";"Equipamento";"Nº de Série";"Tipo Chamado";"Descrição do Defeito / Serviço";"Data Abertura";"Custo Reparo (R$)";"Status"`);
+      csvLines.push(`"ID Chamado";"Unidade de Saúde";"Equipamento";"Número de Patrimônio";"Tipo Chamado";"Descrição do Defeito / Serviço";"Data Abertura";"Custo Reparo (R$)";"Status"`);
 
       chamadosFiltrados.forEach(c => {
         const uni = unidades.find(u => u.id === c.unidade_id);
