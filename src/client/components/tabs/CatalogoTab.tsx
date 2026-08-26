@@ -12,6 +12,7 @@ interface Props {
   onAbrirModalMaterial: () => void;
   onAbrirEditarMaterial: (m: Material) => void;
   onAbrirAjusteEstoque: (m: Material) => void;
+  onDeletarMaterial: (id: number) => void;
   formatarData: (d?: string | null) => string;
   formatarMoeda: (v: number) => string;
 }
@@ -26,6 +27,7 @@ export const CatalogoTab: React.FC<Props> = ({
   onAbrirModalMaterial,
   onAbrirEditarMaterial,
   onAbrirAjusteEstoque,
+  onDeletarMaterial,
   formatarData,
   formatarMoeda
 }) => {
@@ -118,7 +120,6 @@ export const CatalogoTab: React.FC<Props> = ({
             <table className="data-table">
               <thead>
                 <tr>
-                  <th onClick={() => requestSortMateriais('id')} style={{cursor: 'pointer'}}>ID{getSortMateriais('id')}</th>
                   <th onClick={() => requestSortMateriais('descricao')} style={{cursor: 'pointer'}}>Descrição do Material / Insumo{getSortMateriais('descricao')}</th>
                   <th onClick={() => requestSortMateriais('natureza')} style={{cursor: 'pointer'}}>Natureza{getSortMateriais('natureza')}</th>
                   <th onClick={() => requestSortMateriais('fornecedor')} style={{cursor: 'pointer'}}>Fornecedor / Distribuidor{getSortMateriais('fornecedor')}</th>
@@ -149,7 +150,6 @@ export const CatalogoTab: React.FC<Props> = ({
 
                   return (
                     <tr key={m.id}>
-                      <td><strong>#{m.id}</strong></td>
                       <td><strong>{m.descricao}</strong></td>
                       <td>
                         {m.natureza === 'INVESTIMENTO' ? (
@@ -177,6 +177,17 @@ export const CatalogoTab: React.FC<Props> = ({
                             </button>
                             <button className="btn btn-outline btn-sm" onClick={() => onAbrirAjusteEstoque(m)}>
                               <i className="fa-solid fa-boxes-stacked"></i> Repor Estoque
+                            </button>
+                            <button 
+                              className="btn btn-rose btn-sm" 
+                              onClick={() => {
+                                if (confirm(`Deseja realmente excluir o insumo "${m.descricao}"?`)) {
+                                  onDeletarMaterial(m.id);
+                                }
+                              }}
+                              title="Excluir Insumo"
+                            >
+                              <i className="fa-solid fa-trash"></i> Excluir
                             </button>
                           </div>
                         ) : (

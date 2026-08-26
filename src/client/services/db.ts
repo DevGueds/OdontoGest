@@ -106,6 +106,12 @@ class ApiService {
     }, csrfToken);
   }
 
+  async deleteMaterial(materialId: number, csrfToken?: string | null): Promise<void> {
+    return this.request<void>(`/api/materiais/${materialId}`, {
+      method: 'DELETE'
+    }, csrfToken);
+  }
+
   // Pedidos
   async getPedidos(): Promise<PedidoPBS[]> {
     return this.request<PedidoPBS[]>('/api/pedidos');

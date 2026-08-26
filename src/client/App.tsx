@@ -45,7 +45,8 @@ export const AppContent: React.FC = () => {
   const { user, authenticated, loading: authLoading, csrfToken, login, logout } = useAuth();
   const perfilAtual: PerfilUsuario = user?.perfil || 'GESTOR';
 
-  const [activeTab, setActiveTab] = useState<string>('novo-pedido');
+  const [activeTab, setActiveTab] = useState<string>('dashboard');
+  const prevUserIdRef = React.useRef<number | null>(null);
 
   const [unidades, setUnidades] = useState<UnidadeSaude[]>([]);
   const [materiais, setMateriais] = useState<Material[]>([]);
@@ -105,6 +106,21 @@ export const AppContent: React.FC = () => {
       reloadData();
     }
   }, [authenticated, reloadData]);
+
+  useEffect(() => {
+    if (authenticated && user) {
+      if (user.id !== prevUserIdRef.current) {
+        prevUserIdRef.current = user.id;
+        if (user.perfil === 'GESTOR' || user.perfil === 'ADMINISTRADOR') {
+          setActiveTab('dashboard');
+        } else if (user.perfil === 'SOLICITANTE') {
+          setActiveTab('novo-pedido');
+        } else if (user.perfil === 'TECNICO') {
+          setActiveTab('equipamentos');
+        }
+      }
+    }
+  }, [authenticated, user]);
 
   useEffect(() => {
     if (perfilAtual === 'TECNICO' && activeTab !== 'equipamentos') {
@@ -234,6 +250,16 @@ export const AppContent: React.FC = () => {
       await reloadData();
     } catch (err: any) {
       showToast(err.message, 'error');
+    }
+  };
+
+  const handleDeletarMaterial = async (id: number) => {
+    try {
+      await dbService.deleteMaterial(id, csrfToken);
+      showToast('Insumo removido do catálogo com sucesso!', 'info');
+      await reloadData();
+    } catch (err: any) {
+      showToast(err.message || 'Erro ao remover insumo', 'error');
     }
   };
 
@@ -523,6 +549,7 @@ export const AppContent: React.FC = () => {
               onAbrirModalMaterial={() => setModalMatOpen(true)}
               onAbrirEditarMaterial={(m) => { setSelectedMaterial(m); setModalEditMatOpen(true); }}
               onAbrirAjusteEstoque={(m) => { setSelectedMaterial(m); setModalAjusteEstOpen(true); }}
+              onDeletarMaterial={handleDeletarMaterial}
               formatarData={formatarData}
               formatarMoeda={formatarMoeda}
             />

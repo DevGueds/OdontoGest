@@ -344,6 +344,16 @@ async function bootstrap() {
     }
   });
 
+  fastify.delete('/api/materiais/:id', { preHandler: [authenticate] }, async (req, reply) => {
+    const { id } = req.params as any;
+    try {
+      await dataStore.deleteMaterial(Number(id));
+      return { success: true };
+    } catch (err: any) {
+      return reply.status(400).send({ error: err.message });
+    }
+  });
+
   // Pedidos
   fastify.get('/api/pedidos', async () => {
     return await dataStore.getPedidos();

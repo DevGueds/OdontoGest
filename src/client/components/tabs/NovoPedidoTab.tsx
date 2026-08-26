@@ -47,9 +47,7 @@ export const NovoPedidoTab: React.FC<Props> = ({
   const [responsavelNome, setResponsavelNome] = useState('');
   const [responsavelFuncao, setResponsavelFuncao] = useState('');
   const [responsavelRegistro, setResponsavelRegistro] = useState('');
-  const [atividadePrograma, setAtividadePrograma] = useState('');
-  const [elementoDespesa, setElementoDespesa] = useState('');
-  const [observacoes, setObservacoes] = useState('');
+
 
   useEffect(() => {
     if (user) {
@@ -175,9 +173,9 @@ export const NovoPedidoTab: React.FC<Props> = ({
       responsavel_nome: responsavelNome,
       responsavel_funcao: responsavelFuncao,
       responsavel_registro: responsavelRegistro,
-      atividade_programa: atividadePrograma,
-      elemento_despesa: elementoDespesa,
-      observacoes,
+      atividade_programa: '',
+      elemento_despesa: '',
+      observacoes: '',
       itens: validItens.map(i => ({
         material_id: Number(i.material_id),
         qtd_pedida: i.qtd_pedida,
@@ -189,9 +187,7 @@ export const NovoPedidoTab: React.FC<Props> = ({
     setResponsavelNome(user?.nome || '');
     setResponsavelFuncao(user?.funcao || '');
     setResponsavelRegistro(user?.registro || '');
-    setAtividadePrograma('');
-    setElementoDespesa('');
-    setObservacoes('');
+
     if (user?.unidade_id && unidades.some(u => u.id === user.unidade_id)) {
       setUnidadeId(user.unidade_id);
     }
@@ -202,15 +198,15 @@ export const NovoPedidoTab: React.FC<Props> = ({
 
   const listaMateriaisOpcoes = React.useMemo(() => {
     if (isGestor) {
-      return materiais.map(m => ({
-        id: m.id,
-        descricaoLabel: m.fornecedor ? `${m.descricao} (${m.fornecedor})` : m.descricao,
-        material: m,
-        esgotado: (m.qtd_estoque ?? 0) <= 0,
-        txtComplemento: (m.qtd_estoque ?? 0) <= 0 
-          ? ' [ESGOTADO]' 
-          : ` [Estoque: ${m.qtd_estoque} ${m.unidade_medida}${m.limite_max_pedido ? ` | Limite Máx: ${m.limite_max_pedido} ${m.unidade_medida}` : ''}]`
-      }));
+      return materiais
+        .filter(m => (m.qtd_estoque ?? 0) > 0)
+        .map(m => ({
+          id: m.id,
+          descricaoLabel: m.fornecedor ? `${m.descricao} (${m.fornecedor})` : m.descricao,
+          material: m,
+          esgotado: false,
+          txtComplemento: ` [Estoque: ${m.qtd_estoque} ${m.unidade_medida}${m.limite_max_pedido ? ` | Limite Máx: ${m.limite_max_pedido} ${m.unidade_medida}` : ''}]`
+        }));
     } else {
       // Solicitante: Agrupar por descrição + unidade de medida
       const agrupadosMap = new Map<string, Material[]>();
@@ -227,12 +223,13 @@ export const NovoPedidoTab: React.FC<Props> = ({
         const principal = lista.find(m => (m.qtd_estoque ?? 0) > 0) || lista[0];
         const estoqueTotal = lista.reduce((acc, curr) => acc + (curr.qtd_estoque ?? 0), 0);
         const esgotado = estoqueTotal <= 0;
-        const limite = principal.limite_max_pedido;
 
+        // Se estiver com estoque zerado, não exibe no select
+        if (esgotado) continue;
+
+        const limite = principal.limite_max_pedido;
         let txtComplemento = '';
-        if (esgotado) {
-          txtComplemento = ' [Indisponível]';
-        } else if (limite) {
+        if (limite) {
           txtComplemento = ` [Limite máx: ${limite} ${principal.unidade_medida}]`;
         }
 
@@ -240,7 +237,7 @@ export const NovoPedidoTab: React.FC<Props> = ({
           id: principal.id,
           descricaoLabel: principal.descricao,
           material: principal,
-          esgotado,
+          esgotado: false,
           txtComplemento
         });
       }
@@ -352,52 +349,9 @@ export const NovoPedidoTab: React.FC<Props> = ({
             </div>
           </div>
 
-          {/* 2. Dados Orçamentários e Administrativos */}
-          <div className="form-section-title">
-            <i className="fa-solid fa-file-invoice-dollar"></i> 2. Dados Orçamentários e Administrativos
-          </div>
-
-          <div className="form-grid">
-            <div className="form-group">
-              <label htmlFor="atividade_programa">Atividade / Programa</label>
-              <input 
-                type="text" 
-                id="atividade_programa" 
-                className="form-control" 
-                placeholder="Ex: 10.301.0004.2015 - Manutenção da Saúde Bucal USF"
-                value={atividadePrograma}
-                onChange={(e) => setAtividadePrograma(e.target.value)}
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="elemento_despesa">Elemento de Despesa</label>
-              <input 
-                type="text" 
-                id="elemento_despesa" 
-                className="form-control" 
-                placeholder="Ex: 3.3.90.30.00 - Material de Consumo"
-                value={elementoDespesa}
-                onChange={(e) => setElementoDespesa(e.target.value)}
-              />
-            </div>
-
-            <div className="form-group full-width">
-              <label htmlFor="observacoes">Observações / Justificativa</label>
-              <textarea 
-                id="observacoes" 
-                className="form-control" 
-                rows={2} 
-                placeholder="Informe a justificativa do pedido ou detalhes para entrega..."
-                value={observacoes}
-                onChange={(e) => setObservacoes(e.target.value)}
-              ></textarea>
-            </div>
-          </div>
-
-          {/* 3. Itens do Pedido */}
+          {/* 2. Itens do Pedido */}
           <div className="form-section-title flex-between">
-            <span><i className="fa-solid fa-boxes-stacked"></i> 3. Materiais / Insumos Solicitados</span>
+            <span><i className="fa-solid fa-boxes-stacked"></i> 2. Materiais / Insumos Solicitados</span>
             <button type="button" className="btn btn-outline btn-sm" onClick={handleAddLinha}>
               <i className="fa-solid fa-plus"></i> Adicionar Insumo
             </button>
@@ -427,13 +381,14 @@ export const NovoPedidoTab: React.FC<Props> = ({
                       <td>
                         <select 
                           className="form-control"
+                          style={{ maxWidth: '380px', width: '100%' }}
                           value={item.material_id}
                           onChange={(e) => handleMaterialChange(item.id, e.target.value)}
                           required
                         >
                           <option value="">-- Selecione o Material --</option>
                           {listaMateriaisOpcoes.map(opt => (
-                            <option key={opt.id} value={opt.id} disabled={opt.esgotado}>
+                            <option key={opt.id} value={opt.id}>
                               {opt.descricaoLabel}{opt.txtComplemento}
                             </option>
                           ))}

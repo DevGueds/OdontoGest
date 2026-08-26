@@ -385,6 +385,15 @@ class DataStore {
     }
   }
 
+  async deleteMaterial(id: number): Promise<void> {
+    try {
+      await prisma.material.delete({
+        where: { id: Number(id) }
+      });
+    } catch (err) {}
+    this.inMemoryMateriais = this.inMemoryMateriais.filter(m => m.id !== Number(id));
+  }
+
   // Pedidos
   async getPedidos(): Promise<PedidoPBS[]> {
     try {

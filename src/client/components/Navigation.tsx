@@ -24,14 +24,14 @@ export const Navigation: React.FC<NavigationProps> = ({
   return (
     <aside className="app-sidebar" aria-label="Navegação Lateral">
       <nav className="sidebar-nav">
-        {!isTecnico && (
+        {podeVerGestaoCompleta && (
           <button 
-            className={`nav-tab ${activeTab === 'novo-pedido' ? 'active' : ''}`}
-            onClick={() => onSelectTab('novo-pedido')}
-            title="Novo Pedido (PBS)"
+            className={`nav-tab ${activeTab === 'dashboard' ? 'active' : ''}`}
+            onClick={() => onSelectTab('dashboard')}
+            title="Consolidação Financeira & Dashboard"
           >
-            <i className="fa-solid fa-file-circle-plus nav-icon"></i>
-            <span className="nav-label">Novo Pedido (PBS)</span>
+            <i className="fa-solid fa-chart-pie nav-icon"></i>
+            <span className="nav-label">Dashboard & Indicadores</span>
           </button>
         )}
 
@@ -49,6 +49,17 @@ export const Navigation: React.FC<NavigationProps> = ({
           </button>
         )}
 
+        {!isTecnico && (
+          <button 
+            className={`nav-tab ${activeTab === 'novo-pedido' ? 'active' : ''}`}
+            onClick={() => onSelectTab('novo-pedido')}
+            title="Novo Pedido (PBS)"
+          >
+            <i className="fa-solid fa-file-circle-plus nav-icon"></i>
+            <span className="nav-label">Novo Pedido (PBS)</span>
+          </button>
+        )}
+
         <button 
           className={`nav-tab ${activeTab === 'equipamentos' ? 'active' : ''}`}
           onClick={() => onSelectTab('equipamentos')}
@@ -60,15 +71,6 @@ export const Navigation: React.FC<NavigationProps> = ({
 
         {podeVerGestaoCompleta && (
           <>
-            <button 
-              className={`nav-tab ${activeTab === 'dashboard' ? 'active' : ''}`}
-              onClick={() => onSelectTab('dashboard')}
-              title="Consolidação Financeira & Dashboard"
-            >
-              <i className="fa-solid fa-chart-pie nav-icon"></i>
-              <span className="nav-label">Dashboard & Indicadores</span>
-            </button>
-
             <button 
               className={`nav-tab ${activeTab === 'orcamento' ? 'active' : ''}`}
               onClick={() => onSelectTab('orcamento')}
