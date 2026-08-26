@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { UnidadeSaude, UserSistema, PerfilUsuario } from '../../types';
-import { useSortableData } from '../hooks/useSortableData';
+import { useSortableData } from '../../hooks/useSortableData';
 
 interface Props {
   unidades: UnidadeSaude[];
@@ -134,14 +134,14 @@ export const UsuariosTab: React.FC<Props> = ({
             <table className="data-table">
               <thead>
                 <tr>
-                  <th onClick={() => requestSort('id')} style={{cursor: 'pointer'}}>ID {getSortIndicator('id')}</th>
-                  <th onClick={() => requestSort('nome')} style={{cursor: 'pointer'}}>Nome Completo {getSortIndicator('nome')}</th>
-                  <th onClick={() => requestSort('funcao')} style={{cursor: 'pointer'}}>Cargo / Função {getSortIndicator('funcao')}</th>
-                  <th onClick={() => requestSort('email')} style={{cursor: 'pointer'}}>E-mail Corporativo {getSortIndicator('email')}</th>
+                  <th onClick={() => requestSort('id')} style={{ cursor: 'pointer' }}>ID {getSortIndicator('id')}</th>
+                  <th onClick={() => requestSort('nome')} style={{ cursor: 'pointer' }}>Nome Completo {getSortIndicator('nome')}</th>
+                  <th onClick={() => requestSort('funcao')} style={{ cursor: 'pointer' }}>Cargo / Função {getSortIndicator('funcao')}</th>
+                  <th onClick={() => requestSort('email')} style={{ cursor: 'pointer' }}>E-mail Corporativo {getSortIndicator('email')}</th>
                   <th>Senha Cadastrada</th>
-                  <th onClick={() => requestSort('registro')} style={{cursor: 'pointer'}}>Registro Profissional / CRO {getSortIndicator('registro')}</th>
-                  <th onClick={() => requestSort('perfil')} style={{cursor: 'pointer'}}>Perfil de Acesso {getSortIndicator('perfil')}</th>
-                  <th onClick={() => requestSort('unidade_id')} style={{cursor: 'pointer'}}>Unidade de Saúde Alocada {getSortIndicator('unidade_id')}</th>
+                  <th onClick={() => requestSort('registro')} style={{ cursor: 'pointer' }}>Registro Profissional / CRO {getSortIndicator('registro')}</th>
+                  <th onClick={() => requestSort('perfil')} style={{ cursor: 'pointer' }}>Perfil de Acesso {getSortIndicator('perfil')}</th>
+                  <th onClick={() => requestSort('unidade_id')} style={{ cursor: 'pointer' }}>Unidade de Saúde Alocada {getSortIndicator('unidade_id')}</th>
                   <th className="text-center">Ações</th>
                 </tr>
               </thead>
@@ -168,8 +168,8 @@ export const UsuariosTab: React.FC<Props> = ({
                             <span style={{ fontFamily: 'monospace', fontSize: '0.85rem', fontWeight: 600, color: senhasVisiveis[u.id] ? 'var(--primary)' : 'var(--text-muted)' }}>
                               {senhasVisiveis[u.id] ? (u.senha || '123456') : '••••••••'}
                             </span>
-                            <button 
-                              type="button" 
+                            <button
+                              type="button"
                               onClick={() => toggleSenhaVisivel(u.id)}
                               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.1rem 0.2rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}
                               title={senhasVisiveis[u.id] ? "Ocultar senha" : "Ver senha cadastrada"}
@@ -191,15 +191,15 @@ export const UsuariosTab: React.FC<Props> = ({
                         </td>
                         <td className="text-center">
                           <div className="btn-group">
-                            <button 
-                              className="btn btn-primary btn-sm" 
+                            <button
+                              className="btn btn-primary btn-sm"
                               onClick={() => handleAbrirEditar(u)}
                               title="Editar Usuário"
                             >
                               <i className="fa-solid fa-pen"></i> Editar
                             </button>
-                            <button 
-                              className="btn btn-rose btn-sm" 
+                            <button
+                              className="btn btn-rose btn-sm"
                               onClick={() => {
                                 if (confirm(`Deseja realmente apagar o usuário "${u.nome}" (${u.email})?`)) {
                                   onDeleteUsuario(u.id);
@@ -236,8 +236,8 @@ export const UsuariosTab: React.FC<Props> = ({
               <form onSubmit={handleSubmit}>
                 <div className="form-group">
                   <label htmlFor="usr_nome">Nome Completo *</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     id="usr_nome"
                     className="form-control"
                     placeholder="Ex: Dra. Ana Beatriz Ferreira"
@@ -250,8 +250,8 @@ export const UsuariosTab: React.FC<Props> = ({
                 <div className="form-grid margin-top-sm">
                   <div className="form-group">
                     <label htmlFor="usr_email">E-mail Corporativo (Login) *</label>
-                    <input 
-                      type="email" 
+                    <input
+                      type="email"
                       id="usr_email"
                       className="form-control"
                       placeholder="usuario@saude.gov.br"
@@ -282,8 +282,8 @@ export const UsuariosTab: React.FC<Props> = ({
                       </div>
                     )}
                     <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                      <input 
-                        type={showModalSenha ? 'text' : 'password'} 
+                      <input
+                        type={showModalSenha ? 'text' : 'password'}
                         id="usr_senha"
                         className="form-control"
                         placeholder={usuarioEdicao ? "•••••••• (ou digite a nova)" : "••••••••"}
@@ -316,8 +316,8 @@ export const UsuariosTab: React.FC<Props> = ({
                 <div className="form-grid margin-top-sm">
                   <div className="form-group">
                     <label htmlFor="usr_funcao">Cargo / Função do Usuário *</label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       id="usr_funcao"
                       className="form-control"
                       placeholder="Ex: Cirurgião Dentista, Auxiliar de Saúde Bucal, Farmacêutico..."
@@ -329,8 +329,8 @@ export const UsuariosTab: React.FC<Props> = ({
 
                   <div className="form-group">
                     <label htmlFor="usr_registro">Registro Profissional / CRO (Opcional)</label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       id="usr_registro"
                       className="form-control"
                       placeholder="Ex: CRO/PA 0592 ou SMS-1020"
@@ -342,7 +342,7 @@ export const UsuariosTab: React.FC<Props> = ({
 
                 <div className="form-group margin-top-sm">
                   <label htmlFor="usr_perfil">Perfil de Acesso (Nível de Permissão) *</label>
-                  <select 
+                  <select
                     id="usr_perfil"
                     className="form-control"
                     value={perfil}
@@ -358,7 +358,7 @@ export const UsuariosTab: React.FC<Props> = ({
 
                 <div className="form-group margin-top-sm">
                   <label htmlFor="usr_unidade">Unidade de Saúde Alocada (Banco de Dados) *</label>
-                  <select 
+                  <select
                     id="usr_unidade"
                     className="form-control"
                     value={unidadeId}

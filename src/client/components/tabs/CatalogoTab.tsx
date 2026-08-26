@@ -1,6 +1,6 @@
 import React from 'react';
 import { UnidadeSaude, Material, PerfilUsuario } from '../../types';
-import { useSortableData } from '../hooks/useSortableData';
+import { useSortableData } from '../../hooks/useSortableData';
 
 interface Props {
   unidades: UnidadeSaude[];
