@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "concurrently \"vite\" \"tsx watch src/server/server.ts\"",
-    "build": "prisma generate && prisma migrate deploy && tsc && vite build",
+    "db:migrate": "prisma migrate deploy || (prisma migrate resolve --applied 0_init && prisma migrate deploy)",
+    "build": "prisma generate && npm run db:migrate && tsc && vite build",
     "start": "tsx src/server/server.ts",
     "serve": "tsx src/server/server.ts",
     "prisma:generate": "prisma generate",
