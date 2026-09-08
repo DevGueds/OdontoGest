@@ -143,9 +143,7 @@ export const ModalFichaPbs: React.FC<Props> = ({
               </div>
             )}
 
-            <div style={{ marginTop: '15px', border: '1px solid #000', padding: '8px', fontSize: '9pt' }}>
-              <strong>OBSERVAÇÕES DA USF:</strong> {pedido.observacoes || 'Sem observações.'}
-            </div>
+
 
             <div style={{ marginTop: '15px', border: '1px solid #000', padding: '8px', fontSize: '9pt' }}>
               <strong>RASTREABILIDADE DE RECEPÇÃO E ENVIO (ALMOXARIFADO CENTRAL):</strong><br />
@@ -155,17 +153,12 @@ export const ModalFichaPbs: React.FC<Props> = ({
 
             <div className="pbs-print-signatures">
               <div className="pbs-sig-box">
-                <strong>{pedido.responsavel_nome}</strong><br />
-                {pedido.responsavel_funcao || 'Solicitante USF'}<br />
-                {pedido.responsavel_registro || ''}
+                <strong>__________________________________________</strong><br />
+                Coordenadora de Odontologia
               </div>
               <div className="pbs-sig-box">
-                <strong>{pedido.apontador_recebimento_nome || '___________________________'}</strong><br />
-                Conferência / Recebedor Almoxarifado
-              </div>
-              <div className="pbs-sig-box">
-                <strong>{pedido.apontador_envio_nome || '___________________________'}</strong><br />
-                Responsável pelo Despacho / Envio
+                <strong>{pedido.apontador_envio_nome || '__________________________________________'}</strong><br />
+                Responsável pela Liberação dos Materiais
               </div>
             </div>
           </div>

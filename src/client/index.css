@@ -896,21 +896,53 @@ h1, h2, h3, h4, h5, h6 {
    PRINT MEDIA STYLES (A4 Official Requisition Form Layout)
    ========================================================================== */
 @media print {
-    body {
+    @page {
+        size: A4 portrait;
+        margin: 10mm;
+    }
+
+    html, body {
         background: #ffffff !important;
         color: #000000 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        height: auto !important;
+        overflow: visible !important;
     }
     
-    .app-header, .app-nav, .no-print, .btn, .modal-header {
+    /* Hide top app header, sidebars, active tabs/main app content, buttons, modal headers */
+    .app-header, 
+    .app-sidebar, 
+    .app-main, 
+    .app-nav, 
+    .no-print, 
+    .btn, 
+    .modal-header,
+    .toast-container {
         display: none !important;
     }
 
+    .app-layout, .app-body {
+        display: block !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Modal wrapper reset for print */
     .modal {
         position: static !important;
+        display: none !important;
         background: none !important;
         backdrop-filter: none !important;
         opacity: 1 !important;
         pointer-events: auto !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        overflow: visible !important;
+    }
+
+    .modal.active {
+        display: block !important;
     }
 
     .modal-content {
@@ -919,6 +951,13 @@ h1, h2, h3, h4, h5, h6 {
         max-width: 100% !important;
         transform: none !important;
         border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        background: #ffffff !important;
+    }
+
+    .modal-body {
+        padding: 0 !important;
     }
 
     .print-area {
@@ -927,9 +966,11 @@ h1, h2, h3, h4, h5, h6 {
 
     .pbs-print-sheet {
         width: 100%;
+        box-sizing: border-box;
         border: 2px solid #000000;
         padding: 15px;
         font-family: 'Times New Roman', Times, serif;
+        page-break-inside: auto;
     }
 
     .pbs-print-header {
@@ -968,6 +1009,7 @@ h1, h2, h3, h4, h5, h6 {
         display: flex;
         justify-content: space-between;
         gap: 20px;
+        page-break-inside: avoid;
     }
 
     .pbs-sig-box {

@@ -1175,14 +1175,40 @@ class DataStore {
 
   async aprovarChamadoManutencao(chamadoId: number, aprovar: boolean = true): Promise<ChamadoManutencao> {
     const novoStatus: StatusChamado = aprovar ? 'APROVADO_ADM' : 'RECUSADO';
-    const index = this.inMemoryChamados.findIndex(c => c.id === Number(chamadoId));
-    if (index !== -1) {
-      this.inMemoryChamados[index].status = novoStatus;
-      this.inMemoryChamados[index].aprovado_adm = aprovar;
-      this.inMemoryChamados[index].data_aprovacao = new Date().toISOString().substring(0, 10);
-      return this.inMemoryChamados[index];
+    try {
+      const c = await (prisma as any).chamadoManutencao.update({
+        where: { id: Number(chamadoId) },
+        data: {
+          status: novoStatus
+        }
+      });
+      const index = this.inMemoryChamados.findIndex(ch => ch.id === Number(chamadoId));
+      if (index !== -1) {
+        this.inMemoryChamados[index].status = novoStatus;
+        this.inMemoryChamados[index].aprovado_adm = aprovar;
+        this.inMemoryChamados[index].data_aprovacao = new Date().toISOString().substring(0, 10);
+      }
+      return {
+        id: c.id,
+        unidade_id: c.unidadeId,
+        equipamento_id: c.equipamentoId,
+        tipo: c.tipo as any,
+        descricao_defeito: c.descricaoDefeito,
+        custo_reparo: Number(c.custoReparo),
+        status: c.status as any,
+        data_abertura: c.dataAbertura.toISOString().substring(0, 10),
+        data_conclusao: c.dataConclusao ? c.dataConclusao.toISOString().substring(0, 10) : null
+      };
+    } catch (err) {
+      const index = this.inMemoryChamados.findIndex(c => c.id === Number(chamadoId));
+      if (index !== -1) {
+        this.inMemoryChamados[index].status = novoStatus;
+        this.inMemoryChamados[index].aprovado_adm = aprovar;
+        this.inMemoryChamados[index].data_aprovacao = new Date().toISOString().substring(0, 10);
+        return this.inMemoryChamados[index];
+      }
+      throw new Error("Chamado não encontrado.");
     }
-    throw new Error("Chamado não encontrado.");
   }
 
   // Regra Automatizada de Manutenção Preventiva

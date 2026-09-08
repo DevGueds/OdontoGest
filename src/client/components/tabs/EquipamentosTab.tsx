@@ -339,167 +339,190 @@ export const EquipamentosTab: React.FC<Props> = ({
           </div>
 
           {/* Tabela de Equipamentos */}
-          <h4 style={{ marginBottom: '0.8rem' }}><i className="fa-solid fa-boxes-stacked"></i> Equipamentos Instalados</h4>
-          <div className="table-responsive margin-bottom-lg">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Unidade de Saúde</th>
-                  <th>Equipamento</th>
-                  <th>Número de Patrimônio</th>
-                  <th>Última Preventiva</th>
-                  <th>Status de Manutenção</th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {equipamentosFiltrados.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="text-center text-muted" style={{ padding: '1.5rem' }}>Nenhum equipamento cadastrado.</td>
-                  </tr>
-                ) : (
-                  equipamentosFiltrados.map(eq => {
-                    const uni = unidades.find(u => u.id === eq.unidade_id);
-                    const chamadosAbertosEq = chamados.filter(c => c.equipamento_id === eq.id && c.status !== 'CONCLUIDO');
-                    
-                    return (
-                      <tr key={eq.id}>
-                        <td><strong>{uni ? uni.nome : `Unidade #${eq.unidade_id}`}</strong></td>
-                        <td><strong>{eq.nome}</strong></td>
-                        <td><span className="badge badge-secondary">{eq.numero_serie || 'Sem Patrimônio'}</span></td>
-                        <td>{eq.data_ultima_preventiva || 'Não registrada'}</td>
-                        <td>
-                          {chamadosAbertosEq.length > 0 ? (
-                            <span className="badge badge-rose"><i className="fa-solid fa-wrench"></i> Chamado Ativo</span>
-                          ) : (
-                            <span className="badge badge-emerald"><i className="fa-solid fa-check"></i> Operacional</span>
-                          )}
-                        </td>
-                        <td>
-                          <div style={{ display: 'flex', gap: '0.4rem' }}>
-                            {(isAdmin || isGestor) && (
-                              <button 
-                                className="btn btn-outline btn-sm"
-                                title="Editar dados do equipamento / patrimônio"
-                                onClick={() => handleAbrirEditarEquipamento(eq)}
-                              >
-                                <i className="fa-solid fa-pen-to-square"></i> Editar
-                              </button>
-                            )}
-                            {!isGestor && !isTecnico && (
-                              <button 
-                                className="btn btn-outline btn-sm"
-                                title="Agendar manutenção preventiva"
-                                onClick={() => handleAbrirAgendamentoPreventiva(eq)}
-                              >
-                                <i className="fa-solid fa-calendar-check"></i> Preventiva
-                              </button>
-                            )}
-                          </div>
-                        </td>
+          {(() => {
+            const renderEquipamentos = (marginBottom = true) => (
+              <>
+                <h4 style={{ marginBottom: '0.8rem' }}><i className="fa-solid fa-boxes-stacked"></i> Equipamentos Instalados</h4>
+                <div className={`table-responsive ${marginBottom ? 'margin-bottom-lg' : ''}`}>
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>Unidade de Saúde</th>
+                        <th>Equipamento</th>
+                        <th>Número de Patrimônio</th>
+                        <th>Última Preventiva</th>
+                        <th>Status de Manutenção</th>
+                        <th>Ações</th>
                       </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
+                    </thead>
+                    <tbody>
+                      {equipamentosFiltrados.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="text-center text-muted" style={{ padding: '1.5rem' }}>Nenhum equipamento cadastrado.</td>
+                        </tr>
+                      ) : (
+                        equipamentosFiltrados.map(eq => {
+                          const uni = unidades.find(u => u.id === eq.unidade_id);
+                          const chamadosAbertosEq = chamados.filter(c => c.equipamento_id === eq.id && c.status !== 'CONCLUIDO');
+                          
+                          return (
+                            <tr key={eq.id}>
+                              <td><strong>{uni ? uni.nome : `Unidade #${eq.unidade_id}`}</strong></td>
+                              <td><strong>{eq.nome}</strong></td>
+                              <td><span className="badge badge-secondary">{eq.numero_serie || 'Sem Patrimônio'}</span></td>
+                              <td>{eq.data_ultima_preventiva || 'Não registrada'}</td>
+                              <td>
+                                {chamadosAbertosEq.length > 0 ? (
+                                  <span className="badge badge-rose"><i className="fa-solid fa-wrench"></i> Chamado Ativo</span>
+                                ) : (
+                                  <span className="badge badge-emerald"><i className="fa-solid fa-check"></i> Operacional</span>
+                                )}
+                              </td>
+                              <td>
+                                <div style={{ display: 'flex', gap: '0.4rem' }}>
+                                  {(isAdmin || isGestor) && (
+                                    <button 
+                                      className="btn btn-outline btn-sm"
+                                      title="Editar dados do equipamento / patrimônio"
+                                      onClick={() => handleAbrirEditarEquipamento(eq)}
+                                    >
+                                      <i className="fa-solid fa-pen-to-square"></i> Editar
+                                    </button>
+                                  )}
+                                  {!isGestor && !isTecnico && (
+                                    <button 
+                                      className="btn btn-outline btn-sm"
+                                      title="Agendar manutenção preventiva"
+                                      onClick={() => handleAbrirAgendamentoPreventiva(eq)}
+                                    >
+                                      <i className="fa-solid fa-calendar-check"></i> Preventiva
+                                    </button>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            );
 
-          {/* Tabela de Chamados de Manutenção */}
-          <h4 style={{ marginBottom: '0.8rem' }}><i className="fa-solid fa-clipboard-list"></i> Histórico de Chamados de Reparo (Corretiva & Preventiva)</h4>
-          <div className="table-responsive">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Unidade de Saúde</th>
-                  <th>Equipamento</th>
-                  <th>Tipo</th>
-                  <th>Descrição do Defeito / Serviço</th>
-                  <th>Data Abertura</th>
-                  <th>Custo do Reparo (R$)</th>
-                  <th>Status</th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {chamadosFiltrados.length === 0 ? (
-                  <tr>
-                    <td colSpan={9} className="text-center text-muted" style={{ padding: '1.5rem' }}>
-                      {isTecnico 
-                        ? 'Nenhum chamado de manutenção aprovado pela administração no momento.'
-                        : 'Nenhum chamado de manutenção registrado.'}
-                    </td>
-                  </tr>
-                ) : (
-                  chamadosFiltrados.map(ch => {
-                    const uni = unidades.find(u => u.id === ch.unidade_id);
-                    const eq = equipamentos.find(e => e.id === ch.equipamento_id);
-
-                    return (
-                      <tr key={ch.id}>
-                        <td><strong>#{ch.id}</strong></td>
-                        <td><strong>{uni ? uni.nome : `Unidade #${ch.unidade_id}`}</strong></td>
-                        <td>{eq ? eq.nome : `Equip. #${ch.equipamento_id}`}</td>
-                        <td>
-                          <span className={`badge ${ch.tipo === 'PREVENTIVA' ? 'badge-cyan' : 'badge-amber'}`}>
-                            {ch.tipo === 'PREVENTIVA' ? 'Preventiva' : 'Corretiva'}
-                          </span>
-                        </td>
-                        <td>{ch.descricao_defeito}</td>
-                        <td>{ch.data_abertura}</td>
-                        <td style={{ fontWeight: 700 }}>{formatarMoeda(ch.custo_reparo)}</td>
-                        <td>{renderBadgeStatus(ch.status)}</td>
-                        <td>
-                          {/* Ações para ADMINISTRADOR (Aprovar chamados pendentes) */}
-                          {isAdmin && ch.status === 'ABERTO' && (
-                            <div className="btn-group">
-                              <button 
-                                className="btn btn-emerald btn-sm"
-                                onClick={() => onAprovarChamado && onAprovarChamado(ch.id, true)}
-                                title="Aprovar Manutenção e Liberar para Técnico"
-                              >
-                                <i className="fa-solid fa-check"></i> Aprovar (Liberar p/ Técnico)
-                              </button>
-                              <button 
-                                className="btn btn-rose btn-sm"
-                                onClick={() => onAprovarChamado && onAprovarChamado(ch.id, false)}
-                                title="Recusar Chamado"
-                              >
-                                <i className="fa-solid fa-xmark"></i> Recusar
-                              </button>
-                            </div>
-                          )}
-
-                          {/* Ações para TÉCNICO ou ADMIN (Atualizar chamados aprovados) */}
-                          {(isTecnico || isAdmin) && (ch.status === 'APROVADO_ADM' || ch.status === 'EM_ANDAMENTO') && (
-                            <button 
-                              className="btn btn-primary btn-sm"
-                              onClick={() => {
-                                setChamadoEmEdicao(ch);
-                                setNovoStatus('EM_ANDAMENTO');
-                                setNovoCusto(String(ch.custo_reparo || ''));
-                              }}
-                            >
-                              <i className="fa-solid fa-wrench"></i> Atualizar Status / Concluir
-                            </button>
-                          )}
-
-                          {ch.status === 'CONCLUIDO' && (
-                            <span className="text-muted text-sm"><i className="fa-solid fa-check"></i> Reparo Finalizado</span>
-                          )}
-
-                          {isGestor && ch.status !== 'CONCLUIDO' && (
-                            <span className="text-muted text-sm"><i className="fa-solid fa-lock"></i> Somente Leitura</span>
-                          )}
-                        </td>
+            const renderChamados = (marginBottom = true) => (
+              <>
+                <h4 style={{ marginBottom: '0.8rem' }}><i className="fa-solid fa-clipboard-list"></i> Histórico de Chamados de Reparo (Corretiva & Preventiva)</h4>
+                <div className={`table-responsive ${marginBottom ? 'margin-bottom-lg' : ''}`}>
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Unidade de Saúde</th>
+                        <th>Equipamento</th>
+                        <th>Tipo</th>
+                        <th>Descrição do Defeito / Serviço</th>
+                        <th>Data Abertura</th>
+                        {!isSolicitante && <th>Custo do Reparo (R$)</th>}
+                        <th>Status</th>
+                        <th>Ações</th>
                       </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
+                    </thead>
+                    <tbody>
+                      {chamadosFiltrados.length === 0 ? (
+                        <tr>
+                          <td colSpan={isSolicitante ? 8 : 9} className="text-center text-muted" style={{ padding: '1.5rem' }}>
+                            {isTecnico 
+                              ? 'Nenhum chamado de manutenção aprovado pela administração no momento.'
+                              : 'Nenhum chamado de manutenção registrado.'}
+                          </td>
+                        </tr>
+                      ) : (
+                        chamadosFiltrados.map(ch => {
+                          const uni = unidades.find(u => u.id === ch.unidade_id);
+                          const eq = equipamentos.find(e => e.id === ch.equipamento_id);
+
+                          return (
+                            <tr key={ch.id}>
+                              <td><strong>#{ch.id}</strong></td>
+                              <td><strong>{uni ? uni.nome : `Unidade #${ch.unidade_id}`}</strong></td>
+                              <td>{eq ? eq.nome : `Equip. #${ch.equipamento_id}`}</td>
+                              <td>
+                                <span className={`badge ${ch.tipo === 'PREVENTIVA' ? 'badge-cyan' : 'badge-amber'}`}>
+                                  {ch.tipo === 'PREVENTIVA' ? 'Preventiva' : 'Corretiva'}
+                                </span>
+                              </td>
+                              <td>{ch.descricao_defeito}</td>
+                              <td>{ch.data_abertura}</td>
+                              {!isSolicitante && <td style={{ fontWeight: 700 }}>{formatarMoeda(ch.custo_reparo)}</td>}
+                              <td>{renderBadgeStatus(ch.status)}</td>
+                              <td>
+                                {/* Ações para ADMINISTRADOR e GESTOR (Aprovar chamados pendentes) */}
+                                {(isAdmin || isGestor) && ch.status === 'ABERTO' && (
+                                  <div className="btn-group">
+                                    <button 
+                                      className="btn btn-emerald btn-sm"
+                                      onClick={() => onAprovarChamado && onAprovarChamado(ch.id, true)}
+                                      title="Aprovar Manutenção e Liberar para Técnico"
+                                    >
+                                      <i className="fa-solid fa-check"></i> Aprovar (Liberar p/ Técnico)
+                                    </button>
+                                    <button 
+                                      className="btn btn-rose btn-sm"
+                                      onClick={() => onAprovarChamado && onAprovarChamado(ch.id, false)}
+                                      title="Recusar Chamado"
+                                    >
+                                      <i className="fa-solid fa-xmark"></i> Recusar
+                                    </button>
+                                  </div>
+                                )}
+
+                                {/* Ações para TÉCNICO, ADMIN ou GESTOR (Atualizar chamados aprovados) */}
+                                {(isTecnico || isAdmin || isGestor) && (ch.status === 'APROVADO_ADM' || ch.status === 'EM_ANDAMENTO') && (
+                                  <button 
+                                    className="btn btn-primary btn-sm"
+                                    onClick={() => {
+                                      setChamadoEmEdicao(ch);
+                                      setNovoStatus('EM_ANDAMENTO');
+                                      setNovoCusto(String(ch.custo_reparo || ''));
+                                    }}
+                                  >
+                                    <i className="fa-solid fa-wrench"></i> Atualizar Status / Concluir
+                                  </button>
+                                )}
+
+                                {ch.status === 'CONCLUIDO' && (
+                                  <span className="text-muted text-sm"><i className="fa-solid fa-check"></i> Reparo Finalizado</span>
+                                )}
+
+                                {isGestor && ch.status !== 'CONCLUIDO' && (
+                                  <span className="text-muted text-sm"><i className="fa-solid fa-lock"></i> Somente Leitura</span>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            );
+
+            const invertLayout = isAdmin || isTecnico;
+
+            return invertLayout ? (
+              <>
+                {renderChamados(true)}
+                {renderEquipamentos(false)}
+              </>
+            ) : (
+              <>
+                {renderEquipamentos(true)}
+                {renderChamados(false)}
+              </>
+            );
+          })()}
         </div>
       </div>
 
