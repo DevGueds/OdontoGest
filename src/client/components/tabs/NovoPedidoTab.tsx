@@ -25,7 +25,7 @@ interface Props {
     elemento_despesa?: string;
     observacoes?: string;
     itens: { material_id: number; qtd_pedida: number; valor_unitario: number }[];
-  }) => void;
+  }) => Promise<boolean | void>;
   onCancel: () => void;
   formatarMoeda: (v: number) => string;
   showToast: (msg: string, type?: 'success' | 'error' | 'info') => void;
@@ -144,7 +144,7 @@ export const NovoPedidoTab: React.FC<Props> = ({
 
   const totalEstimado = itens.reduce((acc, item) => acc + item.valor_total, 0);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!unidadeId) {
@@ -167,7 +167,7 @@ export const NovoPedidoTab: React.FC<Props> = ({
       }
     }
 
-    onSubmit({
+    if (!await onSubmit({
       unidade_emitente_id: Number(unidadeId),
       data_pedido: dataPedido,
       responsavel_nome: responsavelNome,
@@ -181,7 +181,7 @@ export const NovoPedidoTab: React.FC<Props> = ({
         qtd_pedida: i.qtd_pedida,
         valor_unitario: i.valor_unitario
       }))
-    });
+    })) return;
 
     // Reset Form
     setResponsavelNome(user?.nome || '');

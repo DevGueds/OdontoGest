@@ -14,10 +14,10 @@ interface Props {
   equipamentos: Equipamento[];
   chamados: ChamadoManutencao[];
   perfilAtual: PerfilUsuario;
-  onAddEquipamento: (dados: Omit<Equipamento, 'id'>) => void;
-  onUpdateEquipamento: (id: number, dados: Partial<Equipamento>) => void;
-  onAddChamado: (dados: Omit<ChamadoManutencao, 'id'>) => void;
-  onUpdateStatusChamado: (chamadoId: number, status: StatusChamado, custoReparo?: number) => void;
+  onAddEquipamento: (dados: Omit<Equipamento, 'id'>) => Promise<boolean | void>;
+  onUpdateEquipamento: (id: number, dados: Partial<Equipamento>) => Promise<boolean | void>;
+  onAddChamado: (dados: Omit<ChamadoManutencao, 'id'>) => Promise<boolean | void>;
+  onUpdateStatusChamado: (chamadoId: number, status: StatusChamado, custoReparo?: number) => Promise<boolean | void>;
   onAprovarChamado?: (chamadoId: number, aprovar: boolean) => void;
   formatarMoeda: (v: number) => string;
 }
@@ -137,40 +137,40 @@ export const EquipamentosTab: React.FC<Props> = ({
     setModalEditEquipamentoOpen(true);
   };
 
-  const handleConfirmarEdicaoEquipamento = (e: React.FormEvent) => {
+  const handleConfirmarEdicaoEquipamento = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!equipamentoEdicao) return;
-    onUpdateEquipamento(equipamentoEdicao.id, {
+    if (!await onUpdateEquipamento(equipamentoEdicao.id, {
       unidade_id: Number(editUnidadeId),
       nome: editNome,
       numero_serie: editNumeroSerie,
       data_ultima_preventiva: editDataPreventiva || null
-    });
+    })) return;
     setModalEditEquipamentoOpen(false);
     setEquipamentoEdicao(null);
   };
 
-  const handleSubmitEquipamento = (e: React.FormEvent) => {
+  const handleSubmitEquipamento = async (e: React.FormEvent) => {
     e.preventDefault();
-    onAddEquipamento({
+    if (!await onAddEquipamento({
       unidade_id: Number(eqUnidadeId),
       nome: eqNome,
       numero_serie: eqNumeroSerie,
       categoria: '',
       data_ultima_preventiva: eqDataPreventiva || null
-    });
+    })) return;
     setEqNome('');
     setEqNumeroSerie('');
     setEqDataPreventiva('');
     setModalEquipamentoOpen(false);
   };
 
-  const handleSubmitChamado = (e: React.FormEvent) => {
+  const handleSubmitChamado = async (e: React.FormEvent) => {
     e.preventDefault();
     const eq = equipamentos.find(item => item.id === Number(chEquipamentoId));
     if (!eq) return;
 
-    onAddChamado({
+    if (!await onAddChamado({
       unidade_id: eq.unidade_id,
       equipamento_id: eq.id,
       tipo: chTipo,
@@ -179,7 +179,7 @@ export const EquipamentosTab: React.FC<Props> = ({
       status: 'ABERTO',
       aprovado_adm: false,
       data_abertura: chDataAbertura
-    });
+    })) return;
 
     setChDescricaoDefeito('');
     setChCustoReparo('');
@@ -276,12 +276,12 @@ export const EquipamentosTab: React.FC<Props> = ({
           </div>
 
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            {(isAdmin || isGestor) && (
+            {isAdmin && (
               <button className="btn btn-secondary" onClick={() => setModalEquipamentoOpen(true)}>
                 <i className="fa-solid fa-plus"></i> Cadastrar Equipamento
               </button>
             )}
-            {!isTecnico && (
+            {(isAdmin || isSolicitante) && (
               <button className="btn btn-primary" onClick={() => setModalChamadoOpen(true)}>
                 <i className="fa-solid fa-triangle-exclamation"></i> Abrir Chamado de Reparo
               </button>
@@ -380,7 +380,7 @@ export const EquipamentosTab: React.FC<Props> = ({
                               </td>
                               <td>
                                 <div style={{ display: 'flex', gap: '0.4rem' }}>
-                                  {(isAdmin || isGestor) && (
+                                  {isAdmin && (
                                     <button 
                                       className="btn btn-outline btn-sm"
                                       title="Editar dados do equipamento / patrimônio"
@@ -458,7 +458,7 @@ export const EquipamentosTab: React.FC<Props> = ({
                               <td>{renderBadgeStatus(ch.status)}</td>
                               <td>
                                 {/* Ações para ADMINISTRADOR e GESTOR (Aprovar chamados pendentes) */}
-                                {(isAdmin || isGestor) && ch.status === 'ABERTO' && (
+                                {isAdmin && ch.status === 'ABERTO' && (
                                   <div className="btn-group">
                                     <button 
                                       className="btn btn-emerald btn-sm"
@@ -478,7 +478,7 @@ export const EquipamentosTab: React.FC<Props> = ({
                                 )}
 
                                 {/* Ações para TÉCNICO, ADMIN ou GESTOR (Atualizar chamados aprovados) */}
-                                {(isTecnico || isAdmin || isGestor) && (ch.status === 'APROVADO_ADM' || ch.status === 'EM_ANDAMENTO') && (
+                                {(isTecnico || isAdmin) && (ch.status === 'APROVADO_ADM' || ch.status === 'EM_ANDAMENTO') && (
                                   <button 
                                     className="btn btn-primary btn-sm"
                                     onClick={() => {
@@ -495,7 +495,7 @@ export const EquipamentosTab: React.FC<Props> = ({
                                   <span className="text-muted text-sm"><i className="fa-solid fa-check"></i> Reparo Finalizado</span>
                                 )}
 
-                                {isGestor && ch.status !== 'CONCLUIDO' && (
+                                {isAdmin && ch.status !== 'CONCLUIDO' && (
                                   <span className="text-muted text-sm"><i className="fa-solid fa-lock"></i> Somente Leitura</span>
                                 )}
                               </td>
@@ -766,9 +766,9 @@ export const EquipamentosTab: React.FC<Props> = ({
               <button className="modal-close" onClick={() => setChamadoEmEdicao(null)}>&times;</button>
             </div>
             <div className="modal-body">
-              <form onSubmit={(e) => {
+              <form onSubmit={async (e) => {
                 e.preventDefault();
-                onUpdateStatusChamado(chamadoEmEdicao.id, novoStatus, parseFloat(novoCusto) || 0);
+                if (!await onUpdateStatusChamado(chamadoEmEdicao.id, novoStatus, parseFloat(novoCusto) || 0)) return;
                 setChamadoEmEdicao(null);
               }}>
                 <div className="form-group">

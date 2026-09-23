@@ -5,8 +5,8 @@ import { useSortableData } from '../../hooks/useSortableData';
 interface Props {
   unidades: UnidadeSaude[];
   usuarios: UserSistema[];
-  onAddUsuario: (dados: Omit<UserSistema, 'id'>) => void;
-  onUpdateUsuario: (id: number, dados: Partial<UserSistema>) => void;
+  onAddUsuario: (dados: Omit<UserSistema, 'id'>) => Promise<boolean | void>;
+  onUpdateUsuario: (id: number, dados: Partial<UserSistema>) => Promise<boolean | void>;
   onDeleteUsuario: (id: number) => void;
 }
 
@@ -32,25 +32,19 @@ export const UsuariosTab: React.FC<Props> = ({
   const [unidadeId, setUnidadeId] = useState<number>(unidades[0]?.id || 1);
 
   // Toggles de visibilidade de senha
-  const [senhasVisiveis, setSenhasVisiveis] = useState<Record<number, boolean>>({});
   const [showModalSenha, setShowModalSenha] = useState(false);
-  const [showSenhaAtual, setShowSenhaAtual] = useState(false);
 
-  const toggleSenhaVisivel = (id: number) => {
-    setSenhasVisiveis(prev => ({ ...prev, [id]: !prev[id] }));
-  };
 
   const handleAbrirNovo = () => {
     setUsuarioEdicao(null);
     setNome('');
     setEmail('');
-    setSenha('123456');
+    setSenha('');
     setFuncao('Cirurgião Dentista');
     setRegistro('');
     setPerfil('SOLICITANTE');
     setUnidadeId(unidades[0]?.id || 1);
     setShowModalSenha(false);
-    setShowSenhaAtual(false);
     setModalOpen(true);
   };
 
@@ -64,16 +58,15 @@ export const UsuariosTab: React.FC<Props> = ({
     setPerfil(u.perfil);
     setUnidadeId(u.unidade_id || 1);
     setShowModalSenha(false);
-    setShowSenhaAtual(false);
     setModalOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nome.trim() || !email.trim()) return;
 
     if (usuarioEdicao) {
-      onUpdateUsuario(usuarioEdicao.id, {
+      if (!await onUpdateUsuario(usuarioEdicao.id, {
         nome: nome.trim(),
         email: email.trim().toLowerCase(),
         ...(senha && { senha }),
@@ -81,17 +74,17 @@ export const UsuariosTab: React.FC<Props> = ({
         registro: registro.trim(),
         perfil,
         unidade_id: Number(unidadeId)
-      });
+      })) return;
     } else {
-      onAddUsuario({
+      if (!await onAddUsuario({
         nome: nome.trim(),
         email: email.trim().toLowerCase(),
-        senha: senha || '123456',
+        senha,
         funcao: funcao.trim() || 'Profissional de Saúde',
         registro: registro.trim(),
         perfil,
         unidade_id: Number(unidadeId)
-      });
+      })) return;
     }
 
     setModalOpen(false);
@@ -138,7 +131,7 @@ export const UsuariosTab: React.FC<Props> = ({
                   <th onClick={() => requestSort('nome')} style={{ cursor: 'pointer' }}>Nome Completo {getSortIndicator('nome')}</th>
                   <th onClick={() => requestSort('funcao')} style={{ cursor: 'pointer' }}>Cargo / Função {getSortIndicator('funcao')}</th>
                   <th onClick={() => requestSort('email')} style={{ cursor: 'pointer' }}>E-mail Corporativo {getSortIndicator('email')}</th>
-                  <th>Senha Cadastrada</th>
+                  <th>Acesso</th>
                   <th onClick={() => requestSort('registro')} style={{ cursor: 'pointer' }}>Registro Profissional / CRO {getSortIndicator('registro')}</th>
                   <th onClick={() => requestSort('perfil')} style={{ cursor: 'pointer' }}>Perfil de Acesso {getSortIndicator('perfil')}</th>
                   <th onClick={() => requestSort('unidade_id')} style={{ cursor: 'pointer' }}>Unidade de Saúde Alocada {getSortIndicator('unidade_id')}</th>
@@ -163,21 +156,7 @@ export const UsuariosTab: React.FC<Props> = ({
                           <span className="badge badge-purple">{u.funcao || 'Profissional de Saúde'}</span>
                         </td>
                         <td>{u.email}</td>
-                        <td>
-                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'var(--bg-app)', padding: '0.2rem 0.5rem', borderRadius: 'var(--radius-sm)' }}>
-                            <span style={{ fontFamily: 'monospace', fontSize: '0.85rem', fontWeight: 600, color: senhasVisiveis[u.id] ? 'var(--primary)' : 'var(--text-muted)' }}>
-                              {senhasVisiveis[u.id] ? (u.senha || '123456') : '••••••••'}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => toggleSenhaVisivel(u.id)}
-                              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.1rem 0.2rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}
-                              title={senhasVisiveis[u.id] ? "Ocultar senha" : "Ver senha cadastrada"}
-                            >
-                              <i className={`fa-solid ${senhasVisiveis[u.id] ? 'fa-eye-slash' : 'fa-eye'}`}></i>
-                            </button>
-                          </div>
-                        </td>
+                        <td>Senha protegida</td>
                         <td>
                           {u.registro ? (
                             <span className="badge badge-blue">{u.registro}</span>
@@ -265,26 +244,11 @@ export const UsuariosTab: React.FC<Props> = ({
                     <label htmlFor="usr_senha">
                       {usuarioEdicao ? 'Nova Senha (deixe em branco p/ manter)' : 'Senha de Acesso *'}
                     </label>
-                    {usuarioEdicao && (
-                      <div style={{ marginBottom: '0.35rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                        Senha Atual: {' '}
-                        <strong style={{ fontFamily: 'monospace', color: showSenhaAtual ? 'var(--primary)' : 'inherit' }}>
-                          {showSenhaAtual ? (usuarioEdicao.senha || '123456') : '••••••••'}
-                        </strong>
-                        <button
-                          type="button"
-                          onClick={() => setShowSenhaAtual(!showSenhaAtual)}
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', marginLeft: '0.4rem', color: 'var(--primary)', fontSize: '0.8rem' }}
-                          title={showSenhaAtual ? "Ocultar senha atual" : "Ver senha atual cadastrada"}
-                        >
-                          <i className={`fa-solid ${showSenhaAtual ? 'fa-eye-slash' : 'fa-eye'}`}></i>
-                        </button>
-                      </div>
-                    )}
+                    <small>Por segurança, senhas existentes não são exibidas.</small>
                     <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                       <input
                         type={showModalSenha ? 'text' : 'password'}
-                        id="usr_senha"
+                        id="usr_senha" minLength={12} maxLength={128} autoComplete="new-password"
                         className="form-control"
                         placeholder={usuarioEdicao ? "•••••••• (ou digite a nova)" : "••••••••"}
                         value={senha}

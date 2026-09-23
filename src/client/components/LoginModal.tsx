@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { PrivacyNotice } from './PrivacyNotice';
 
 export const LoginModal: React.FC = () => {
   const { login, loading } = useAuth();
   const [email, setEmail] = useState<string>('');
   const [senha, setSenha] = useState<string>('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
   const [showSenha, setShowSenha] = useState<boolean>(false);
 
@@ -19,9 +21,12 @@ export const LoginModal: React.FC = () => {
     }
 
     try {
+      setBusy(true);
       await login(email, senha);
     } catch (err: any) {
       setErrorMsg(err.message || 'E-mail ou senha incorretos.');
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -51,6 +56,8 @@ export const LoginModal: React.FC = () => {
               <label htmlFor="loginEmail">Email *</label>
               <input 
                 type="email"
+                autoComplete="username"
+                maxLength={150}
                 id="loginEmail" 
                 className="form-control"
                 placeholder="exemplo@dominio.com"
@@ -65,6 +72,8 @@ export const LoginModal: React.FC = () => {
               <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                 <input 
                   type={showSenha ? "text" : "password"}
+                  autoComplete="current-password"
+                  maxLength={128}
                   id="loginSenha" 
                   className="form-control"
                   placeholder="••••••••"
@@ -94,8 +103,8 @@ export const LoginModal: React.FC = () => {
             </div>
 
             <div className="form-actions margin-top-md">
-              <button type="submit" className="btn btn-primary btn-lg" style={{ width: '100%' }} disabled={loading}>
-                {loading ? (
+              <button type="submit" className="btn btn-primary btn-lg" style={{ width: '100%' }} disabled={loading || busy}>
+                {loading || busy ? (
                   <><i className="fa-solid fa-spinner fa-spin"></i> Autenticando...</>
                 ) : (
                   <><i className="fa-solid fa-right-to-bracket"></i> Entrar no Sistema</>
@@ -103,6 +112,7 @@ export const LoginModal: React.FC = () => {
               </button>
             </div>
           </form>
+          <div className="margin-top-md"><PrivacyNotice /></div>
         </div>
       </div>
     </div>

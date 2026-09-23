@@ -1,293 +1,96 @@
-import crypto from 'crypto';
+import { randomBytes } from 'node:crypto';
+import type { Usuario } from '@prisma/client';
 import { prisma } from '../db/prisma.js';
+import { AppError } from '../errors.js';
+import { hashPassword, verifyPassword, validatePassword, dummyHash } from './password.js';
+import type { Input } from '../validation.js';
 
-export interface User {
-  id: number;
-  email: string;
-  senha?: string;
-  nome: string;
-  funcao: string;
-  registro: string;
-  perfil: 'SOLICITANTE' | 'GESTOR' | 'ADMINISTRADOR' | 'TECNICO';
-  unidade_id: number;
+export function publicUser(u: Omit<Usuario, 'senhaHash'>) {
+  return { id: u.id, email: u.email, nome: u.nome, funcao: u.funcao || '', registro: u.registro || '', perfil: u.perfil, unidade_id: u.unidadeId, senha_requer_troca: u.senhaRequerTroca };
 }
-
-export interface Session {
-  sessionId: string;
-  userId: number;
-  perfil: 'SOLICITANTE' | 'GESTOR' | 'ADMINISTRADOR' | 'TECNICO';
-  createdAt: number;
-  expiresAt: number;
+export type User = ReturnType<typeof publicUser>;
+const publicSelect = { id: true, email: true, nome: true, funcao: true, registro: true, perfil: true, unidadeId: true, senhaRequerTroca: true, criadoEm: true, atualizadoEm: true } as const;
+export const getAllUsers = async () => (await prisma.usuario.findMany({ select: publicSelect, orderBy: { nome: 'asc' } })).map(publicUser);
+export async function getUserById(id: number) {
+  const user = await prisma.usuario.findUnique({ where: { id }, select: publicSelect });
+  return user ? publicUser(user) : null;
 }
-
-export interface OAuthAuthCode {
-  code: string;
-  state: string;
-  userId: number;
-  codeChallenge: string;
-  codeChallengeMethod: string;
-  expiresAt: number;
+export async function addUser(data: Input<'user'>) {
+  validatePassword(data.senha);
+  return publicUser(await prisma.usuario.create({ data: {
+    email: data.email.toLowerCase(), senhaHash: await hashPassword(data.senha), nome: data.nome,
+    funcao: data.funcao, registro: data.registro, perfil: data.perfil, unidadeId: data.unidade_id,
+    senhaRequerTroca: true,
+  }, select: publicSelect }));
 }
-
-export const USERS_SEED: User[] = [
-  {
-    id: 1,
-    email: "admin@saude.gov.br",
-    senha: "123456",
-    nome: "Dr. Roberto Sotillo (Administrador)",
-    funcao: "Administrador Geral SMS",
-    registro: "ADM/PA 001",
-    perfil: "ADMINISTRADOR",
-    unidade_id: 1
-  }
-];
-
-let inMemoryUsers: User[] = [...USERS_SEED];
-
-export const SESSIONS = new Map<string, Session>();
-export const OAUTH_CODES = new Map<string, OAuthAuthCode>();
-
-export async function getAllUsers(): Promise<User[]> {
-  try {
-    let list = await prisma.usuario.findMany();
-    if (list.length === 0) {
-      // Semear unidade SMS e Administrador padrao no MySQL caso a tabela esteja vazia
-      let uni = await prisma.unidadeSaude.findFirst();
-      if (!uni) {
-        uni = await prisma.unidadeSaude.create({
-          data: { nome: "SECRETARIA MUNICIPAL DE SAÚDE (SMS)", tipo: "SMS" }
-        });
-      }
-      const admin = await prisma.usuario.create({
-        data: {
-          email: "admin@saude.gov.br",
-          senhaHash: "123456",
-          nome: "Dr. Roberto Sotillo (Administrador)",
-          funcao: "Administrador Geral SMS",
-          registro: "ADM/PA 001",
-          perfil: "ADMINISTRADOR" as any,
-          unidadeId: uni.id
-        }
-      });
-      list = [admin];
+export async function updateUser(id: number, data: Partial<Input<'user'>>) {
+  if (data.senha) validatePassword(data.senha);
+  const senhaHash = data.senha ? await hashPassword(data.senha) : undefined;
+  const updated = await prisma.$transaction(async tx => {
+    // Serialize administrator changes to protect the last administrator, including concurrent changes.
+    await tx.$queryRaw`SELECT id FROM usuarios WHERE perfil = 'ADMINISTRADOR' FOR UPDATE`;
+    const existing = await tx.usuario.findUniqueOrThrow({ where: { id } });
+    if (existing.perfil === 'ADMINISTRADOR' && data.perfil && data.perfil !== 'ADMINISTRADOR' && await tx.usuario.count({ where: { perfil: 'ADMINISTRADOR' } }) <= 1) {
+      throw new AppError(409, 'Mantenha pelo menos um administrador.');
     }
-
-    return list.map(u => ({
-      id: u.id,
-      email: u.email,
-      senha: u.senhaHash,
-      nome: u.nome,
-      funcao: u.funcao || '',
-      registro: u.registro || '',
-      perfil: u.perfil as any,
-      unidade_id: u.unidadeId || 1
-    }));
-  } catch (err) {}
-  return inMemoryUsers;
+    return tx.usuario.update({ where: { id }, data: {
+      nome: data.nome, email: data.email?.toLowerCase(), senhaHash, funcao: data.funcao,
+      registro: data.registro, perfil: data.perfil, unidadeId: data.unidade_id,
+      ...(senhaHash ? { senhaRequerTroca: true } : {}),
+    }, select: publicSelect });
+  });
+  revokeUserSessions(id);
+  return publicUser(updated);
+}
+export async function deleteUser(id: number) {
+  await prisma.$transaction(async tx => {
+    await tx.$queryRaw`SELECT id FROM usuarios WHERE perfil = 'ADMINISTRADOR' FOR UPDATE`;
+    const existing = await tx.usuario.findUniqueOrThrow({ where: { id } });
+    if (existing.perfil === 'ADMINISTRADOR' && await tx.usuario.count({ where: { perfil: 'ADMINISTRADOR' } }) <= 1) throw new AppError(409, 'Mantenha pelo menos um administrador.');
+    await tx.usuario.delete({ where: { id } });
+  });
+  revokeUserSessions(id);
+}
+export async function authenticateUser(email: string, password: string) {
+  const user = await prisma.usuario.findUnique({ where: { email: email.trim().toLowerCase() } });
+  const valid = await verifyPassword(password, user?.senhaHash || dummyHash);
+  if (!user || !valid) throw new AppError(401, 'E-mail ou senha incorretos.');
+  return publicUser(user);
+}
+export async function changePassword(id: number, current: string, next: string) {
+  validatePassword(next);
+  const user = await prisma.usuario.findUniqueOrThrow({ where: { id } });
+  if (!await verifyPassword(current, user.senhaHash)) throw new AppError(401, 'Senha atual incorreta.');
+  if (current === next) throw new AppError(400, 'A nova senha deve ser diferente da atual.');
+  const updated = await prisma.usuario.update({ where: { id, senhaHash: user.senhaHash }, data: { senhaHash: await hashPassword(next), senhaRequerTroca: false }, select: publicSelect });
+  revokeUserSessions(id);
+  return publicUser(updated);
 }
 
-export async function addUser(dados: Omit<User, 'id'>): Promise<User> {
-  const emailNorm = dados.email.trim().toLowerCase();
-  if (inMemoryUsers.some(u => u.email.toLowerCase() === emailNorm)) {
-    throw new Error(`E-mail "${dados.email}" já está cadastrado.`);
-  }
-
-  try {
-    const u = await prisma.usuario.create({
-      data: {
-        email: emailNorm,
-        senhaHash: dados.senha || '123456',
-        nome: dados.nome,
-        funcao: dados.funcao || 'Profissional de Saúde',
-        registro: dados.registro || '',
-        perfil: dados.perfil as any,
-        unidadeId: dados.unidade_id
-      }
-    });
-
-    const novo: User = {
-      id: u.id,
-      email: u.email,
-      senha: u.senhaHash,
-      nome: u.nome,
-      funcao: u.funcao || '',
-      registro: u.registro || '',
-      perfil: u.perfil as any,
-      unidade_id: u.unidadeId || 1
-    };
-    inMemoryUsers.push(novo);
-    return novo;
-  } catch (err) {
-    const nextId = inMemoryUsers.length ? Math.max(...inMemoryUsers.map(u => u.id)) + 1 : 1;
-    const novo: User = {
-      id: nextId,
-      email: emailNorm,
-      senha: dados.senha || '123456',
-      nome: dados.nome,
-      funcao: dados.funcao || 'Profissional de Saúde',
-      registro: dados.registro || '',
-      perfil: dados.perfil,
-      unidade_id: dados.unidade_id
-    };
-    inMemoryUsers.push(novo);
-    return novo;
-  }
+export interface Session { sessionId: string; userId: number; createdAt: number; expiresAt: number; lastSeen: number }
+const sessions = new Map<string, Session>();
+const idleMs = 30 * 60_000;
+export const sessionLifetimeMs = 8 * 60 * 60_000;
+export function pruneSessions(now = Date.now()) {
+  for (const [key, s] of sessions) if (s.expiresAt <= now || s.lastSeen + idleMs <= now) sessions.delete(key);
 }
-
-export async function updateUser(id: number, dados: Partial<User>): Promise<User> {
-  try {
-    const u = await prisma.usuario.update({
-      where: { id: Number(id) },
-      data: {
-        ...(dados.nome && { nome: dados.nome }),
-        ...(dados.email && { email: dados.email.trim().toLowerCase() }),
-        ...(dados.senha && { senhaHash: dados.senha }),
-        ...(dados.registro !== undefined && { registro: dados.registro }),
-        ...(dados.funcao !== undefined && { funcao: dados.funcao }),
-        ...(dados.perfil && { perfil: dados.perfil as any }),
-        ...(dados.unidade_id && { unidadeId: dados.unidade_id })
-      }
-    });
-    const idx = inMemoryUsers.findIndex(u => u.id === Number(id));
-    const alt: User = {
-      id: u.id,
-      email: u.email,
-      senha: u.senhaHash,
-      nome: u.nome,
-      funcao: u.funcao || '',
-      registro: u.registro || '',
-      perfil: u.perfil as any,
-      unidade_id: u.unidadeId || 1
-    };
-    if (idx !== -1) inMemoryUsers[idx] = alt;
-    return alt;
-  } catch (err) {
-    const idx = inMemoryUsers.findIndex(u => u.id === Number(id));
-    if (idx === -1) throw new Error("Usuário não encontrado.");
-
-    inMemoryUsers[idx] = {
-      ...inMemoryUsers[idx],
-      ...dados
-    };
-    return inMemoryUsers[idx];
-  }
-}
-
-export async function deleteUser(id: number): Promise<void> {
-  try {
-    await prisma.usuario.delete({
-      where: { id: Number(id) }
-    });
-  } catch (err) {}
-  inMemoryUsers = inMemoryUsers.filter(u => u.id !== Number(id));
-}
-
-export async function getUserById(userId: number): Promise<User | null> {
-  try {
-    const u = await prisma.usuario.findUnique({
-      where: { id: Number(userId) }
-    });
-    if (u) {
-      return {
-        id: u.id,
-        email: u.email,
-        senha: u.senhaHash,
-        nome: u.nome,
-        funcao: u.funcao || '',
-        registro: u.registro || '',
-        perfil: u.perfil as any,
-        unidade_id: u.unidadeId || 1
-      };
-    }
-  } catch (err) {
-    // Fallback
-  }
-  return inMemoryUsers.find(u => u.id === Number(userId)) || null;
-}
-
-export async function authenticateUser(email: string, senha?: string): Promise<User> {
-  const normalizedEmail = (email || '').trim().toLowerCase();
-
-  try {
-    const u = await prisma.usuario.findUnique({
-      where: { email: normalizedEmail }
-    });
-
-    if (u) {
-      if (senha && u.senhaHash !== senha) {
-        throw new Error("E-mail ou senha incorretos.");
-      }
-
-      return {
-        id: u.id,
-        email: u.email,
-        senha: u.senhaHash,
-        nome: u.nome,
-        funcao: u.funcao || '',
-        registro: u.registro || '',
-        perfil: u.perfil as any,
-        unidade_id: u.unidadeId || 1
-      };
-    }
-  } catch (err: any) {
-    if (err.message === "E-mail ou senha incorretos.") throw err;
-  }
-
-  // Fallback em memória se MySQL desconectado
-  const user = inMemoryUsers.find(u => u.email.toLowerCase() === normalizedEmail);
-  if (!user) {
-    throw new Error("E-mail ou senha incorretos.");
-  }
-
-  if (senha && user.senha && user.senha !== senha) {
-    throw new Error("E-mail ou senha incorretos.");
-  }
-
-  return user;
-}
-
-export async function createSession(userId: number): Promise<Session> {
-  const sessionId = crypto.randomBytes(32).toString('hex');
-  const user = await getUserById(userId);
-  if (!user) throw new Error("Usuário não encontrado.");
-
+export function createSession(userId: number): Session {
+  pruneSessions();
+  const userSessions = [...sessions.values()].filter(s => s.userId === userId);
+  while (userSessions.length >= 5) sessions.delete(userSessions.shift()!.sessionId);
+  if (sessions.size >= 5000) throw new AppError(503, 'Limite de sessões atingido. Tente novamente em alguns minutos.');
   const now = Date.now();
-  const expiresAt = now + 8 * 60 * 60 * 1000; // 8 Horas
-
-  const session: Session = {
-    sessionId,
-    userId,
-    perfil: user.perfil,
-    createdAt: now,
-    expiresAt
-  };
-
-  SESSIONS.set(sessionId, session);
+  const session = { sessionId: randomBytes(32).toString('hex'), userId, createdAt: now, expiresAt: now + sessionLifetimeMs, lastSeen: now };
+  sessions.set(session.sessionId, session);
   return session;
 }
-
-export function getSession(sessionId: string): Session | undefined {
-  const session = SESSIONS.get(sessionId);
+export function getSession(id?: string) {
+  if (!id) return undefined;
+  const session = sessions.get(id);
   if (!session) return undefined;
-
-  if (Date.now() > session.expiresAt) {
-    SESSIONS.delete(sessionId);
-    return undefined;
-  }
-
+  if (session.expiresAt <= Date.now() || session.lastSeen + idleMs <= Date.now()) { sessions.delete(id); return undefined; }
+  session.lastSeen = Date.now();
   return session;
 }
-
-export function destroySession(sessionId: string): boolean {
-  return SESSIONS.delete(sessionId);
-}
-
-export function generatePKCEChallenge(verifier: string): string {
-  return crypto
-    .createHash('sha256')
-    .update(verifier)
-    .digest('base64')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/, '');
-}
+export function destroySession(id?: string) { if (id) sessions.delete(id); }
+export function revokeUserSessions(userId: number) { for (const [id, s] of sessions) if (s.userId === userId) sessions.delete(id); }

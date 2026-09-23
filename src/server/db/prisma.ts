@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client';
 
-export const prisma = new PrismaClient({
-  log: process.env.DEBUG_PRISMA === 'true' ? ['query', 'error', 'warn'] : []
-});
+// Query/error logs may include personal data and parameters; log only sanitized events in app.ts.
+export const prisma = new PrismaClient();

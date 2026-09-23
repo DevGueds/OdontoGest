@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (nome: string, tipo?: string) => void;
+  onConfirm: (nome: string, tipo?: string) => Promise<boolean | void>;
 }
 
 export const ModalUnidade: React.FC<Props> = ({ isOpen, onClose, onConfirm }) => {
@@ -11,10 +11,10 @@ export const ModalUnidade: React.FC<Props> = ({ isOpen, onClose, onConfirm }) =>
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nome.trim()) return;
-    onConfirm(nome.trim(), 'UNIDADE');
+    if (!await onConfirm(nome.trim(), 'UNIDADE')) return;
     setNome('');
   };
 

@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { ChangePassword } from './ChangePassword';
+import { PrivacyNotice } from './PrivacyNotice';
 import { PerfilUsuario } from '../types';
 import { useAuth } from '../context/AuthContext';
 
@@ -10,9 +12,11 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ perfilAtual, onExportarSQL, onAbrirModalRelatorios }) => {
   const { user, logout } = useAuth();
+  const [passwordOpen, setPasswordOpen] = useState(false);
 
   return (
     <header className="app-header">
+      {passwordOpen && <ChangePassword onClose={() => setPasswordOpen(false)} />}
       <div className="header-container">
         <div className="brand">
           <div className="brand-icon">
@@ -94,6 +98,8 @@ export const Header: React.FC<HeaderProps> = ({ perfilAtual, onExportarSQL, onAb
             </button>
           )}
 
+          <button className="btn btn-secondary btn-sm" onClick={() => setPasswordOpen(true)}>Alterar senha</button>
+          <PrivacyNotice />
           <button 
             className="btn btn-secondary btn-sm" 
             onClick={logout} 

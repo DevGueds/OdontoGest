@@ -1,3 +1,4 @@
+import { escapeHtml, csvText } from '../../services/exportSafety';
 import React, { useState, useMemo } from 'react';
 import { 
   UnidadeSaude, 
@@ -117,7 +118,7 @@ export const ModalRelatorio: React.FC<Props> = ({
 
     if (tipoRelatorio === 'FINANCEIRO' || tipoRelatorio === 'COMPLETO') {
       csvLines.push(`"RELATÓRIO DE FLUXO FINANCEIRO E CONSOLIDAÇÃO MULTICLÍNICA"`);
-      csvLines.push(`"Período: ${nomeMes}";"Data de Emissão: ${dataEmissao}"`);
+      csvLines.push(`"Período: ${csvText(nomeMes)}";"Data de Emissão: ${csvText(dataEmissao)}"`);
       csvLines.push(``);
       csvLines.push(`"Estabelecimento de Saúde";"Tipo";"Gastos em Insumos (R$)";"Salários / Honorários Dentistas (R$)";"Manutenção Equipamentos (R$)";"CUSTO TOTAL GERAL (R$)"`);
 
@@ -132,16 +133,16 @@ export const ModalRelatorio: React.FC<Props> = ({
         totalManutencao += item.custoManutencaoEquipamentos;
         totalGeral += item.custoTotalGeral;
 
-        csvLines.push(`"${item.nome}";"${item.tipo}";"${item.custoInsumosAtendidos.toFixed(2).replace('.', ',')}";"${item.custoHonorariosDentistas.toFixed(2).replace('.', ',')}";"${item.custoManutencaoEquipamentos.toFixed(2).replace('.', ',')}";"${item.custoTotalGeral.toFixed(2).replace('.', ',')}"`);
+        csvLines.push(`"${csvText(item.nome)}";"${csvText(item.tipo)}";"${csvText(item.custoInsumosAtendidos.toFixed(2).replace('.', ','))}";"${csvText(item.custoHonorariosDentistas.toFixed(2).replace('.', ','))}";"${csvText(item.custoManutencaoEquipamentos.toFixed(2).replace('.', ','))}";"${csvText(item.custoTotalGeral.toFixed(2).replace('.', ','))}"`);
       });
 
-      csvLines.push(`"TOTAL GERAL MULTICLÍNICA";"";"${totalInsumos.toFixed(2).replace('.', ',')}";"${totalHonorarios.toFixed(2).replace('.', ',')}";"${totalManutencao.toFixed(2).replace('.', ',')}";"${totalGeral.toFixed(2).replace('.', ',')}"`);
+      csvLines.push(`"TOTAL GERAL MULTICLÍNICA";"";"${csvText(totalInsumos.toFixed(2).replace('.', ','))}";"${csvText(totalHonorarios.toFixed(2).replace('.', ','))}";"${csvText(totalManutencao.toFixed(2).replace('.', ','))}";"${csvText(totalGeral.toFixed(2).replace('.', ','))}"`);
       csvLines.push(``);
     }
 
     if (tipoRelatorio === 'INSUMOS' || tipoRelatorio === 'COMPLETO') {
       csvLines.push(`"RELATÓRIO DE GESTÃO DE INSUMOS & ESTOQUE DE MATERIAIS"`);
-      csvLines.push(`"Período: ${nomeMes}";"Data de Emissão: ${dataEmissao}"`);
+      csvLines.push(`"Período: ${csvText(nomeMes)}";"Data de Emissão: ${csvText(dataEmissao)}"`);
       csvLines.push(``);
       csvLines.push(`"ID";"Insumo / Material";"Unidade Medida";"Fornecedor";"Estoque Atual";"Limite Máx. Pedido";"Valor Estimado (R$)";"Valor Total Estoque (R$)";"Status Estoque"`);
 
@@ -150,7 +151,7 @@ export const ModalRelatorio: React.FC<Props> = ({
         const totalVal = est * (m.valor_estimado || 0);
         const status = est <= 0 ? 'ESGOTADO' : (est < 20 ? 'ESTOQUE BAIXO' : 'OK');
 
-        csvLines.push(`"${m.id}";"${m.descricao}";"${m.unidade_medida}";"${m.fornecedor || 'Não Informado'}";"${est}";"${m.limite_max_pedido || 'Sem limite'}";"${(m.valor_estimado || 0).toFixed(2).replace('.', ',')}";"${totalVal.toFixed(2).replace('.', ',')}";"${status}"`);
+        csvLines.push(`"${csvText(m.id)}";"${csvText(m.descricao)}";"${csvText(m.unidade_medida)}";"${csvText(m.fornecedor || 'Não Informado')}";"${csvText(est)}";"${csvText(m.limite_max_pedido || 'Sem limite')}";"${csvText((m.valor_estimado || 0).toFixed(2).replace('.', ','))}";"${csvText(totalVal.toFixed(2).replace('.', ','))}";"${csvText(status)}"`);
       });
 
       csvLines.push(``);
@@ -158,7 +159,7 @@ export const ModalRelatorio: React.FC<Props> = ({
 
     if (tipoRelatorio === 'MANUTENCAO' || tipoRelatorio === 'COMPLETO') {
       csvLines.push(`"RELATÓRIO DE GESTÃO DE EQUIPAMENTOS & MANUTENÇÃO"`);
-      csvLines.push(`"Período: ${nomeMes}";"Data de Emissão: ${dataEmissao}"`);
+      csvLines.push(`"Período: ${csvText(nomeMes)}";"Data de Emissão: ${csvText(dataEmissao)}"`);
       csvLines.push(``);
       csvLines.push(`"ID Chamado";"Unidade de Saúde";"Equipamento";"Número de Patrimônio";"Tipo Chamado";"Descrição do Defeito / Serviço";"Data Abertura";"Custo Reparo (R$)";"Status"`);
 
@@ -166,14 +167,14 @@ export const ModalRelatorio: React.FC<Props> = ({
         const uni = unidades.find(u => u.id === c.unidade_id);
         const eq = equipamentos.find(e => e.id === c.equipamento_id);
 
-        csvLines.push(`"#${c.id}";"${uni?.nome || 'N/D'}";"${eq?.nome || 'N/D'}";"${eq?.numero_serie || 'N/D'}";"${c.tipo}";"${c.descricao_defeito.replace(/"/g, '""')}";"${c.data_abertura}";"${(c.custo_reparo || 0).toFixed(2).replace('.', ',')}";"${c.status}"`);
+        csvLines.push(`"#${csvText(c.id)}";"${csvText(uni?.nome || 'N/D')}";"${csvText(eq?.nome || 'N/D')}";"${csvText(eq?.numero_serie || 'N/D')}";"${csvText(c.tipo)}";"${csvText(c.descricao_defeito)}";"${csvText(c.data_abertura)}";"${csvText((c.custo_reparo || 0).toFixed(2).replace('.', ','))}";"${csvText(c.status)}"`);
       });
     }
 
     csvLines.push(``);
     csvLines.push(`"ASSINATURAS E HOMOLOGAÇÃO:"`);
-    csvLines.push(`"Coordenadora de Saúde Bucal";"Ana Beatriz Figueiredo Ferreira Santos"` );
-    csvLines.push(`"Secretário Municipal de Saúde";"Paulo Roberto Sotillo de Lima Filho"`);
+    csvLines.push(`"Coordenadora de Saúde Bucal";"Responsável pela Saúde Bucal"` );
+    csvLines.push(`"Secretário Municipal de Saúde";"Responsável pela Secretaria de Saúde"`);
 
     const csvContent = csvLines.join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -226,7 +227,7 @@ export const ModalRelatorio: React.FC<Props> = ({
       </head>
       <body>
         <div class="no-print" style="margin-bottom: 15px; text-align: right;">
-          <button onclick="window.print()" style="background: #0284c7; color: #fff; border: none; padding: 8px 16px; font-weight: bold; border-radius: 4px; cursor: pointer;">
+          <button data-print-action style="background: #0284c7; color: #fff; border: none; padding: 8px 16px; font-weight: bold; border-radius: 4px; cursor: pointer;">
             🖨️ Imprimir ou Salvar PDF
           </button>
         </div>
@@ -239,19 +240,19 @@ export const ModalRelatorio: React.FC<Props> = ({
         <div class="meta-box">
           <div class="meta-item">
             <span>Tipo de Relatório</span>
-            <strong>${tipoRelatorio === 'FINANCEIRO' ? 'Fluxo Financeiro & Consolidação Multiclínica' : (tipoRelatorio === 'INSUMOS' ? 'Gestão de Insumos & Estoque' : (tipoRelatorio === 'MANUTENCAO' ? 'Manutenção de Equipamentos' : 'Relatório Geral Consolidado'))}</strong>
+            <strong>${escapeHtml(tipoRelatorio === 'FINANCEIRO' ? 'Fluxo Financeiro & Consolidação Multiclínica' : (tipoRelatorio === 'INSUMOS' ? 'Gestão de Insumos & Estoque' : (tipoRelatorio === 'MANUTENCAO' ? 'Manutenção de Equipamentos' : 'Relatório Geral Consolidado')))}</strong>
           </div>
           <div class="meta-item">
             <span>Período de Referência</span>
-            <strong>${nomeMes}</strong>
+            <strong>${escapeHtml(nomeMes)}</strong>
           </div>
           <div class="meta-item">
             <span>Data de Emissão</span>
-            <strong>${dataEmissao}</strong>
+            <strong>${escapeHtml(dataEmissao)}</strong>
           </div>
           <div class="meta-item">
             <span>Filtro de Unidade</span>
-            <strong>${unidadeFiltro === 'TODAS' ? 'Todas as Unidades' : (unidades.find(u => u.id === unidadeFiltro)?.nome || 'Unidade Especificada')}</strong>
+            <strong>${escapeHtml(unidadeFiltro === 'TODAS' ? 'Todas as Unidades' : (unidades.find(u => u.id === unidadeFiltro)?.nome || 'Unidade Especificada'))}</strong>
           </div>
         </div>
     `;
@@ -283,12 +284,12 @@ export const ModalRelatorio: React.FC<Props> = ({
 
         conteudoHTML += `
           <tr>
-            <td><strong>${item.nome}</strong></td>
-            <td class="text-center">${item.tipo}</td>
-            <td class="text-right">${formatarMoeda(item.custoInsumosAtendidos)}</td>
-            <td class="text-right">${formatarMoeda(item.custoHonorariosDentistas)}</td>
-            <td class="text-right">${formatarMoeda(item.custoManutencaoEquipamentos)}</td>
-            <td class="text-right" style="font-weight: bold; color: #0284c7;">${formatarMoeda(item.custoTotalGeral)}</td>
+            <td><strong>${escapeHtml(item.nome)}</strong></td>
+            <td class="text-center">${escapeHtml(item.tipo)}</td>
+            <td class="text-right">${escapeHtml(formatarMoeda(item.custoInsumosAtendidos))}</td>
+            <td class="text-right">${escapeHtml(formatarMoeda(item.custoHonorariosDentistas))}</td>
+            <td class="text-right">${escapeHtml(formatarMoeda(item.custoManutencaoEquipamentos))}</td>
+            <td class="text-right" style="font-weight: bold; color: #0284c7;">${escapeHtml(formatarMoeda(item.custoTotalGeral))}</td>
           </tr>
         `;
       });
@@ -298,10 +299,10 @@ export const ModalRelatorio: React.FC<Props> = ({
           <tfoot>
             <tr class="total-row">
               <td colspan="2">TOTAL OPERACIONAL MULTICLÍNICA:</td>
-              <td class="text-right">${formatarMoeda(tInsumos)}</td>
-              <td class="text-right">${formatarMoeda(tHonorarios)}</td>
-              <td class="text-right">${formatarMoeda(tManutencao)}</td>
-              <td class="text-right" style="font-size: 13px; color: #0284c7;">${formatarMoeda(tGeral)}</td>
+              <td class="text-right">${escapeHtml(formatarMoeda(tInsumos))}</td>
+              <td class="text-right">${escapeHtml(formatarMoeda(tHonorarios))}</td>
+              <td class="text-right">${escapeHtml(formatarMoeda(tManutencao))}</td>
+              <td class="text-right" style="font-size: 13px; color: #0284c7;">${escapeHtml(formatarMoeda(tGeral))}</td>
             </tr>
           </tfoot>
         </table>
@@ -334,14 +335,14 @@ export const ModalRelatorio: React.FC<Props> = ({
 
         conteudoHTML += `
           <tr>
-            <td>#${m.id}</td>
-            <td><strong>${m.descricao}</strong></td>
-            <td class="text-center">${m.unidade_medida}</td>
-            <td>${m.fornecedor || 'Não Informado'}</td>
-            <td class="text-center"><strong>${est}</strong></td>
-            <td class="text-right">${formatarMoeda(m.valor_estimado || 0)}</td>
-            <td class="text-right">${formatarMoeda(totalVal)}</td>
-            <td class="text-center">${status}</td>
+            <td>#${escapeHtml(m.id)}</td>
+            <td><strong>${escapeHtml(m.descricao)}</strong></td>
+            <td class="text-center">${escapeHtml(m.unidade_medida)}</td>
+            <td>${escapeHtml(m.fornecedor || 'Não Informado')}</td>
+            <td class="text-center"><strong>${escapeHtml(est)}</strong></td>
+            <td class="text-right">${escapeHtml(formatarMoeda(m.valor_estimado || 0))}</td>
+            <td class="text-right">${escapeHtml(formatarMoeda(totalVal))}</td>
+            <td class="text-center">${escapeHtml(status)}</td>
           </tr>
         `;
       });
@@ -379,14 +380,14 @@ export const ModalRelatorio: React.FC<Props> = ({
 
         conteudoHTML += `
           <tr>
-            <td>#${c.id}</td>
-            <td><strong>${uni?.nome || 'N/D'}</strong></td>
-            <td>${eq?.nome || 'N/D'}</td>
-            <td>${c.tipo}</td>
-            <td>${c.descricao_defeito}</td>
-            <td class="text-center">${formatarData(c.data_abertura)}</td>
-            <td class="text-right"><strong>${formatarMoeda(c.custo_reparo || 0)}</strong></td>
-            <td class="text-center">${c.status}</td>
+            <td>#${escapeHtml(c.id)}</td>
+            <td><strong>${escapeHtml(uni?.nome || 'N/D')}</strong></td>
+            <td>${escapeHtml(eq?.nome || 'N/D')}</td>
+            <td>${escapeHtml(c.tipo)}</td>
+            <td>${escapeHtml(c.descricao_defeito)}</td>
+            <td class="text-center">${escapeHtml(formatarData(c.data_abertura))}</td>
+            <td class="text-right"><strong>${escapeHtml(formatarMoeda(c.custo_reparo || 0))}</strong></td>
+            <td class="text-center">${escapeHtml(c.status)}</td>
           </tr>
         `;
       });
@@ -396,7 +397,7 @@ export const ModalRelatorio: React.FC<Props> = ({
           <tfoot>
             <tr class="total-row">
               <td colspan="6">TOTAL CUSTO MANUTENÇÃO:</td>
-              <td class="text-right" style="font-size: 12px; color: #0284c7;">${formatarMoeda(tCustoManut)}</td>
+              <td class="text-right" style="font-size: 12px; color: #0284c7;">${escapeHtml(formatarMoeda(tCustoManut))}</td>
               <td></td>
             </tr>
           </tfoot>
@@ -407,11 +408,11 @@ export const ModalRelatorio: React.FC<Props> = ({
     conteudoHTML += `
         <div class="footer-signatures">
           <div class="sig-box">
-            <strong>Ana Beatriz Figueiredo Ferreira Santos</strong><br />
+            <strong>Responsável pela Saúde Bucal</strong><br />
             Coordenadora de Saúde Bucal
           </div>
           <div class="sig-box">
-            <strong>Paulo Roberto Sotillo de Lima Filho</strong><br />
+            <strong>Responsável pela Secretaria de Saúde</strong><br />
             Secretário Municipal de Saúde
           </div>
         </div>
@@ -422,6 +423,8 @@ export const ModalRelatorio: React.FC<Props> = ({
     win.document.open();
     win.document.write(conteudoHTML);
     win.document.close();
+    win.opener = null;
+    win.document.querySelector('[data-print-action]')?.addEventListener('click', () => win.print());
   };
 
   return (

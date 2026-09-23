@@ -13,9 +13,53 @@ import {
   EntradaRecurso,
   UserSistema
 } from '../types';
+import { RequestCache } from './requestCache';
 
 class ApiService {
+  private cache = new RequestCache();
+  private pendingWrites = new Map<string, Promise<unknown>>();
+  clearCache() { this.cache.clear(); }
+  private invalidate(url: string) {
+    const resource = url.split('/')[2];
+    const groups: Record<string, string[]> = {
+      materiais: ['materiais', 'pedidos', 'financeiro'], pedidos: ['pedidos', 'materiais', 'financeiro'],
+      honorarios: ['honorarios', 'financeiro'], equipamentos: ['equipamentos', 'chamados', 'manutencao'],
+      chamados: ['chamados', 'equipamentos', 'manutencao', 'financeiro'], entradas: ['entradas'], usuarios: ['usuarios'],
+    };
+    if (!groups[resource]) this.clearCache();
+    else this.cache.invalidate(groups[resource].map(s => `/api/${s}`));
+    window.dispatchEvent(new Event('odontogest:data-changed'));
+  }
   private async request<T>(url: string, options: RequestInit = {}, csrfToken?: string | null): Promise<T> {
+    if (!options.method || options.method === 'GET') {
+      if (url === '/api/export/sql') return this.fetchRequest<T>(url, options, csrfToken);
+      return this.cache.get(url, signal => this.fetchPages<T>(url, { ...options, signal }));
+    }
+    const key = `${options.method}:${url}:${csrfToken || ''}:${String(options.body || '')}`;
+    const pending = this.pendingWrites.get(key);
+    if (pending) return pending as Promise<T>;
+    const task = this.fetchRequest<T>(url, options, csrfToken).then(result => { this.invalidate(url); return result; });
+    this.pendingWrites.set(key, task);
+    try { return await task; } finally { if (this.pendingWrites.get(key) === task) this.pendingWrites.delete(key); }
+  }
+  private async fetchPages<T>(url: string, options: RequestInit): Promise<T> {
+    let after = ''; const combined: unknown[] = [];
+    do {
+      const response = await this.fetchResponse(`${url}${after ? `?after=${after}` : ''}`, options);
+      const data = await response.json();
+      if (!Array.isArray(data)) return data as T;
+      combined.push(...data);
+      const next = response.headers.get('X-Next-Cursor') || '';
+      if (next && (!/^\d+$/.test(next) || Number(next) <= Number(after))) throw new Error('Paginação inválida. Atualize a página.');
+      after = next;
+    } while (after);
+    return combined as T;
+  }
+  private async fetchRequest<T>(url: string, options: RequestInit = {}, csrfToken?: string | null): Promise<T> {
+    const response = await this.fetchResponse(url, options, csrfToken);
+    return response.headers.get('content-type')?.includes('text/sql') ? (await response.text()) as T : response.json();
+  }
+  private async fetchResponse(url: string, options: RequestInit = {}, csrfToken?: string | null): Promise<Response> {
     const headers = new Headers(options.headers || {});
     
     if (csrfToken && ['POST', 'PUT', 'PATCH', 'DELETE'].includes((options.method || 'GET').toUpperCase())) {
@@ -30,20 +74,16 @@ class ApiService {
       ...options,
       headers,
       credentials: 'include' // Always pass HttpOnly session cookies
+      , cache: 'no-store', signal: options.signal ? AbortSignal.any([options.signal, AbortSignal.timeout(20_000)]) : AbortSignal.timeout(20_000)
     });
 
     if (!response.ok) {
+      if (response.status === 401) { this.clearCache(); window.dispatchEvent(new Event('odontogest:unauthorized')); }
       const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido na requisição.' }));
       throw new Error(errorData.error || `Erro HTTP ${response.status}`);
     }
 
-    // Return text if response is SQL script or string
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('text/sql')) {
-      return (await response.text()) as unknown as T;
-    }
-
-    return response.json();
+    return response;
   }
 
   // Unidades
@@ -92,10 +132,10 @@ class ApiService {
     }, csrfToken);
   }
 
-  async atualizarEstoqueMaterial(materialId: number, novaQtd: number, csrfToken?: string | null): Promise<Material> {
+  async atualizarEstoqueMaterial(materialId: number, novaQtd: number, estoqueAnterior: number, csrfToken?: string | null): Promise<Material> {
     return this.request<Material>(`/api/materiais/${materialId}/estoque`, {
       method: 'PATCH',
-      body: JSON.stringify({ qtd_estoque: novaQtd })
+      body: JSON.stringify({ qtd_estoque: novaQtd, estoque_anterior: estoqueAnterior })
     }, csrfToken);
   }
 
@@ -348,7 +388,7 @@ class ApiService {
       const custoHonorarios = honorariosUnidade.reduce((acc, h) => acc + Number(h.valor_total || 0), 0);
 
       // 3. Manutenção de Equipamentos
-      const chamadosUnidade = chamados.filter(c => c.unidade_id === u.id);
+      const chamadosUnidade = chamados.filter(c => c.unidade_id === u.id && c.status === 'CONCLUIDO');
       const custoManutencao = chamadosUnidade.reduce((acc, c) => acc + Number(c.custo_reparo || 0), 0);
 
       const custoTotalGeral = custoInsumos + custoHonorarios + custoManutencao;
@@ -434,7 +474,7 @@ class ApiService {
     const rhHonorarios = honorarios.reduce((acc, h) => acc + Number(h.valor_total || 0), 0);
 
     // 4. Gastos com Manutenção de Equipamentos (100% Custeio)
-    const manutencao = chamados.reduce((acc, c) => acc + Number(c.custo_reparo || 0), 0);
+    const manutencao = chamados.filter(c => c.status === 'CONCLUIDO').reduce((acc, c) => acc + Number(c.custo_reparo || 0), 0);
 
     // Totais e Saldos Custeio
     const gastoCusteioTotal = insumosCusteio + rhHonorarios + manutencao;

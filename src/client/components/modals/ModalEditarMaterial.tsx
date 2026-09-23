@@ -40,7 +40,6 @@ export const ModalEditarMaterial: React.FC<Props> = ({ material, isOpen, onClose
       fornecedor: forn,
       unidade_medida: un,
       valor_estimado: parseFloat(val) || 0,
-      qtd_estoque: parseInt(est) || 0,
       limite_max_pedido: lMax,
       natureza
     });
@@ -122,9 +121,9 @@ export const ModalEditarMaterial: React.FC<Props> = ({ material, isOpen, onClose
                 id="edit_mat_qtd_estoque" 
                 className="form-control" 
                 value={est}
-                onChange={(e) => setEst(e.target.value)}
-                required 
+                disabled
               />
+              <small>Use a opção Ajustar estoque para alterar a quantidade.</small>
             </div>
             <div className="form-group margin-top-sm">
               <label htmlFor="edit_mat_limite_max">

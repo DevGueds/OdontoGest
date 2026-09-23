@@ -1,3 +1,4 @@
+import { escapeHtml, csvText } from '../../services/exportSafety';
 import React from 'react';
 import { PedidoPBS, UnidadeSaude, Material, PerfilUsuario } from '../../types';
 
@@ -50,21 +51,21 @@ export const ModalFichaPbs: React.FC<Props> = ({
       
       let html = `
         <tr>
-          <td style="text-align: center;">${it.numero_item}</td>
-          <td>${mat ? mat.descricao : `Material #${it.material_id}`}</td>
-          <td style="text-align: center;">${mat ? mat.unidade_medida : 'un'}</td>
-          <td style="text-align: center;"><strong>${it.qtd_pedida}</strong></td>
-          <td style="text-align: center; color: ${it.qtd_atendida > 0 ? '#047857' : '#000'}">
-            <strong>${it.qtd_atendida || 0}</strong>
+          <td style="text-align: center;">${escapeHtml(it.numero_item)}</td>
+          <td>${escapeHtml(mat ? mat.descricao : `Material #${it.material_id}`)}</td>
+          <td style="text-align: center;">${escapeHtml(mat ? mat.unidade_medida : 'un')}</td>
+          <td style="text-align: center;"><strong>${escapeHtml(it.qtd_pedida)}</strong></td>
+          <td style="text-align: center; color: ${escapeHtml(it.qtd_atendida > 0 ? '#047857' : '#000')}">
+            <strong>${escapeHtml(it.qtd_atendida || 0)}</strong>
           </td>
       `;
 
       if (isGestor) {
         html += `
-          <td style="text-align: right;">${formatarMoeda(it.valor_unitario)}</td>
-          <td style="text-align: right;">${formatarMoeda(valSolicitado)}</td>
-          <td style="text-align: right; font-weight: bold; color: ${valAtendido > 0 ? '#047857' : '#000'}">
-            ${formatarMoeda(valAtendido)}
+          <td style="text-align: right;">${escapeHtml(formatarMoeda(it.valor_unitario))}</td>
+          <td style="text-align: right;">${escapeHtml(formatarMoeda(valSolicitado))}</td>
+          <td style="text-align: right; font-weight: bold; color: ${escapeHtml(valAtendido > 0 ? '#047857' : '#000')}">
+            ${escapeHtml(formatarMoeda(valAtendido))}
           </td>
         `;
       }
@@ -78,8 +79,8 @@ export const ModalFichaPbs: React.FC<Props> = ({
         <tfoot>
           <tr>
             <td colspan="6" style="text-align: right;"><strong>SUBTOTAIS E RESUMO FINANCEIRO:</strong></td>
-            <td style="text-align: right;"><strong>${formatarMoeda(valorTotalSolicitado)}</strong></td>
-            <td style="text-align: right; color: #047857;"><strong>${formatarMoeda(valorTotalAtendido)}</strong></td>
+            <td style="text-align: right;"><strong>${escapeHtml(formatarMoeda(valorTotalSolicitado))}</strong></td>
+            <td style="text-align: right; color: #047857;"><strong>${escapeHtml(formatarMoeda(valorTotalAtendido))}</strong></td>
           </tr>
         </tfoot>
       `;
@@ -90,10 +91,10 @@ export const ModalFichaPbs: React.FC<Props> = ({
       resumoFinanceiroHtml = `
         <div style="margin-top: 10px; display: flex; justify-content: flex-end; gap: 15px; font-size: 9.5pt;">
           <div style="background: #f8fafc; padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 4px;">
-            Total Solicitado: <strong>${formatarMoeda(valorTotalSolicitado)}</strong>
+            Total Solicitado: <strong>${escapeHtml(formatarMoeda(valorTotalSolicitado))}</strong>
           </div>
           <div style="background: #ecfdf5; padding: 6px 12px; border: 1px solid #a7f3d0; border-radius: 4px; color: #065f46;">
-            Total Efetivamente Atendido/Liberado: <strong>${formatarMoeda(valorTotalAtendido)}</strong>
+            Total Efetivamente Atendido/Liberado: <strong>${escapeHtml(formatarMoeda(valorTotalAtendido))}</strong>
           </div>
         </div>
       `;
@@ -104,7 +105,7 @@ export const ModalFichaPbs: React.FC<Props> = ({
       <html lang="pt-BR">
       <head>
         <meta charset="UTF-8" />
-        <title>Ficha PBS - ${pedido.numero_pbs}</title>
+        <title>Ficha PBS - ${escapeHtml(pedido.numero_pbs)}</title>
         <style>
           body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 12px; color: #000; padding: 20px; line-height: 1.5; }
           .pbs-print-header { text-align: center; margin-bottom: 20px; }
@@ -124,28 +125,28 @@ export const ModalFichaPbs: React.FC<Props> = ({
       </head>
       <body>
         <div class="no-print" style="margin-bottom: 15px; text-align: right;">
-          <button onclick="window.print()" style="background: #0284c7; color: #fff; border: none; padding: 8px 16px; font-weight: bold; border-radius: 4px; cursor: pointer;">
+          <button data-print-action style="background: #0284c7; color: #fff; border: none; padding: 8px 16px; font-weight: bold; border-radius: 4px; cursor: pointer;">
             🖨️ Imprimir / Gerar PDF
           </button>
         </div>
 
         <div class="pbs-print-header">
           <h2>SECRETARIA MUNICIPAL DE SAÚDE</h2>
-          <h3>PEDIDO DE BENS E SERVIÇOS (PBS) - Nº ${pedido.numero_pbs}</h3>
+          <h3>PEDIDO DE BENS E SERVIÇOS (PBS) - Nº ${escapeHtml(pedido.numero_pbs)}</h3>
           <p style="font-size: 9pt; margin-top: 5px;">
-            Status do Ciclo: <strong>${pedido.status}</strong> | Emissão: ${formatarData(pedido.data_pedido)}
+            Status do Ciclo: <strong>${escapeHtml(pedido.status)}</strong> | Emissão: ${escapeHtml(formatarData(pedido.data_pedido))}
           </p>
         </div>
 
         <table style="width: 100%; font-size: 10pt; border-collapse: collapse; margin-bottom: 15px;">
           <tbody>
             <tr>
-              <td><strong>UNIDADE EMITENTE:</strong> ${nomeUnidade}</td>
-              <td><strong>DATA PEDIDO:</strong> ${formatarData(pedido.data_pedido)}</td>
+              <td><strong>UNIDADE EMITENTE:</strong> ${escapeHtml(nomeUnidade)}</td>
+              <td><strong>DATA PEDIDO:</strong> ${escapeHtml(formatarData(pedido.data_pedido))}</td>
             </tr>
             <tr>
-              <td><strong>RESPONSÁVEL USF:</strong> ${pedido.responsavel_nome}</td>
-              <td><strong>FUNÇÃO/REGISTRO:</strong> ${pedido.responsavel_funcao || ''} - ${pedido.responsavel_registro || ''}</td>
+              <td><strong>RESPONSÁVEL USF:</strong> ${escapeHtml(pedido.responsavel_nome)}</td>
+              <td><strong>FUNÇÃO/REGISTRO:</strong> ${escapeHtml(pedido.responsavel_funcao || '')} - ${escapeHtml(pedido.responsavel_registro || '')}</td>
             </tr>
           </tbody>
         </table>
@@ -172,13 +173,13 @@ export const ModalFichaPbs: React.FC<Props> = ({
 
         <div style="margin-top: 15px; border: 1px solid #000; padding: 8px; font-size: 9pt; page-break-inside: avoid;">
           <strong>RASTREABILIDADE DE RECEPÇÃO E ENVIO (ALMOXARIFADO CENTRAL):</strong><br />
-          - Recebimento no Almoxarifado: <strong>${pedido.apontador_recebimento_nome || 'Pendente'}</strong> em <strong>${pedido.data_recebimento ? formatarData(pedido.data_recebimento) : 'N/D'}</strong><br />
-          - Despacho / Envio do Material: <strong>${pedido.apontador_envio_nome || 'Pendente'}</strong> em <strong>${pedido.data_envio ? formatarData(pedido.data_envio) : 'N/D'}</strong>
+          - Recebimento no Almoxarifado: <strong>${escapeHtml(pedido.apontador_recebimento_nome || 'Pendente')}</strong> em <strong>${escapeHtml(pedido.data_recebimento ? formatarData(pedido.data_recebimento) : 'N/D')}</strong><br />
+          - Despacho / Envio do Material: <strong>${escapeHtml(pedido.apontador_envio_nome || 'Pendente')}</strong> em <strong>${escapeHtml(pedido.data_envio ? formatarData(pedido.data_envio) : 'N/D')}</strong>
         </div>
 
         <div class="pbs-print-signatures" style="display: flex; justify-content: center; margin-top: 50px; page-break-inside: avoid;">
           <div class="pbs-sig-box" style="flex: none; width: 350px; text-align: center; border-top: 1px solid #000; padding-top: 5px; font-size: 9pt;">
-            <strong>Ana Beatriz Figueiredo Ferreira Santos</strong><br />
+            <strong>Responsável pela Saúde Bucal</strong><br />
             Coordenadora de Saúde Bucal
           </div>
         </div>
@@ -315,7 +316,7 @@ export const ModalFichaPbs: React.FC<Props> = ({
 
             <div className="pbs-print-signatures" style={{ display: 'flex', justifyContent: 'center', marginTop: '40px' }}>
               <div className="pbs-sig-box" style={{ textAlign: 'center', flex: 'none', width: '350px' }}>
-                <strong>Ana Beatriz Figueiredo Ferreira Santos</strong><br />
+                <strong>Responsável pela Saúde Bucal</strong><br />
                 Coordenadora de Saúde Bucal
               </div>
             </div>

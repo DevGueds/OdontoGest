@@ -20,15 +20,16 @@ import { Header } from './components/Header';
 import { Navigation } from './components/Navigation';
 import { Toast } from './components/Toast';
 import { LoginModal } from './components/LoginModal';
+import { ChangePassword } from './components/ChangePassword';
 
-import { NovoPedidoTab } from './components/tabs/NovoPedidoTab';
-import { TriagemTab } from './components/tabs/TriagemTab';
-import { DashboardTab } from './components/tabs/DashboardTab';
-import { CatalogoTab } from './components/tabs/CatalogoTab';
-import { HonorariosTab } from './components/tabs/HonorariosTab';
-import { EquipamentosTab } from './components/tabs/EquipamentosTab';
-import { OrcamentoTab } from './components/tabs/OrcamentoTab';
-import { UsuariosTab } from './components/tabs/UsuariosTab';
+const NovoPedidoTab = React.lazy(() => import('./components/tabs/NovoPedidoTab').then(module => ({ default: module.NovoPedidoTab })));
+const TriagemTab = React.lazy(() => import('./components/tabs/TriagemTab').then(module => ({ default: module.TriagemTab })));
+const DashboardTab = React.lazy(() => import('./components/tabs/DashboardTab').then(module => ({ default: module.DashboardTab })));
+const CatalogoTab = React.lazy(() => import('./components/tabs/CatalogoTab').then(module => ({ default: module.CatalogoTab })));
+const HonorariosTab = React.lazy(() => import('./components/tabs/HonorariosTab').then(module => ({ default: module.HonorariosTab })));
+const EquipamentosTab = React.lazy(() => import('./components/tabs/EquipamentosTab').then(module => ({ default: module.EquipamentosTab })));
+const OrcamentoTab = React.lazy(() => import('./components/tabs/OrcamentoTab').then(module => ({ default: module.OrcamentoTab })));
+const UsuariosTab = React.lazy(() => import('./components/tabs/UsuariosTab').then(module => ({ default: module.UsuariosTab })));
 
 import { ModalRecebimento } from './components/modals/ModalRecebimento';
 import { ModalAtendimento } from './components/modals/ModalAtendimento';
@@ -43,7 +44,7 @@ import { ModalRelatorio } from './components/modals/ModalRelatorio';
 
 export const AppContent: React.FC = () => {
   const { user, authenticated, loading: authLoading, csrfToken, login, logout } = useAuth();
-  const perfilAtual: PerfilUsuario = user?.perfil || 'GESTOR';
+  const perfilAtual: PerfilUsuario = user?.perfil || 'SOLICITANTE';
 
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const prevUserIdRef = React.useRef<number | null>(null);
@@ -57,6 +58,8 @@ export const AppContent: React.FC = () => {
   const [entradas, setEntradas] = useState<EntradaRecurso[]>([]);
   const [usuarios, setUsuarios] = useState<UserSistema[]>([]);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const [dataError, setDataError] = useState('');
+  const loadGeneration = React.useRef(0);
 
   // Selected items for modals
   const [selectedPedido, setSelectedPedido] = useState<PedidoPBS | null>(null);
@@ -76,36 +79,58 @@ export const AppContent: React.FC = () => {
   const [modalRelatoriosOpen, setModalRelatoriosOpen] = useState(false);
 
   const reloadData = useCallback(async () => {
-    if (!authenticated) return;
+    if (!authenticated || !user || user.senha_requer_troca) return;
+    const generation = ++loadGeneration.current;
+    const financial = ['ADMINISTRADOR', 'GESTOR'].includes(user.perfil);
+    const orders = user.perfil !== 'TECNICO';
     try {
       const [u, m, p, h, eq, ch, ent, us] = await Promise.all([
         dbService.getUnidades(),
-        dbService.getMateriais(),
-        dbService.getPedidos(),
-        dbService.getHonorarios(),
+        orders ? dbService.getMateriais() : Promise.resolve([]),
+        orders ? dbService.getPedidos() : Promise.resolve([]),
+        financial ? dbService.getHonorarios() : Promise.resolve([]),
         dbService.getEquipamentos(),
         dbService.getChamados(),
-        dbService.getEntradas(),
-        dbService.getUsuarios().catch(() => [])
+        financial ? dbService.getEntradas() : Promise.resolve([]),
+        user.perfil === 'ADMINISTRADOR' ? dbService.getUsuarios() : Promise.resolve([])
       ]);
+      if (generation !== loadGeneration.current) return;
+      setDataError('');
       setUnidades(u);
-      setMateriais(m);
-      setPedidos(p);
+      setMateriais([...m].sort((a, b) => a.descricao.localeCompare(b.descricao, 'pt-BR')));
+      setPedidos([...p].sort((a, b) => b.id - a.id));
       setHonorarios(h);
       setEquipamentos(eq);
       setChamados(ch);
       setEntradas(ent);
       setUsuarios(us);
     } catch (err) {
-      console.error("Erro ao carregar dados do Fastify:", err);
+      if (generation !== loadGeneration.current || (err instanceof Error && err.name === 'AbortError')) return;
+      setDataError(err instanceof Error ? err.message : 'Não foi possível atualizar os dados.');
     }
-  }, [authenticated]);
+  }, [authenticated, user]);
 
   useEffect(() => {
     if (authenticated) {
       reloadData();
     }
+    return () => { loadGeneration.current++; };
   }, [authenticated, reloadData]);
+
+  useEffect(() => {
+    if (!authenticated || user?.senha_requer_troca) {
+      loadGeneration.current++;
+      setUnidades([]); setMateriais([]); setPedidos([]); setHonorarios([]); setEquipamentos([]); setChamados([]); setEntradas([]); setUsuarios([]);
+      setSelectedPedido(null); setSelectedMaterial(null); setSelectedUnidade(null);
+      setModalRecOpen(false); setModalAtendOpen(false); setModalEnvioOpen(false); setModalMatOpen(false); setModalEditMatOpen(false); setModalAjusteEstOpen(false); setModalUniOpen(false); setModalEditUniOpen(false); setModalFichaOpen(false); setModalRelatoriosOpen(false);
+      setDataError(''); setToasts([]); prevUserIdRef.current = null;
+    }
+  }, [authenticated, user?.senha_requer_troca]);
+  useEffect(() => {
+    const refresh = () => { if (document.visibilityState === 'visible') void reloadData(); };
+    window.addEventListener('focus', refresh);
+    return () => window.removeEventListener('focus', refresh);
+  }, [reloadData]);
 
   useEffect(() => {
     if (authenticated && user) {
@@ -151,8 +176,10 @@ export const AppContent: React.FC = () => {
       a.click();
       URL.revokeObjectURL(url);
       showToast('Script SQL MySQL baixado com sucesso!', 'success');
+      return true;
     } catch (err: any) {
       showToast(err.message || 'Erro ao exportar SQL', 'error');
+      return false;
     }
   };
 
@@ -171,8 +198,10 @@ export const AppContent: React.FC = () => {
       showToast(`Solicitação ${pedidoCriado.numero_pbs} emitida com sucesso!`, 'success');
       await reloadData();
       setActiveTab('triagem');
+      return true;
     } catch (err: any) {
       showToast(err.message || 'Erro ao emitir pedido', 'error');
+      return false;
     }
   };
 
@@ -182,8 +211,10 @@ export const AppContent: React.FC = () => {
       showToast('Pedido marcado como RECEBIDO pelo Almoxarifado!', 'success');
       setModalRecOpen(false);
       await reloadData();
+      return true;
     } catch (err: any) {
       showToast(err.message, 'error');
+      return false;
     }
   };
 
@@ -193,8 +224,10 @@ export const AppContent: React.FC = () => {
       showToast('Quantidades atendidas/liberadas com sucesso! Estoque atualizado.', 'success');
       setModalAtendOpen(false);
       await reloadData();
+      return true;
     } catch (err: any) {
       showToast(err.message, 'error');
+      return false;
     }
   };
 
@@ -204,8 +237,10 @@ export const AppContent: React.FC = () => {
       showToast('Status do pedido atualizado para ENVIADO!', 'success');
       setModalEnvioOpen(false);
       await reloadData();
+      return true;
     } catch (err: any) {
       showToast(err.message, 'error');
+      return false;
     }
   };
 
@@ -215,8 +250,10 @@ export const AppContent: React.FC = () => {
       await dbService.cancelarPedido(pedidoId, csrfToken);
       showToast('Pedido cancelado com sucesso!', 'info');
       await reloadData();
+      return true;
     } catch (err: any) {
       showToast(err.message, 'error');
+      return false;
     }
   };
 
@@ -226,8 +263,10 @@ export const AppContent: React.FC = () => {
       showToast(`Material "${desc}" cadastrado com sucesso!`, 'success');
       setModalMatOpen(false);
       await reloadData();
+      return true;
     } catch (err: any) {
       showToast(err.message, 'error');
+      return false;
     }
   };
 
@@ -237,19 +276,25 @@ export const AppContent: React.FC = () => {
       showToast(`Insumo "${m.descricao}" atualizado com sucesso!`, 'success');
       setModalEditMatOpen(false);
       await reloadData();
+      return true;
     } catch (err: any) {
       showToast(err.message, 'error');
+      return false;
     }
   };
 
   const handleConfirmarAjusteEstoque = async (id: number, novaQtd: number) => {
     try {
-      const m = await dbService.atualizarEstoqueMaterial(id, novaQtd, csrfToken);
+      const anterior = materiais.find(m => m.id === id)?.qtd_estoque;
+      if (anterior === undefined) throw new Error('Material não encontrado. Atualize os dados.');
+      const m = await dbService.atualizarEstoqueMaterial(id, novaQtd, anterior, csrfToken);
       showToast(`Estoque de "${m.descricao}" atualizado para ${m.qtd_estoque} ${m.unidade_medida}!`, 'success');
       setModalAjusteEstOpen(false);
       await reloadData();
+      return true;
     } catch (err: any) {
       showToast(err.message, 'error');
+      return false;
     }
   };
 
@@ -258,8 +303,10 @@ export const AppContent: React.FC = () => {
       await dbService.deleteMaterial(id, csrfToken);
       showToast('Insumo removido do catálogo com sucesso!', 'info');
       await reloadData();
+      return true;
     } catch (err: any) {
       showToast(err.message || 'Erro ao remover insumo', 'error');
+      return false;
     }
   };
 
@@ -269,8 +316,10 @@ export const AppContent: React.FC = () => {
       showToast(`Estabelecimento "${nome}" cadastrado com sucesso!`, 'success');
       setModalUniOpen(false);
       await reloadData();
+      return true;
     } catch (err: any) {
       showToast(err.message, 'error');
+      return false;
     }
   };
 
@@ -280,8 +329,10 @@ export const AppContent: React.FC = () => {
       showToast(`Estabelecimento "${u.nome}" atualizado com sucesso!`, 'success');
       setModalEditUniOpen(false);
       await reloadData();
+      return true;
     } catch (err: any) {
       showToast(err.message || 'Erro ao editar estabelecimento', 'error');
+      return false;
     }
   };
 
@@ -290,8 +341,10 @@ export const AppContent: React.FC = () => {
       await dbService.deleteUnidade(id, csrfToken);
       showToast('Estabelecimento removido com sucesso!', 'info');
       await reloadData();
+      return true;
     } catch (err: any) {
       showToast(err.message || 'Erro ao remover estabelecimento', 'error');
+      return false;
     }
   };
 
@@ -300,8 +353,10 @@ export const AppContent: React.FC = () => {
       const novo = await dbService.addHonorario(dados, csrfToken);
       showToast(`Honorário de "${novo.nome_dentista}" registrado com sucesso!`, 'success');
       await reloadData();
+      return true;
     } catch (err: any) {
       showToast(err.message || 'Erro ao registrar honorário', 'error');
+      return false;
     }
   };
 
@@ -310,8 +365,10 @@ export const AppContent: React.FC = () => {
       const novo = await dbService.addEquipamento(dados, csrfToken);
       showToast(`Equipamento "${novo.nome}" cadastrado com sucesso!`, 'success');
       await reloadData();
+      return true;
     } catch (err: any) {
       showToast(err.message || 'Erro ao cadastrar equipamento', 'error');
+      return false;
     }
   };
 
@@ -320,8 +377,10 @@ export const AppContent: React.FC = () => {
       const eq = await dbService.atualizarEquipamento(id, dados, csrfToken);
       showToast(`Equipamento "${eq.nome}" atualizado com sucesso!`, 'success');
       await reloadData();
+      return true;
     } catch (err: any) {
       showToast(err.message || 'Erro ao atualizar equipamento', 'error');
+      return false;
     }
   };
 
@@ -330,8 +389,10 @@ export const AppContent: React.FC = () => {
       const novo = await dbService.addChamado(dados, csrfToken);
       showToast(`Chamado de manutenção #${novo.id} registrado com sucesso!`, 'success');
       await reloadData();
+      return true;
     } catch (err: any) {
       showToast(err.message || 'Erro ao abrir chamado', 'error');
+      return false;
     }
   };
 
@@ -340,8 +401,10 @@ export const AppContent: React.FC = () => {
       await dbService.updateStatusChamado(chamadoId, status, custoReparo, csrfToken);
       showToast('Status do chamado atualizado com sucesso!', 'success');
       await reloadData();
+      return true;
     } catch (err: any) {
       showToast(err.message || 'Erro ao atualizar status', 'error');
+      return false;
     }
   };
 
@@ -350,8 +413,10 @@ export const AppContent: React.FC = () => {
       await dbService.aprovarChamadoManutencao(chamadoId, aprovar, csrfToken);
       showToast(aprovar ? 'Manutenção aprovada e liberada para o Técnico!' : 'Manutenção recusada.', aprovar ? 'success' : 'info');
       await reloadData();
+      return true;
     } catch (err: any) {
       showToast(err.message || 'Erro ao aprovar chamado', 'error');
+      return false;
     }
   };
 
@@ -360,8 +425,10 @@ export const AppContent: React.FC = () => {
       await dbService.addEntrada(dados, csrfToken);
       showToast(`Aporte "${dados.descricao}" cadastrado com sucesso!`, 'success');
       await reloadData();
+      return true;
     } catch (err: any) {
       showToast(err.message || 'Erro ao cadastrar aporte', 'error');
+      return false;
     }
   };
 
@@ -370,8 +437,10 @@ export const AppContent: React.FC = () => {
       const u = await dbService.addUsuario(dados, csrfToken);
       showToast(`Usuário "${u.nome}" (${u.email}) cadastrado com sucesso!`, 'success');
       await reloadData();
+      return true;
     } catch (err: any) {
       showToast(err.message || 'Erro ao cadastrar usuário', 'error');
+      return false;
     }
   };
 
@@ -380,8 +449,10 @@ export const AppContent: React.FC = () => {
       const u = await dbService.updateUsuario(id, dados, csrfToken);
       showToast(`Dados de "${u.nome}" atualizados com sucesso!`, 'success');
       await reloadData();
+      return true;
     } catch (err: any) {
       showToast(err.message || 'Erro ao editar usuário', 'error');
+      return false;
     }
   };
 
@@ -390,8 +461,10 @@ export const AppContent: React.FC = () => {
       await dbService.deleteUsuario(id, csrfToken);
       showToast('Usuário removido com sucesso!', 'info');
       await reloadData();
+      return true;
     } catch (err: any) {
       showToast(err.message || 'Erro ao remover usuário', 'error');
+      return false;
     }
   };
 
@@ -400,8 +473,10 @@ export const AppContent: React.FC = () => {
       await dbService.deleteEntrada(id, csrfToken);
       showToast('Aporte removido com sucesso!', 'info');
       await reloadData();
+      return true;
     } catch (err: any) {
       showToast(err.message || 'Erro ao remover aporte', 'error');
+      return false;
     }
   };
 
@@ -431,6 +506,7 @@ export const AppContent: React.FC = () => {
   if (!authenticated) {
     return <LoginModal />;
   }
+  if (user?.senha_requer_troca) return <ChangePassword />;
 
   const pendentesCount = pedidos.filter(p => p.status === 'SOLICITADO' || p.status === 'RECEBIDO').length;
 
@@ -439,7 +515,7 @@ export const AppContent: React.FC = () => {
       <Header 
         perfilAtual={perfilAtual}
         onExportarSQL={handleExportarSQL}
-        onAbrirModalRelatorios={() => setModalRelatoriosOpen(true)}
+        onAbrirModalRelatorios={['ADMINISTRADOR', 'GESTOR'].includes(perfilAtual) ? () => setModalRelatoriosOpen(true) : undefined}
       />
 
       <div className="app-body">
@@ -451,6 +527,8 @@ export const AppContent: React.FC = () => {
         />
 
         <main className="app-main">
+        <React.Suspense fallback={<p role="status">Carregando tela…</p>}>
+        {dataError && <div role="alert" className="card" style={{ padding: '1rem', color: 'var(--rose)' }}>{dataError} <button className="btn btn-secondary btn-sm" onClick={() => { dbService.clearCache(); void reloadData(); }}>Tentar novamente</button></div>}
         {activeTab === 'novo-pedido' && (
           <div className="tab-content active">
             <NovoPedidoTab 
@@ -578,6 +656,7 @@ export const AppContent: React.FC = () => {
             />
           </div>
         )}
+        </React.Suspense>
         </main>
       </div>
 

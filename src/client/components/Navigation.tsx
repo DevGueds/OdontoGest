@@ -35,7 +35,7 @@ export const Navigation: React.FC<NavigationProps> = ({
           </button>
         )}
 
-        {!isTecnico && (
+        {(isSolicitante || isAdmin || isGestor) && (
           <button 
             className={`nav-tab ${activeTab === 'triagem' ? 'active' : ''}`}
             onClick={() => onSelectTab('triagem')}
@@ -49,7 +49,7 @@ export const Navigation: React.FC<NavigationProps> = ({
           </button>
         )}
 
-        {!isTecnico && (
+        {(isSolicitante || isAdmin) && (
           <button 
             className={`nav-tab ${activeTab === 'novo-pedido' ? 'active' : ''}`}
             onClick={() => onSelectTab('novo-pedido')}

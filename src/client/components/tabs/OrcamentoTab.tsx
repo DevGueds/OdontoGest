@@ -20,7 +20,7 @@ interface Props {
   honorarios: HonorarioOdontologo[];
   chamados: ChamadoManutencao[];
   perfilAtual?: PerfilUsuario;
-  onAddEntrada: (dados: Omit<EntradaRecurso, 'id'>) => void;
+  onAddEntrada: (dados: Omit<EntradaRecurso, 'id'>) => Promise<boolean | void>;
   onDeleteEntrada: (id: number) => void;
   formatarMoeda: (val: number) => string;
   formatarData: (d?: string | null) => string;
@@ -53,11 +53,11 @@ export const OrcamentoTab: React.FC<Props> = ({
 
   const saldos = dbService.getSaldosNaturezaRecursos(unidades, pedidos, materiais, honorarios, chamados, entradas);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!descricao.trim() || !valor || parseFloat(valor) <= 0) return;
 
-    onAddEntrada({
+    if (!await onAddEntrada({
       unidade_id: unidadeId ? parseInt(unidadeId) : null,
       natureza,
       tipo_recorrencia: tipoRecorrencia,
@@ -66,7 +66,7 @@ export const OrcamentoTab: React.FC<Props> = ({
       data_credito: dataCredito,
       mes_referencia: mesReferencia,
       observacoes: observacoes.trim() || undefined
-    });
+    })) return;
 
     setDescricao('');
     setValor('');

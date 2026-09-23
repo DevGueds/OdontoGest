@@ -45,7 +45,7 @@ export const ModalAtendimento: React.FC<Props> = ({
       const estAtual = mat ? (mat.qtd_estoque ?? 0) : 0;
       const estMax = estAtual + (it.qtd_atendida || 0);
 
-      if (qAtendida > estMax) {
+      if (qAtendida < 0 || qAtendida > Math.min(estMax, it.qtd_pedida)) {
         excessoDetectado = true;
         const desc = mat ? mat.descricao : `Material #${it.material_id}`;
         showToast(`Quantidade liberada de "${desc}" (${qAtendida}) é maior que o estoque disponível (${estMax}).`, 'error');

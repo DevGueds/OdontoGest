@@ -5,7 +5,7 @@ interface Props {
   unidades: UnidadeSaude[];
   honorarios: HonorarioOdontologo[];
   perfilAtual?: PerfilUsuario;
-  onAddHonorario: (dados: Omit<HonorarioOdontologo, 'id'>) => void;
+  onAddHonorario: (dados: Omit<HonorarioOdontologo, 'id'>) => Promise<boolean | void>;
   formatarMoeda: (v: number) => string;
 }
 
@@ -44,9 +44,9 @@ export const HonorariosTab: React.FC<Props> = ({
   const totalComissoes = honorariosFiltrados.reduce((acc, h) => acc + (h.valor_comissao || 0), 0);
   const totalGeralHonorarios = honorariosFiltrados.reduce((acc, h) => acc + (h.valor_total || 0), 0);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onAddHonorario({
+    if (!await onAddHonorario({
       unidade_id: Number(unidadeId),
       nome_dentista: nomeDentista,
       cro,
@@ -56,7 +56,7 @@ export const HonorariosTab: React.FC<Props> = ({
       valor_comissao: parseFloat(valorComissao) || 0,
       valor_total: (parseFloat(valorFixo) || 0) + (parseFloat(valorComissao) || 0),
       observacoes
-    });
+    })) return;
 
     setNomeDentista('');
     setCro('');

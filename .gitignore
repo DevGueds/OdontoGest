@@ -9,3 +9,6 @@ build/
 coverage/
 .next/
 out/
+.local/
+playwright-report/
+test-results/

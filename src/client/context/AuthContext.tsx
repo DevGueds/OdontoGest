@@ -1,132 +1,66 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { PerfilUsuario } from '../types';
+import { dbService } from '../services/db';
 
-export interface User {
-  id: number;
-  email: string;
-  nome: string;
-  funcao: string;
-  registro: string;
-  perfil: PerfilUsuario;
-  unidade_id: number;
-}
-
+export interface User { id: number; email: string; nome: string; funcao: string; registro: string; perfil: PerfilUsuario; unidade_id: number | null; senha_requer_troca: boolean }
 interface AuthContextType {
-  user: User | null;
-  authenticated: boolean;
-  loading: boolean;
-  csrfToken: string | null;
-  login: (email: string, senha: string) => Promise<void>;
-  logout: () => Promise<void>;
+  user: User | null; authenticated: boolean; loading: boolean; csrfToken: string | null;
+  login: (email: string, senha: string) => Promise<void>; logout: () => Promise<void>;
+  changePassword: (current: string, next: string) => Promise<void>;
   csrfFetch: (url: string, options?: RequestInit) => Promise<Response>;
 }
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [authenticated, setAuthenticated] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [csrfToken, setCsrfToken] = useState<string | null>(null);
-
-  // Helper fetch wrapping credentials & X-CSRF-Token
-  const csrfFetch = useCallback(async (url: string, options: RequestInit = {}) => {
-    const headers = new Headers(options.headers || {});
-    
-    // Automatically attach X-CSRF-Token if available and request is mutative
-    if (csrfToken && ['POST', 'PUT', 'PATCH', 'DELETE'].includes((options.method || 'GET').toUpperCase())) {
-      headers.set('X-CSRF-Token', csrfToken);
-    }
-
-    if (options.body && !(options.body instanceof FormData)) {
-      headers.set('Content-Type', 'application/json');
-    }
-
-    const response = await fetch(url, {
-      ...options,
-      headers,
-      credentials: 'include' // Always include HttpOnly cookies
-    });
-
-    return response;
-  }, [csrfToken]);
-
-  // Check auth session on startup
-  const checkAuth = useCallback(async () => {
-    try {
-      const res = await fetch('/api/auth/me', { credentials: 'include' });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.authenticated) {
-          setUser(data.user);
-          setAuthenticated(true);
-          setCsrfToken(data.csrfToken);
-        } else {
-          setUser(null);
-          setAuthenticated(false);
-          setCsrfToken(null);
-        }
-      }
-    } catch (err) {
-      setUser(null);
-      setAuthenticated(false);
-      setCsrfToken(null);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
+  const channel = useRef<BroadcastChannel | null>(null);
+  const generation = useRef(0);
+  const clear = useCallback(() => { generation.current++; dbService.clearCache(); setUser(null); setCsrfToken(null); }, []);
   useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
-
-  // Login via Fastify API (sets HttpOnly cookie + CSRF token)
-  const login = async (email: string, senha: string) => {
-    setLoading(true);
-    try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ email, senha })
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || 'E-mail ou senha incorretos.');
-      }
-
-      const data = await res.json();
-      setUser(data.user);
-      setAuthenticated(true);
-      setCsrfToken(data.csrfToken);
-    } finally {
-      setLoading(false);
-    }
+    const controller = new AbortController(); const epoch = generation.current;
+    fetch('/api/auth/me', { credentials: 'include', cache: 'no-store', signal: controller.signal }).then(async res => {
+      if (res.ok) { const data = await res.json(); if (epoch === generation.current && !controller.signal.aborted) { dbService.clearCache(); setUser(data.user); setCsrfToken(data.csrfToken); } }
+    }).catch(() => {}).finally(() => { if (!controller.signal.aborted) setLoading(false); });
+    return () => controller.abort();
+  }, []);
+  useEffect(() => {
+    const onUnauthorized = () => { clear(); setLoading(false); };
+    window.addEventListener('odontogest:unauthorized', onUnauthorized);
+    channel.current = new BroadcastChannel('odontogest-auth');
+    channel.current.onmessage = onUnauthorized;
+    return () => { window.removeEventListener('odontogest:unauthorized', onUnauthorized); channel.current?.close(); };
+  }, [clear]);
+  const csrfFetch = useCallback((url: string, options: RequestInit = {}) => {
+    const headers = new Headers(options.headers); if (csrfToken) headers.set('X-CSRF-Token', csrfToken);
+    if (options.body) headers.set('Content-Type', 'application/json');
+    return fetch(url, { ...options, headers, credentials: 'include', cache: 'no-store', signal: AbortSignal.timeout(20_000) });
+  }, [csrfToken]);
+  const accept = async (response: Response) => {
+    const data = await response.json(); if (!response.ok) throw new Error(data.error || 'Não foi possível autenticar.');
+    dbService.clearCache(); setUser(data.user); setCsrfToken(data.csrfToken);
   };
-
-  // Logout via Fastify API (clears HttpOnly cookie)
+  const login = async (email: string, senha: string) => {
+    clear();
+    try {
+      const tokenResponse = await fetch('/api/auth/csrf', { credentials: 'include', cache: 'no-store', signal: AbortSignal.timeout(15_000) });
+      if (!tokenResponse.ok) throw new Error('Não foi possível iniciar o acesso. Tente novamente.');
+      const token = (await tokenResponse.json()).csrfToken;
+      await accept(await fetch('/api/auth/login', { method: 'POST', credentials: 'include', cache: 'no-store', signal: AbortSignal.timeout(20_000), headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': token }, body: JSON.stringify({ email, senha }) }));
+      channel.current?.postMessage('session-changed');
+    } finally { setLoading(false); }
+  };
   const logout = async () => {
     try {
-      await csrfFetch('/api/auth/logout', { method: 'POST' });
-    } finally {
-      setUser(null);
-      setAuthenticated(false);
-      setCsrfToken(null);
-    }
+      const response = await csrfFetch('/api/auth/logout', { method: 'POST' });
+      if (!response.ok && response.status !== 401) throw new Error('Não foi possível encerrar a sessão no servidor. Tente novamente.');
+      clear(); channel.current?.postMessage('logout');
+    } catch (error) { window.alert(error instanceof Error ? error.message : 'Falha ao sair. Tente novamente.'); }
   };
-
-  return (
-    <AuthContext.Provider value={{ user, authenticated, loading, csrfToken, login, logout, csrfFetch }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  const changePassword = async (current: string, next: string) => {
+    await accept(await csrfFetch('/api/auth/password', { method: 'POST', body: JSON.stringify({ senha_atual: current, nova_senha: next }) }));
+    channel.current?.postMessage('session-changed');
+  };
+  return <AuthContext.Provider value={{ user, authenticated: !!user, loading, csrfToken, login, logout, changePassword, csrfFetch }}>{children}</AuthContext.Provider>;
 };
-
-export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth deve ser utilizado dentro de um AuthProvider.');
-  }
-  return context;
-};
+export const useAuth = () => { const context = useContext(AuthContext); if (!context) throw new Error('AuthProvider ausente.'); return context; };

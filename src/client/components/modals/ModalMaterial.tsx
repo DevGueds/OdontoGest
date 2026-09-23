@@ -4,7 +4,7 @@ import { NaturezaDespesa } from '../../types';
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (desc: string, un: string, val: number, est: number, limiteMax?: number | null, fornecedor?: string | null, natureza?: NaturezaDespesa) => void;
+  onConfirm: (desc: string, un: string, val: number, est: number, limiteMax?: number | null, fornecedor?: string | null, natureza?: NaturezaDespesa) => Promise<boolean | void>;
 }
 
 export const ModalMaterial: React.FC<Props> = ({ isOpen, onClose, onConfirm }) => {
@@ -12,22 +12,22 @@ export const ModalMaterial: React.FC<Props> = ({ isOpen, onClose, onConfirm }) =
   const [fornecedor, setFornecedor] = useState('');
   const [un, setUn] = useState('');
   const [val, setVal] = useState('');
-  const [est, setEst] = useState('100');
+  const [est, setEst] = useState('0');
   const [limiteMax, setLimiteMax] = useState('');
   const [natureza, setNatureza] = useState<NaturezaDespesa>('CUSTEIO');
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const lMax = limiteMax.trim() !== '' ? parseInt(limiteMax) : null;
     const forn = fornecedor.trim() !== '' ? fornecedor.trim() : null;
-    onConfirm(desc, un, parseFloat(val) || 0, parseInt(est) || 100, lMax, forn, natureza);
+    if (!await onConfirm(desc, un, parseFloat(val) || 0, parseInt(est) || 0, lMax, forn, natureza)) return;
     setDesc('');
     setFornecedor('');
     setUn('');
     setVal('');
-    setEst('100');
+    setEst('0');
     setLimiteMax('');
     setNatureza('CUSTEIO');
   };

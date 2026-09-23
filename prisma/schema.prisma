@@ -32,14 +32,15 @@ model UnidadeSaude {
   id                   Int                   @id @default(autoincrement())
   nome                 String                @unique @db.VarChar(150)
   tipo                 String                @default("USF") @db.VarChar(50)
-  orcamentoCusteio     Decimal               @default(100000.00) @map("orcamento_custeio") @db.Decimal(12, 2)
-  orcamentoInvestimento Decimal              @default(50000.00) @map("orcamento_investimento") @db.Decimal(12, 2)
+  orcamentoCusteio     Decimal               @default(0.00) @map("orcamento_custeio") @db.Decimal(12, 2)
+  orcamentoInvestimento Decimal              @default(0.00) @map("orcamento_investimento") @db.Decimal(12, 2)
   criadoEm             DateTime              @default(now()) @map("criado_em")
   usuarios             Usuario[]
   pedidos              PedidoPBS[]
   honorarios           HonorarioOdontologo[]
   equipamentos         Equipamento[]
   chamados             ChamadoManutencao[]
+  entradas             EntradaRecurso[]
 
   @@map("unidades_saude")
 }
@@ -48,6 +49,7 @@ model Usuario {
   id           Int           @id @default(autoincrement())
   email        String        @unique @db.VarChar(150)
   senhaHash    String        @map("senha_hash") @db.VarChar(255)
+  senhaRequerTroca Boolean   @default(false) @map("senha_requer_troca")
   nome         String        @db.VarChar(150)
   funcao       String?       @db.VarChar(100)
   registro     String?       @db.VarChar(50)
@@ -66,7 +68,7 @@ model Material {
   fornecedor      String?         @db.VarChar(150)
   unidadeMedida   String          @map("unidade_medida") @db.VarChar(20)
   valorEstimado   Decimal         @default(0.00) @map("valor_estimado") @db.Decimal(10, 2)
-  qtdEstoque      Int             @default(100) @map("qtd_estoque")
+  qtdEstoque      Int             @default(0) @map("qtd_estoque")
   limiteMaxPedido Int?            @map("limite_max_pedido")
   natureza        NaturezaDespesa @default(CUSTEIO)
   criadoEm        DateTime        @default(now()) @map("criado_em")
@@ -97,6 +99,7 @@ model PedidoPBS {
   unidade                  UnidadeSaude    @relation(fields: [unidadeEmitenteId], references: [id])
   itens                    ItemPedidoPBS[]
 
+  @@index([unidadeEmitenteId, status, dataPedido])
   @@map("pedidos_pbs")
 }
 
@@ -109,9 +112,11 @@ model ItemPedidoPBS {
   qtdAtendida   Int       @default(0) @map("qtd_atendida")
   valorUnitario Decimal?  @map("valor_unitario") @db.Decimal(10, 2)
   valorTotal    Decimal?  @map("valor_total") @db.Decimal(10, 2)
+  natureza      NaturezaDespesa @default(CUSTEIO)
   pedido        PedidoPBS @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
   material      Material  @relation(fields: [materialId], references: [id])
 
+  @@unique([pedidoId, materialId])
   @@map("itens_pedido_pbs")
 }
 
@@ -129,6 +134,7 @@ model HonorarioOdontologo {
   criadoEm      DateTime     @default(now()) @map("criado_em")
   unidade       UnidadeSaude @relation(fields: [unidadeId], references: [id])
 
+  @@index([unidadeId, mesReferencia])
   @@map("honorarios_odontologos")
 }
 
@@ -161,6 +167,8 @@ model ChamadoManutencao {
   unidade         UnidadeSaude @relation(fields: [unidadeId], references: [id])
   equipamento     Equipamento  @relation(fields: [equipamentoId], references: [id], onDelete: Cascade)
 
+  @@index([unidadeId, status])
+  @@index([equipamentoId, status])
   @@map("chamados_manutencao")
 }
 
@@ -180,6 +188,20 @@ model EntradaRecurso {
   mesReferencia   String          @map("mes_referencia") @db.VarChar(10)
   observacoes     String?         @db.Text
   criadoEm        DateTime        @default(now()) @map("criado_em")
+  unidade         UnidadeSaude?   @relation(fields: [unidadeId], references: [id], onDelete: Restrict)
 
+  @@index([unidadeId, mesReferencia])
   @@map("entradas_recursos")
+}
+
+model AuditEvent {
+  id BigInt @id @default(autoincrement())
+  actorId Int? @map("actor_id")
+  action String @db.VarChar(100)
+  resource String @db.VarChar(150)
+  outcome Int
+  requestId String @map("request_id") @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at")
+  @@index([createdAt])
+  @@map("audit_events")
 }

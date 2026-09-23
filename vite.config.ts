@@ -7,9 +7,12 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 3000,
+    host: 'localhost',
+    strictPort: true,
+    headers: { 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY', 'Referrer-Policy': 'no-referrer' },
     proxy: {
       '/api': {
-        target: 'http://localhost:3001',
+        target: 'http://127.0.0.1:3001',
         changeOrigin: true,
       },
     },

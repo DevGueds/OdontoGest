@@ -1,1391 +1,189 @@
+import { Prisma, type Material, type UnidadeSaude, type HonorarioOdontologo, type Equipamento, type ChamadoManutencao, type EntradaRecurso } from '@prisma/client';
 import { prisma } from '../db/prisma.js';
+import { AppError } from '../errors.js';
+import type { Input } from '../validation.js';
 
-export type NaturezaDespesa = 'CUSTEIO' | 'INVESTIMENTO';
+const day = (d: Date | null) => d?.toISOString().slice(0, 10) ?? null;
+export const mapUnidade = (u: UnidadeSaude) => ({ id: u.id, nome: u.nome, tipo: u.tipo, orcamento_custeio: Number(u.orcamentoCusteio), orcamento_investimento: Number(u.orcamentoInvestimento), criado_em: u.criadoEm.toISOString() });
+export const mapMaterial = (m: Material) => ({ id: m.id, descricao: m.descricao, unidade_medida: m.unidadeMedida, fornecedor: m.fornecedor, valor_estimado: Number(m.valorEstimado), qtd_estoque: m.qtdEstoque, limite_max_pedido: m.limiteMaxPedido, natureza: m.natureza });
+export const mapPedido = (p: Prisma.PedidoPBSGetPayload<{ include: { itens: true } }>) => ({
+  id: p.id, numero_pbs: p.numeroPbs || '', unidade_emitente_id: p.unidadeEmitenteId, data_pedido: day(p.dataPedido),
+  responsavel_nome: p.responsavelNome, responsavel_funcao: p.responsavelFuncao, responsavel_registro: p.responsavelRegistro,
+  atividade_programa: p.atividadePrograma, elemento_despesa: p.elementoDespesa, observacoes: p.observacoes,
+  status: p.status, valor_total_estimado: Number(p.valorTotalEstimado), apontador_envio_nome: p.apontadorEnvioNome,
+  data_envio: day(p.dataEnvio), apontador_recebimento_nome: p.apontadorRecebimentoNome, data_recebimento: day(p.dataRecebimento),
+  itens: p.itens.map(i => ({ id: i.id, pedido_id: i.pedidoId, numero_item: i.numeroItem, material_id: i.materialId, qtd_pedida: i.qtdPedida, qtd_atendida: i.qtdAtendida, valor_unitario: Number(i.valorUnitario), valor_total: Number(i.valorTotal), natureza: i.natureza })),
+});
+export const mapHonorario = (h: HonorarioOdontologo) => ({ id: h.id, unidade_id: h.unidadeId, nome_dentista: h.nomeDentista, cro: h.cro, tipo_contrato: h.tipoContrato, mes_referencia: h.mesReferencia, valor_fixo: Number(h.valorFixo), valor_comissao: Number(h.valorComissao), valor_total: Number(h.valorTotal), observacoes: h.observacoes });
+export const mapEquipamento = (e: Equipamento) => ({ id: e.id, unidade_id: e.unidadeId, nome: e.nome, numero_serie: e.numeroSerie, categoria: e.categoria, data_ultima_preventiva: day(e.dataUltimaPreventiva) });
+export const mapChamado = (c: ChamadoManutencao) => ({ id: c.id, unidade_id: c.unidadeId, equipamento_id: c.equipamentoId, tipo: c.tipo, descricao_defeito: c.descricaoDefeito, custo_reparo: Number(c.custoReparo), status: c.status, data_abertura: day(c.dataAbertura), data_conclusao: day(c.dataConclusao), observacoes: c.observacoes });
+export const mapEntrada = (e: EntradaRecurso) => ({ id: e.id, unidade_id: e.unidadeId, natureza: e.natureza, tipo_recorrencia: e.tipoRecorrencia, descricao: e.descricao, valor: Number(e.valor), data_credito: day(e.dataCredito), mes_referencia: e.mesReferencia, observacoes: e.observacoes });
 
-export interface UnidadeSaude {
-  id: number;
-  nome: string;
-  tipo: string;
-  orcamento_custeio?: number;
-  orcamento_investimento?: number;
-  criado_em?: string;
+export type Page = { after?: number; limit: number };
+const paging = (p: Page) => ({ take: p.limit + 1, orderBy: { id: 'asc' as const }, ...(p.after ? { cursor: { id: p.after }, skip: 1 } : {}) });
+const money = (value: Prisma.Decimal | number) => new Prisma.Decimal(value);
+const ensureTotal = (value: Prisma.Decimal) => { if (value.gt('99999999.99')) throw new AppError(400, 'Valor total excede o limite permitido.'); return value; };
+async function lockPedido(tx: Prisma.TransactionClient, id: number) {
+  await tx.$queryRaw`SELECT id FROM pedidos_pbs WHERE id = ${id} FOR UPDATE`;
+  return tx.pedidoPBS.findUniqueOrThrow({ where: { id }, include: { itens: { orderBy: { materialId: 'asc' } } } });
 }
-
-export interface Material {
-  id: number;
-  descricao: string;
-  unidade_medida: string;
-  valor_estimado: number;
-  qtd_estoque: number;
-  limite_max_pedido?: number | null;
-  fornecedor?: string | null;
-  natureza?: NaturezaDespesa;
-  criado_em?: string;
-}
-
-export interface ItemPedido {
-  id: number;
-  pedido_id: number;
-  numero_item: number;
-  material_id: number;
-  qtd_pedida: number;
-  qtd_atendida: number;
-  valor_unitario: number;
-  valor_total: number;
-}
-
-export interface PedidoPBS {
-  id: number;
-  numero_pbs: string;
-  unidade_emitente_id: number;
-  data_pedido: string;
-  responsavel_nome: string;
-  responsavel_funcao?: string;
-  responsavel_registro?: string;
-  atividade_programa?: string;
-  elemento_despesa?: string;
-  observacoes?: string;
-  status: 'SOLICITADO' | 'RECEBIDO' | 'ENVIADO' | 'ATENDIDO_PARCIAL' | 'ATENDIDO_TOTAL' | 'CANCELADO';
-  valor_total_estimado: number;
-  apontador_envio_nome?: string | null;
-  data_envio?: string | null;
-  apontador_recebimento_nome?: string | null;
-  data_recebimento?: string | null;
-  criado_em?: string;
-  atualizado_em?: string;
-  itens: ItemPedido[];
-}
-
-export interface UnidadeStats {
-  unidadeId: number;
-  nome: string;
-  tipo: string;
-  totalPedidos: number;
-  pendentes: number;
-  atendidos: number;
-  cancelados: number;
-  totalSolicitado: number;
-  totalAtendido: number;
-}
-
-export interface EstatisticasGerais {
-  unidadesStats: UnidadeStats[];
-  geral: {
-    totalSolicitadoGeral: number;
-    totalAtendidoGeral: number;
-    totalPedidosGeral: number;
-    totalPendentesGeral: number;
-    totalAtendidosGeral: number;
-    totalUnidades: number;
-  };
-}
-
-export const INITIAL_UNIDADES: UnidadeSaude[] = [
-  { id: 1, nome: "SECRETARIA MUNICIPAL DE SAÚDE (SMS)", tipo: "SMS", criado_em: "2026-08-18 00:00:00" }
-];
-
-export const INITIAL_MATERIAIS: Material[] = [];
-
-export const INITIAL_PEDIDOS: PedidoPBS[] = [];
-export type TipoContratoOdontologo = 'FOLHA_FIXA' | 'COMISSAO' | 'PLANTAO' | 'PJ_RPA';
-
-export interface HonorarioOdontologo {
-  id: number;
-  unidade_id: number;
-  nome_dentista: string;
-  cro: string;
-  tipo_contrato: TipoContratoOdontologo;
-  mes_referencia: string;
-  valor_fixo: number;
-  valor_comissao: number;
-  valor_total: number;
-  observacoes?: string;
-  criado_em?: string;
-}
-
-export interface Equipamento {
-  id: number;
-  unidade_id: number;
-  nome: string;
-  numero_serie: string;
-  categoria: string;
-  data_ultima_preventiva?: string | null;
-  criado_em?: string;
-}
-
-export type StatusChamado = 'ABERTO' | 'APROVADO_ADM' | 'EM_ANDAMENTO' | 'CONCLUIDO' | 'RECUSADO';
-export type TipoChamado = 'CORRETIVA' | 'PREVENTIVA';
-
-export interface ChamadoManutencao {
-  id: number;
-  unidade_id: number;
-  equipamento_id: number;
-  tipo: TipoChamado;
-  descricao_defeito: string;
-  custo_reparo: number;
-  status: StatusChamado;
-  aprovado_adm?: boolean;
-  data_abertura: string;
-  data_aprovacao?: string | null;
-  data_conclusao?: string | null;
-  observacoes?: string;
-  criado_em?: string;
-}
-
-export interface UnidadeConsolidacaoFinanceira {
-  unidadeId: number;
-  nome: string;
-  tipo: string;
-  custoInsumosAtendidos: number;
-  custoHonorariosDentistas: number;
-  custoManutencaoEquipamentos: number;
-  custoTotalGeral: number;
-}
-
-export const INITIAL_HONORARIOS: HonorarioOdontologo[] = [];
-
-export const INITIAL_EQUIPAMENTOS: Equipamento[] = [];
-
-export const INITIAL_CHAMADOS: ChamadoManutencao[] = [];
-
-export type TipoRecorrencia = 'RECORRENTE' | 'PARCELA_UNICA';
-
-export interface EntradaRecurso {
-  id: number;
-  unidade_id?: number | null;
-  natureza: NaturezaDespesa;
-  tipo_recorrencia: TipoRecorrencia;
-  descricao: string;
-  valor: number;
-  data_credito: string;
-  mes_referencia: string;
-  observacoes?: string;
-  criado_em?: string;
-}
-
-export const INITIAL_ENTRADAS: EntradaRecurso[] = [];
-
-class DataStore {
-  private inMemoryUnidades: UnidadeSaude[] = [...INITIAL_UNIDADES];
-  private inMemoryMateriais: Material[] = [...INITIAL_MATERIAIS];
-  private inMemoryPedidos: PedidoPBS[] = [...INITIAL_PEDIDOS];
-  private inMemoryHonorarios: HonorarioOdontologo[] = [...INITIAL_HONORARIOS];
-  private inMemoryEquipamentos: Equipamento[] = [...INITIAL_EQUIPAMENTOS];
-  private inMemoryChamados: ChamadoManutencao[] = [...INITIAL_CHAMADOS];
-  private inMemoryEntradas: EntradaRecurso[] = [...INITIAL_ENTRADAS];
-
-  // Unidades
-  async getUnidades(): Promise<UnidadeSaude[]> {
-    try {
-      const list = await prisma.unidadeSaude.findMany();
-      if (list) {
-        return list.map(u => ({
-          id: u.id,
-          nome: u.nome,
-          tipo: u.tipo,
-          criado_em: u.criadoEm.toISOString()
-        }));
-      }
-    } catch (err) {
-      // Fallback
-    }
-    return this.inMemoryUnidades;
-  }
-
-  async addUnidade(nome: string, tipo: string = "UNIDADE"): Promise<UnidadeSaude> {
-    try {
-      const u = await prisma.unidadeSaude.create({
-        data: { nome, tipo }
-      });
-      const nova = { id: u.id, nome: u.nome, tipo: u.tipo, criado_em: u.criadoEm.toISOString() };
-      this.inMemoryUnidades.push(nova);
-      return nova;
-    } catch (err) {
-      if (this.inMemoryUnidades.some(u => u.nome.toLowerCase() === nome.toLowerCase())) {
-        throw new Error(`Unidade "${nome}" já cadastrada.`);
-      }
-      const nova: UnidadeSaude = {
-        id: this.inMemoryUnidades.length ? Math.max(...this.inMemoryUnidades.map(u => u.id)) + 1 : 1,
-        nome,
-        tipo,
-        criado_em: new Date().toISOString()
-      };
-      this.inMemoryUnidades.push(nova);
-      return nova;
-    }
-  }
-
-  async updateUnidade(id: number, nome: string, tipo?: string): Promise<UnidadeSaude> {
-    try {
-      const existing = this.inMemoryUnidades.find(u => u.id === Number(id));
-      const tipoFinal = tipo || existing?.tipo || "UNIDADE";
-      const u = await prisma.unidadeSaude.update({
-        where: { id: Number(id) },
-        data: { nome, tipo: tipoFinal }
-      });
-      const idx = this.inMemoryUnidades.findIndex(item => item.id === Number(id));
-      const alt = { id: u.id, nome: u.nome, tipo: u.tipo, criado_em: u.criadoEm.toISOString() };
-      if (idx !== -1) this.inMemoryUnidades[idx] = alt;
-      return alt;
-    } catch (err) {
-      const idx = this.inMemoryUnidades.findIndex(item => item.id === Number(id));
-      if (idx !== -1) {
-        this.inMemoryUnidades[idx].nome = nome;
-        if (tipo) this.inMemoryUnidades[idx].tipo = tipo;
-        return this.inMemoryUnidades[idx];
-      }
-      throw new Error(`Estabelecimento #${id} não encontrado.`);
-    }
-  }
-
-  async deleteUnidade(id: number): Promise<void> {
-    try {
-      await prisma.unidadeSaude.delete({
-        where: { id: Number(id) }
-      });
-    } catch (err) {}
-    this.inMemoryUnidades = this.inMemoryUnidades.filter(u => u.id !== Number(id));
-  }
-
-  // Materiais
-  async getMateriais(): Promise<Material[]> {
-    try {
-      const list = await prisma.material.findMany({
-        orderBy: { descricao: 'asc' }
-      });
-      if (list) {
-        return list.map(m => ({
-          id: m.id,
-          descricao: m.descricao,
-          unidade_medida: m.unidadeMedida,
-          valor_estimado: Number(m.valorEstimado),
-          qtd_estoque: m.qtdEstoque,
-          limite_max_pedido: (m as any).limiteMaxPedido,
-          fornecedor: (m as any).fornecedor || null,
-          criado_em: m.criadoEm.toISOString()
-        }));
-      }
-    } catch (err) {
-      // Fallback
-    }
-    return this.inMemoryMateriais;
-  }
-
-  async addMaterial(
-    descricao: string, 
-    unidade_medida: string, 
-    valor_estimado: number = 0, 
-    qtd_estoque: number = 100,
-    limite_max_pedido: number | null = null,
-    fornecedor: string | null = null
-  ): Promise<Material> {
-    try {
-      const m = await (prisma.material as any).create({
-        data: {
-          descricao,
-          unidadeMedida: unidade_medida,
-          valorEstimado: valor_estimado,
-          qtdEstoque: qtd_estoque,
-          limiteMaxPedido: limite_max_pedido,
-          fornecedor: fornecedor
-        }
-      });
-      const novo = { 
-        id: m.id, 
-        descricao: m.descricao, 
-        unidade_medida: m.unidadeMedida, 
-        valor_estimado: Number(m.valorEstimado), 
-        qtd_estoque: m.qtdEstoque,
-        limite_max_pedido: m.limiteMaxPedido,
-        fornecedor: m.fornecedor
-      };
-      this.inMemoryMateriais.push(novo);
-      return novo;
-    } catch (err) {
-      const fornNorm = (fornecedor || '').toLowerCase().trim();
-      const descNorm = descricao.toLowerCase().trim();
-      if (this.inMemoryMateriais.some(m => m.descricao.toLowerCase().trim() === descNorm && (m.fornecedor || '').toLowerCase().trim() === fornNorm)) {
-        throw new Error(`Material "${descricao}" do mesmo fornecedor já cadastrado.`);
-      }
-      const novo: Material = {
-        id: this.inMemoryMateriais.length ? Math.max(...this.inMemoryMateriais.map(m => m.id)) + 1 : 1,
-        descricao,
-        unidade_medida,
-        valor_estimado: Number(valor_estimado) || 0,
-        qtd_estoque: Number(qtd_estoque) || 0,
-        limite_max_pedido: limite_max_pedido ? Number(limite_max_pedido) : null,
-        fornecedor: fornecedor || null,
-        criado_em: new Date().toISOString()
-      };
-      this.inMemoryMateriais.push(novo);
-      return novo;
-    }
-  }
-
-  async atualizarEstoqueMaterial(materialId: number, novaQtd: number): Promise<Material> {
-    try {
-      const m = await prisma.material.update({
-        where: { id: Number(materialId) },
-        data: { qtdEstoque: Math.max(0, Number(novaQtd) || 0) }
-      });
-      return { 
-        id: m.id, 
-        descricao: m.descricao, 
-        unidade_medida: m.unidadeMedida, 
-        valor_estimado: Number(m.valorEstimado), 
-        qtd_estoque: m.qtdEstoque,
-        limite_max_pedido: (m as any).limiteMaxPedido,
-        fornecedor: (m as any).fornecedor || null
-      };
-    } catch (err) {
-      const mIndex = this.inMemoryMateriais.findIndex(m => m.id === Number(materialId));
-      if (mIndex === -1) throw new Error("Material não encontrado.");
-      this.inMemoryMateriais[mIndex].qtd_estoque = Math.max(0, Number(novaQtd) || 0);
-      return this.inMemoryMateriais[mIndex];
-    }
-  }
-
-  async updateMaterial(materialId: number, dados: Partial<Material>): Promise<Material> {
-    try {
-      const m = await (prisma.material as any).update({
-        where: { id: Number(materialId) },
-        data: {
-          ...(dados.descricao && { descricao: dados.descricao }),
-          ...(dados.unidade_medida && { unidadeMedida: dados.unidade_medida }),
-          ...(dados.valor_estimado !== undefined && { valorEstimado: dados.valor_estimado }),
-          ...(dados.qtd_estoque !== undefined && { qtdEstoque: dados.qtd_estoque }),
-          ...(dados.limite_max_pedido !== undefined && { limiteMaxPedido: dados.limite_max_pedido }),
-          ...(dados.fornecedor !== undefined && { fornecedor: dados.fornecedor })
-        }
-      });
-      return { 
-        id: m.id, 
-        descricao: m.descricao, 
-        unidade_medida: m.unidadeMedida, 
-        valor_estimado: Number(m.valorEstimado), 
-        qtd_estoque: m.qtdEstoque,
-        limite_max_pedido: m.limiteMaxPedido,
-        fornecedor: m.fornecedor
-      };
-    } catch (err) {
-      const mIndex = this.inMemoryMateriais.findIndex(m => m.id === Number(materialId));
-      if (mIndex === -1) throw new Error("Material não encontrado.");
-
-      if (dados.descricao && this.inMemoryMateriais.some(m => m.id !== Number(materialId) && m.descricao.toLowerCase() === dados.descricao!.toLowerCase())) {
-        throw new Error(`Outro material já cadastrado com o nome "${dados.descricao}".`);
-      }
-
-      if (dados.descricao !== undefined) this.inMemoryMateriais[mIndex].descricao = dados.descricao;
-      if (dados.unidade_medida !== undefined) this.inMemoryMateriais[mIndex].unidade_medida = dados.unidade_medida;
-      if (dados.valor_estimado !== undefined) this.inMemoryMateriais[mIndex].valor_estimado = Number(dados.valor_estimado) || 0;
-      if (dados.qtd_estoque !== undefined) this.inMemoryMateriais[mIndex].qtd_estoque = Math.max(0, Number(dados.qtd_estoque) || 0);
-      if (dados.limite_max_pedido !== undefined) this.inMemoryMateriais[mIndex].limite_max_pedido = dados.limite_max_pedido !== null ? Number(dados.limite_max_pedido) : null;
-
-      return this.inMemoryMateriais[mIndex];
-    }
-  }
-
-  async deleteMaterial(id: number): Promise<void> {
-    try {
-      await prisma.material.delete({
-        where: { id: Number(id) }
-      });
-    } catch (err) {}
-    this.inMemoryMateriais = this.inMemoryMateriais.filter(m => m.id !== Number(id));
-  }
-
-  // Pedidos
-  async getPedidos(): Promise<PedidoPBS[]> {
-    try {
-      const list = await prisma.pedidoPBS.findMany({
-        include: { itens: true },
-        orderBy: { id: 'desc' }
-      });
-      if (list) {
-        return list.map(p => ({
-          id: p.id,
-          numero_pbs: p.numeroPbs || '',
-          unidade_emitente_id: p.unidadeEmitenteId,
-          data_pedido: p.dataPedido.toISOString().substring(0, 10),
-          responsavel_nome: p.responsavelNome,
-          responsavel_funcao: p.responsavelFuncao || undefined,
-          responsavel_registro: p.responsavelRegistro || undefined,
-          atividade_programa: p.atividadePrograma || undefined,
-          elemento_despesa: p.elementoDespesa || undefined,
-          observacoes: p.observacoes || undefined,
-          status: p.status as any,
-          valor_total_estimado: Number(p.valorTotalEstimado),
-          apontador_envio_nome: p.apontadorEnvioNome,
-          data_envio: p.dataEnvio ? p.dataEnvio.toISOString().substring(0, 10) : null,
-          apontador_recebimento_nome: p.apontadorRecebimentoNome,
-          data_recebimento: p.dataRecebimento ? p.dataRecebimento.toISOString().substring(0, 10) : null,
-          itens: p.itens.map(it => ({
-            id: it.id,
-            pedido_id: it.pedidoId,
-            numero_item: it.numeroItem,
-            material_id: it.materialId,
-            qtd_pedida: it.qtdPedida,
-            qtd_atendida: it.qtdAtendida,
-            valor_unitario: Number(it.valorUnitario || 0),
-            valor_total: Number(it.valorTotal || 0)
-          }))
-        }));
-      }
-    } catch (err) {
-      // Fallback
-    }
-    return this.inMemoryPedidos;
-  }
-
-  async salvarPedido(dados: {
-    unidade_emitente_id: number;
-    data_pedido: string;
-    responsavel_nome: string;
-    responsavel_funcao?: string;
-    responsavel_registro?: string;
-    atividade_programa?: string;
-    elemento_despesa?: string;
-    observacoes?: string;
-    numero_pbs?: string;
-    itens: { material_id: number; qtd_pedida: number; valor_unitario: number }[];
-  }): Promise<PedidoPBS> {
-    try {
-      const count = await prisma.pedidoPBS.count();
-      const nextId = count + 1;
-      const anoAtual = new Date().getFullYear();
-      const numeroPbs = dados.numero_pbs || `PBS-${anoAtual}/${String(nextId).padStart(4, '0')}`;
-
-      let valorTotalEstimado = 0;
-      const itensCreate = (dados.itens || []).map((item, index) => {
-        const vUnit = Number(item.valor_unitario) || 0;
-        const qPed = Number(item.qtd_pedida) || 1;
-        const vTot = vUnit * qPed;
-        valorTotalEstimado += vTot;
-        return {
-          numeroItem: index + 1,
-          materialId: Number(item.material_id),
-          qtdPedida: qPed,
-          qtdAtendida: 0,
-          valorUnitario: vUnit,
-          valorTotal: vTot
-        };
-      });
-
-      const p = await prisma.pedidoPBS.create({
-        data: {
-          numeroPbs,
-          unidadeEmitenteId: Number(dados.unidade_emitente_id),
-          dataPedido: new Date(dados.data_pedido || Date.now()),
-          responsavelNome: dados.responsavel_nome,
-          responsavelFuncao: dados.responsavel_funcao || "",
-          responsavelRegistro: dados.responsavel_registro || "",
-          atividadePrograma: dados.atividade_programa || "",
-          elementoDespesa: dados.elemento_despesa || "",
-          observacoes: dados.observacoes || "",
-          status: "SOLICITADO",
-          valorTotalEstimado,
-          itens: {
-            create: itensCreate
-          }
-        },
-        include: { itens: true }
-      });
-
-      const res: PedidoPBS = {
-        id: p.id,
-        numero_pbs: p.numeroPbs || '',
-        unidade_emitente_id: p.unidadeEmitenteId,
-        data_pedido: p.dataPedido.toISOString().substring(0, 10),
-        responsavel_nome: p.responsavelNome,
-        responsavel_funcao: p.responsavelFuncao || undefined,
-        responsavel_registro: p.responsavelRegistro || undefined,
-        atividade_programa: p.atividadePrograma || undefined,
-        elemento_despesa: p.elementoDespesa || undefined,
-        observacoes: p.observacoes || undefined,
-        status: p.status as any,
-        valor_total_estimado: Number(p.valorTotalEstimado),
-        apontador_envio_nome: p.apontadorEnvioNome,
-        data_envio: p.dataEnvio ? p.dataEnvio.toISOString().substring(0, 10) : null,
-        apontador_recebimento_nome: p.apontadorRecebimentoNome,
-        data_recebimento: p.dataRecebimento ? p.dataRecebimento.toISOString().substring(0, 10) : null,
-        itens: p.itens.map(it => ({
-          id: it.id,
-          pedido_id: it.pedidoId,
-          numero_item: it.numeroItem,
-          material_id: it.materialId,
-          qtd_pedida: it.qtdPedida,
-          qtd_atendida: it.qtdAtendida,
-          valor_unitario: Number(it.valorUnitario || 0),
-          valor_total: Number(it.valorTotal || 0)
-        }))
-      };
-
-      this.inMemoryPedidos.unshift(res);
-      return res;
-    } catch (err) {
-      const nextId = this.inMemoryPedidos.length ? Math.max(...this.inMemoryPedidos.map(p => p.id)) + 1 : 1;
-      const anoAtual = new Date().getFullYear();
-      const numeroPbs = dados.numero_pbs || `PBS-${anoAtual}/${String(nextId).padStart(4, '0')}`;
-
-      let valorTotalEstimado = 0;
-      const itensCompletos: ItemPedido[] = (dados.itens || []).map((item, index) => {
-        const vUnit = Number(item.valor_unitario) || 0;
-        const qPed = Number(item.qtd_pedida) || 1;
-        const vTot = vUnit * qPed;
-        valorTotalEstimado += vTot;
-        return {
-          id: Date.now() + index,
-          pedido_id: nextId,
-          numero_item: index + 1,
-          material_id: Number(item.material_id),
-          qtd_pedida: qPed,
-          qtd_atendida: 0,
-          valor_unitario: vUnit,
-          valor_total: vTot
-        };
-      });
-
-      const novoPedido: PedidoPBS = {
-        id: nextId,
-        numero_pbs: numeroPbs,
-        unidade_emitente_id: Number(dados.unidade_emitente_id),
-        data_pedido: dados.data_pedido || new Date().toISOString().substring(0, 10),
-        responsavel_nome: dados.responsavel_nome,
-        responsavel_funcao: dados.responsavel_funcao || "",
-        responsavel_registro: dados.responsavel_registro || "",
-        atividade_programa: dados.atividade_programa || "",
-        elemento_despesa: dados.elemento_despesa || "",
-        observacoes: dados.observacoes || "",
-        status: "SOLICITADO",
-        valor_total_estimado: valorTotalEstimado,
-        apontador_envio_nome: null,
-        data_envio: null,
-        apontador_recebimento_nome: null,
-        data_recebimento: null,
-        criado_em: new Date().toISOString(),
-        atualizado_em: new Date().toISOString(),
-        itens: itensCompletos
-      };
-
-      this.inMemoryPedidos.unshift(novoPedido);
-      return novoPedido;
-    }
-  }
-
-  async confirmarRecebimento(pedidoId: number, apontadorRecebimentoNome: string, dataRecebimento: string): Promise<PedidoPBS> {
-    try {
-      const p = await prisma.pedidoPBS.update({
-        where: { id: Number(pedidoId) },
-        data: {
-          status: 'RECEBIDO',
-          apontadorRecebimentoNome,
-          dataRecebimento: new Date(dataRecebimento || Date.now())
-        },
-        include: { itens: true }
-      });
-
-      return {
-        id: p.id,
-        numero_pbs: p.numeroPbs || '',
-        unidade_emitente_id: p.unidadeEmitenteId,
-        data_pedido: p.dataPedido.toISOString().substring(0, 10),
-        responsavel_nome: p.responsavelNome,
-        responsavel_funcao: p.responsavelFuncao || undefined,
-        responsavel_registro: p.responsavelRegistro || undefined,
-        atividade_programa: p.atividadePrograma || undefined,
-        elemento_despesa: p.elementoDespesa || undefined,
-        observacoes: p.observacoes || undefined,
-        status: p.status as any,
-        valor_total_estimado: Number(p.valorTotalEstimado),
-        apontador_envio_nome: p.apontadorEnvioNome,
-        data_envio: p.dataEnvio ? p.dataEnvio.toISOString().substring(0, 10) : null,
-        apontador_recebimento_nome: p.apontadorRecebimentoNome,
-        data_recebimento: p.dataRecebimento ? p.dataRecebimento.toISOString().substring(0, 10) : null,
-        itens: p.itens.map(it => ({
-          id: it.id,
-          pedido_id: it.pedidoId,
-          numero_item: it.numeroItem,
-          material_id: it.materialId,
-          qtd_pedida: it.qtdPedida,
-          qtd_atendida: it.qtdAtendida,
-          valor_unitario: Number(it.valorUnitario || 0),
-          valor_total: Number(it.valorTotal || 0)
-        }))
-      };
-    } catch (err) {
-      const pIndex = this.inMemoryPedidos.findIndex(p => p.id === Number(pedidoId));
-      if (pIndex === -1) throw new Error("Pedido não encontrado.");
-
-      this.inMemoryPedidos[pIndex].status = "RECEBIDO";
-      this.inMemoryPedidos[pIndex].apontador_recebimento_nome = apontadorRecebimentoNome;
-      this.inMemoryPedidos[pIndex].data_recebimento = dataRecebimento || new Date().toISOString().substring(0, 10);
-      this.inMemoryPedidos[pIndex].atualizado_em = new Date().toISOString();
-
-      return this.inMemoryPedidos[pIndex];
-    }
-  }
-
-  async atenderPedido(pedidoId: number, itensAtendidos: { item_id?: number; material_id: number; qtd_atendida: number }[]): Promise<PedidoPBS> {
-    try {
-      const pedidoAtual = await prisma.pedidoPBS.findUnique({
-        where: { id: Number(pedidoId) },
-        include: { itens: true }
-      });
-      if (!pedidoAtual) throw new Error("Pedido não encontrado.");
-
-      let todosAtendidos100 = true;
-      let algumAtendido = false;
-
-      for (const item of pedidoAtual.itens) {
-        const matAtualizacao = itensAtendidos.find(i => i.item_id === item.id || i.material_id === item.materialId);
-        if (matAtualizacao) {
-          const qAtendidaAntiga = Number(item.qtdAtendida) || 0;
-          const qAtendidaNova = Number(matAtualizacao.qtd_atendida) || 0;
-          const diferenca = qAtendidaNova - qAtendidaAntiga;
-
-          if (diferenca !== 0) {
-            await prisma.material.update({
-              where: { id: item.materialId },
-              data: { qtdEstoque: { decrement: diferenca } }
-            }).catch(() => {});
-          }
-
-          await prisma.itemPedidoPBS.update({
-            where: { id: item.id },
-            data: { qtdAtendida: qAtendidaNova }
-          });
-
-          if (qAtendidaNova > 0) algumAtendido = true;
-          if (qAtendidaNova < item.qtdPedida) todosAtendidos100 = false;
-        }
-      }
-
-      let novoStatus: any = pedidoAtual.status;
-      if (todosAtendidos100 && algumAtendido) {
-        novoStatus = "ATENDIDO_TOTAL";
-      } else if (algumAtendido) {
-        novoStatus = "ATENDIDO_PARCIAL";
-      }
-
-      const p = await prisma.pedidoPBS.update({
-        where: { id: Number(pedidoId) },
-        data: { status: novoStatus },
-        include: { itens: true }
-      });
-
-      return {
-        id: p.id,
-        numero_pbs: p.numeroPbs || '',
-        unidade_emitente_id: p.unidadeEmitenteId,
-        data_pedido: p.dataPedido.toISOString().substring(0, 10),
-        responsavel_nome: p.responsavelNome,
-        responsavel_funcao: p.responsavelFuncao || undefined,
-        responsavel_registro: p.responsavelRegistro || undefined,
-        atividade_programa: p.atividadePrograma || undefined,
-        elemento_despesa: p.elementoDespesa || undefined,
-        observacoes: p.observacoes || undefined,
-        status: p.status as any,
-        valor_total_estimado: Number(p.valorTotalEstimado),
-        apontador_envio_nome: p.apontadorEnvioNome,
-        data_envio: p.dataEnvio ? p.dataEnvio.toISOString().substring(0, 10) : null,
-        apontador_recebimento_nome: p.apontadorRecebimentoNome,
-        data_recebimento: p.dataRecebimento ? p.dataRecebimento.toISOString().substring(0, 10) : null,
-        itens: p.itens.map(it => ({
-          id: it.id,
-          pedido_id: it.pedidoId,
-          numero_item: it.numeroItem,
-          material_id: it.materialId,
-          qtd_pedida: it.qtdPedida,
-          qtd_atendida: it.qtdAtendida,
-          valor_unitario: Number(it.valorUnitario || 0),
-          valor_total: Number(it.valorTotal || 0)
-        }))
-      };
-    } catch (err) {
-      const pIndex = this.inMemoryPedidos.findIndex(p => p.id === Number(pedidoId));
-      if (pIndex === -1) throw new Error("Pedido não encontrado.");
-
-      let todosAtendidos100 = true;
-      let algumAtendido = false;
-
-      this.inMemoryPedidos[pIndex].itens = this.inMemoryPedidos[pIndex].itens.map(item => {
-        const matAtualizacao = itensAtendidos.find(i => i.item_id === item.id || i.material_id === item.material_id);
-        if (matAtualizacao) {
-          const qAtendidaAntiga = Number(item.qtd_atendida) || 0;
-          const qAtendidaNova = Number(matAtualizacao.qtd_atendida) || 0;
-          
-          const diferenca = qAtendidaNova - qAtendidaAntiga;
-          if (diferenca !== 0) {
-            const matObj = this.inMemoryMateriais.find(m => m.id === item.material_id);
-            if (matObj) {
-              matObj.qtd_estoque = Math.max(0, (Number(matObj.qtd_estoque) || 0) - diferenca);
-            }
-          }
-
-          item.qtd_atendida = qAtendidaNova;
-          if (qAtendidaNova > 0) algumAtendido = true;
-          if (qAtendidaNova < item.qtd_pedida) todosAtendidos100 = false;
-        }
-        return item;
-      });
-
-      if (todosAtendidos100 && algumAtendido) {
-        this.inMemoryPedidos[pIndex].status = "ATENDIDO_TOTAL";
-      } else if (algumAtendido) {
-        this.inMemoryPedidos[pIndex].status = "ATENDIDO_PARCIAL";
-      }
-
-      this.inMemoryPedidos[pIndex].atualizado_em = new Date().toISOString();
-      return this.inMemoryPedidos[pIndex];
-    }
-  }
-
-  async confirmarEnvio(pedidoId: number, apontadorEnvioNome: string, dataEnvio: string): Promise<PedidoPBS> {
-    try {
-      const p = await prisma.pedidoPBS.update({
-        where: { id: Number(pedidoId) },
-        data: {
-          status: 'ENVIADO',
-          apontadorEnvioNome,
-          dataEnvio: new Date(dataEnvio || Date.now())
-        },
-        include: { itens: true }
-      });
-
-      return {
-        id: p.id,
-        numero_pbs: p.numeroPbs || '',
-        unidade_emitente_id: p.unidadeEmitenteId,
-        data_pedido: p.dataPedido.toISOString().substring(0, 10),
-        responsavel_nome: p.responsavelNome,
-        responsavel_funcao: p.responsavelFuncao || undefined,
-        responsavel_registro: p.responsavelRegistro || undefined,
-        atividade_programa: p.atividadePrograma || undefined,
-        elemento_despesa: p.elementoDespesa || undefined,
-        observacoes: p.observacoes || undefined,
-        status: p.status as any,
-        valor_total_estimado: Number(p.valorTotalEstimado),
-        apontador_envio_nome: p.apontadorEnvioNome,
-        data_envio: p.dataEnvio ? p.dataEnvio.toISOString().substring(0, 10) : null,
-        apontador_recebimento_nome: p.apontadorRecebimentoNome,
-        data_recebimento: p.dataRecebimento ? p.dataRecebimento.toISOString().substring(0, 10) : null,
-        itens: p.itens.map(it => ({
-          id: it.id,
-          pedido_id: it.pedidoId,
-          numero_item: it.numeroItem,
-          material_id: it.materialId,
-          qtd_pedida: it.qtdPedida,
-          qtd_atendida: it.qtdAtendida,
-          valor_unitario: Number(it.valorUnitario || 0),
-          valor_total: Number(it.valorTotal || 0)
-        }))
-      };
-    } catch (err) {
-      const pIndex = this.inMemoryPedidos.findIndex(p => p.id === Number(pedidoId));
-      if (pIndex === -1) throw new Error("Pedido não encontrado.");
-
-      this.inMemoryPedidos[pIndex].status = "ENVIADO";
-      this.inMemoryPedidos[pIndex].apontador_envio_nome = apontadorEnvioNome;
-      this.inMemoryPedidos[pIndex].data_envio = dataEnvio || new Date().toISOString().substring(0, 10);
-      this.inMemoryPedidos[pIndex].atualizado_em = new Date().toISOString();
-
-      return this.inMemoryPedidos[pIndex];
-    }
-  }
-
-  async cancelarPedido(pedidoId: number): Promise<PedidoPBS> {
-    try {
-      const p = await prisma.pedidoPBS.update({
-        where: { id: Number(pedidoId) },
-        data: {
-          status: 'CANCELADO'
-        },
-        include: { itens: true }
-      });
-
-      return {
-        id: p.id,
-        numero_pbs: p.numeroPbs || '',
-        unidade_emitente_id: p.unidadeEmitenteId,
-        data_pedido: p.dataPedido.toISOString().substring(0, 10),
-        responsavel_nome: p.responsavelNome,
-        responsavel_funcao: p.responsavelFuncao || undefined,
-        responsavel_registro: p.responsavelRegistro || undefined,
-        atividade_programa: p.atividadePrograma || undefined,
-        elemento_despesa: p.elementoDespesa || undefined,
-        observacoes: p.observacoes || undefined,
-        status: p.status as any,
-        valor_total_estimado: Number(p.valorTotalEstimado),
-        apontador_envio_nome: p.apontadorEnvioNome,
-        data_envio: p.dataEnvio ? p.dataEnvio.toISOString().substring(0, 10) : null,
-        apontador_recebimento_nome: p.apontadorRecebimentoNome,
-        data_recebimento: p.dataRecebimento ? p.dataRecebimento.toISOString().substring(0, 10) : null,
-        itens: p.itens.map(it => ({
-          id: it.id,
-          pedido_id: it.pedidoId,
-          numero_item: it.numeroItem,
-          material_id: it.materialId,
-          qtd_pedida: it.qtdPedida,
-          qtd_atendida: it.qtdAtendida,
-          valor_unitario: Number(it.valorUnitario || 0),
-          valor_total: Number(it.valorTotal || 0)
-        }))
-      };
-    } catch (err) {
-      const pIndex = this.inMemoryPedidos.findIndex(p => p.id === Number(pedidoId));
-      if (pIndex === -1) throw new Error("Pedido não encontrado.");
-
-      this.inMemoryPedidos[pIndex].status = "CANCELADO";
-      this.inMemoryPedidos[pIndex].atualizado_em = new Date().toISOString();
-
-      return this.inMemoryPedidos[pIndex];
-    }
-  }
-
-  // Estatísticas
-  getEstatisticasGastos(pedidos: PedidoPBS[]) {
-    const pedidosValidos = pedidos.filter(p => p.status !== 'CANCELADO');
-
-    let totalSolicitado = 0;
-    let totalAtendido = 0;
-
-    pedidosValidos.forEach(p => {
-      totalSolicitado += (p.valor_total_estimado || 0);
-      (p.itens || []).forEach(it => {
-        totalAtendido += (Number(it.qtd_atendida || 0) * Number(it.valor_unitario || 0));
-      });
-    });
-
-    const gastosPorMes: Record<string, number> = {};
-    pedidosValidos.forEach(p => {
-      const mesAno = (p.data_pedido || p.criado_em || '').substring(0, 7);
-      if (mesAno) {
-        gastosPorMes[mesAno] = (gastosPorMes[mesAno] || 0) + (p.valor_total_estimado || 0);
-      }
-    });
-
-    const totalMeses = Object.keys(gastosPorMes).length || 1;
-    const mediaMensal = totalSolicitado / totalMeses;
-
-    return { totalSolicitado, totalAtendido, totalGasto: totalSolicitado, gastosPorMes, totalMeses, mediaMensal };
-  }
-
-  getEstatisticasPorUnidade(unidades: UnidadeSaude[], pedidos: PedidoPBS[]): EstatisticasGerais {
-    let totalSolicitadoGeral = 0;
-    let totalAtendidoGeral = 0;
-    let totalPedidosGeral = 0;
-    let totalPendentesGeral = 0;
-    let totalAtendidosGeral = 0;
-
-    const resultado = unidades.map(u => {
-      const pedidosUnidade = pedidos.filter(p => p.unidade_emitente_id === u.id);
-      const pedidosValidos = pedidosUnidade.filter(p => p.status !== 'CANCELADO');
-
-      const totalPedidos = pedidosUnidade.length;
-      const pendentes = pedidosUnidade.filter(p => p.status === 'SOLICITADO' || p.status === 'RECEBIDO').length;
-      const atendidos = pedidosUnidade.filter(p => p.status === 'ATENDIDO_PARCIAL' || p.status === 'ATENDIDO_TOTAL' || p.status === 'ENVIADO').length;
-      const cancelados = pedidosUnidade.filter(p => p.status === 'CANCELADO').length;
-
-      let totalSolicitado = 0;
-      let totalAtendido = 0;
-
-      pedidosValidos.forEach(p => {
-        totalSolicitado += (p.valor_total_estimado || 0);
-        (p.itens || []).forEach(it => {
-          totalAtendido += (Number(it.qtd_atendida || 0) * Number(it.valor_unitario || 0));
-        });
-      });
-
-      totalSolicitadoGeral += totalSolicitado;
-      totalAtendidoGeral += totalAtendido;
-      totalPedidosGeral += totalPedidos;
-      totalPendentesGeral += pendentes;
-      totalAtendidosGeral += atendidos;
-
-      return {
-        unidadeId: u.id,
-        nome: u.nome,
-        tipo: u.tipo,
-        totalPedidos,
-        pendentes,
-        atendidos,
-        cancelados,
-        totalSolicitado,
-        totalAtendido
-      };
-    });
-
-    return {
-      unidadesStats: resultado,
-      geral: {
-        totalSolicitadoGeral,
-        totalAtendidoGeral,
-        totalPedidosGeral,
-        totalPendentesGeral,
-        totalAtendidosGeral,
-        totalUnidades: unidades.length
-      }
-    };
-  }
-
-  // Honorários & Folha dos Odontólogos
-  async getHonorarios(): Promise<HonorarioOdontologo[]> {
-    try {
-      const list = await (prisma as any).honorarioOdontologo.findMany();
-      if (list) {
-        return list.map((h: any) => ({
-          id: h.id,
-          unidade_id: h.unidadeId,
-          nome_dentista: h.nomeDentista,
-          cro: h.cro,
-          tipo_contrato: h.tipoContrato,
-          mes_referencia: h.mesReferencia,
-          valor_fixo: Number(h.valorFixo),
-          valor_comissao: Number(h.valorComissao),
-          valor_total: Number(h.valorTotal),
-          observacoes: h.observacoes || undefined,
-          criado_em: h.criadoEm?.toISOString()
-        }));
-      }
-    } catch (err) {}
-    return this.inMemoryHonorarios;
-  }
-
-  async addHonorario(dados: Omit<HonorarioOdontologo, 'id'>): Promise<HonorarioOdontologo> {
-    const vTotal = Number(dados.valor_fixo || 0) + Number(dados.valor_comissao || 0);
-    try {
-      const h = await (prisma as any).honorarioOdontologo.create({
-        data: {
-          unidadeId: Number(dados.unidade_id),
-          nomeDentista: dados.nome_dentista,
-          cro: dados.cro,
-          tipoContrato: dados.tipo_contrato,
-          mesReferencia: dados.mes_referencia,
-          valorFixo: dados.valor_fixo,
-          valorComissao: dados.valor_comissao,
-          valorTotal: vTotal,
-          observacoes: dados.observacoes
-        }
-      });
-      const novo = {
-        id: h.id,
-        unidade_id: h.unidadeId,
-        nome_dentista: h.nomeDentista,
-        cro: h.cro,
-        tipo_contrato: h.tipoContrato as any,
-        mes_referencia: h.mesReferencia,
-        valor_fixo: Number(h.valorFixo),
-        valor_comissao: Number(h.valorComissao),
-        valor_total: Number(h.valorTotal),
-        observacoes: h.observacoes || undefined
-      };
-      this.inMemoryHonorarios.push(novo);
-      return novo;
-    } catch (err) {
-      const novo: HonorarioOdontologo = {
-        id: this.inMemoryHonorarios.length ? Math.max(...this.inMemoryHonorarios.map(h => h.id)) + 1 : 1,
-        ...dados,
-        valor_total: vTotal
-      };
-      this.inMemoryHonorarios.push(novo);
-      return novo;
-    }
-  }
-
-  // Equipamentos
-  async getEquipamentos(): Promise<Equipamento[]> {
-    try {
-      const list = await (prisma as any).equipamento.findMany();
-      if (list) {
-        return list.map((e: any) => ({
-          id: e.id,
-          unidade_id: e.unidadeId,
-          nome: e.nome,
-          numero_serie: e.numeroSerie,
-          categoria: e.categoria,
-          data_ultima_preventiva: e.dataUltimaPreventiva ? e.dataUltimaPreventiva.toISOString().substring(0, 10) : null
-        }));
-      }
-    } catch (err) {}
-    return this.inMemoryEquipamentos;
-  }
-
-  async addEquipamento(dados: Omit<Equipamento, 'id'>): Promise<Equipamento> {
-    try {
-      const e = await (prisma as any).equipamento.create({
-        data: {
-          unidadeId: Number(dados.unidade_id),
-          nome: dados.nome,
-          numeroSerie: dados.numero_serie,
-          categoria: dados.categoria,
-          dataUltimaPreventiva: dados.data_ultima_preventiva ? new Date(dados.data_ultima_preventiva) : null
-        }
-      });
-      const novo = {
-        id: e.id,
-        unidade_id: e.unidadeId,
-        nome: e.nome,
-        numero_serie: e.numeroSerie,
-        categoria: e.categoria,
-        data_ultima_preventiva: e.dataUltimaPreventiva ? e.dataUltimaPreventiva.toISOString().substring(0, 10) : null
-      };
-      this.inMemoryEquipamentos.push(novo);
-      return novo;
-    } catch (err) {
-      const novo: Equipamento = {
-        id: this.inMemoryEquipamentos.length ? Math.max(...this.inMemoryEquipamentos.map(e => e.id)) + 1 : 1,
-        ...dados
-      };
-      this.inMemoryEquipamentos.push(novo);
-      return novo;
-    }
-  }
-
-  async updateEquipamento(id: number, dados: Partial<Equipamento>): Promise<Equipamento> {
-    try {
-      const updateData: any = {};
-      if (dados.unidade_id !== undefined) updateData.unidadeId = Number(dados.unidade_id);
-      if (dados.nome !== undefined) updateData.nome = dados.nome;
-      if (dados.numero_serie !== undefined) updateData.numeroSerie = dados.numero_serie;
-      if (dados.categoria !== undefined) updateData.categoria = dados.categoria;
-      if (dados.data_ultima_preventiva !== undefined) {
-        updateData.dataUltimaPreventiva = dados.data_ultima_preventiva ? new Date(dados.data_ultima_preventiva) : null;
-      }
-
-      const e = await (prisma as any).equipamento.update({
-        where: { id: Number(id) },
-        data: updateData
-      });
-      const updated: Equipamento = {
-        id: e.id,
-        unidade_id: e.unidadeId,
-        nome: e.nome,
-        numero_serie: e.numeroSerie,
-        categoria: e.categoria,
-        data_ultima_preventiva: e.dataUltimaPreventiva ? e.dataUltimaPreventiva.toISOString().substring(0, 10) : null
-      };
-      const idx = this.inMemoryEquipamentos.findIndex(item => item.id === id);
-      if (idx !== -1) {
-        this.inMemoryEquipamentos[idx] = updated;
-      }
-      return updated;
-    } catch (err) {
-      const idx = this.inMemoryEquipamentos.findIndex(item => item.id === id);
-      if (idx !== -1) {
-        this.inMemoryEquipamentos[idx] = {
-          ...this.inMemoryEquipamentos[idx],
-          ...dados
-        };
-        return this.inMemoryEquipamentos[idx];
-      }
-      throw new Error("Equipamento não encontrado.");
-    }
-  }
-
-  // Chamados de Manutenção & Regra de Manutenção Preventiva Automática
-  async getChamados(): Promise<ChamadoManutencao[]> {
-    try {
-      const list = await (prisma as any).chamadoManutencao.findMany();
-      if (list) {
-        return list.map((c: any) => ({
-          id: c.id,
-          unidade_id: c.unidadeId,
-          equipamento_id: c.equipamentoId,
-          tipo: c.tipo as any,
-          descricao_defeito: c.descricaoDefeito,
-          custo_reparo: Number(c.custoReparo),
-          status: c.status as any,
-          data_abertura: c.dataAbertura.toISOString().substring(0, 10),
-          data_conclusao: c.dataConclusao ? c.dataConclusao.toISOString().substring(0, 10) : null,
-          observacoes: c.observacoes || undefined
-        }));
-      }
-    } catch (err) {}
-    return this.inMemoryChamados;
-  }
-
-  async addChamado(dados: Omit<ChamadoManutencao, 'id'>): Promise<ChamadoManutencao> {
-    try {
-      const c = await (prisma as any).chamadoManutencao.create({
-        data: {
-          unidadeId: Number(dados.unidade_id),
-          equipamentoId: Number(dados.equipamento_id),
-          tipo: dados.tipo || 'CORRETIVA',
-          descricaoDefeito: dados.descricao_defeito,
-          custoReparo: Number(dados.custo_reparo || 0),
-          status: dados.status || 'ABERTO',
-          dataAbertura: dados.data_abertura ? new Date(dados.data_abertura) : new Date(),
-          observacoes: dados.observacoes
-        }
-      });
-      const novo = {
-        id: c.id,
-        unidade_id: c.unidadeId,
-        equipamento_id: c.equipamentoId,
-        tipo: c.tipo as any,
-        descricao_defeito: c.descricaoDefeito,
-        custo_reparo: Number(c.custoReparo),
-        status: c.status as any,
-        data_abertura: c.dataAbertura.toISOString().substring(0, 10),
-        observacoes: c.observacoes || undefined
-      };
-      this.inMemoryChamados.push(novo);
-      return novo;
-    } catch (err) {
-      const novo: ChamadoManutencao = {
-        id: this.inMemoryChamados.length ? Math.max(...this.inMemoryChamados.map(c => c.id)) + 1 : 1,
-        ...dados
-      };
-      this.inMemoryChamados.push(novo);
-      return novo;
-    }
-  }
-
-  async updateStatusChamado(chamadoId: number, status: StatusChamado, custoReparo?: number): Promise<ChamadoManutencao> {
-    const dataConc = status === 'CONCLUIDO' ? new Date().toISOString().substring(0, 10) : null;
-    try {
-      const c = await (prisma as any).chamadoManutencao.update({
-        where: { id: Number(chamadoId) },
-        data: {
-          status,
-          ...(custoReparo !== undefined && { custoReparo }),
-          ...(status === 'CONCLUIDO' && { dataConclusao: new Date() })
-        }
-      });
-      return {
-        id: c.id,
-        unidade_id: c.unidadeId,
-        equipamento_id: c.equipamentoId,
-        tipo: c.tipo as any,
-        descricao_defeito: c.descricaoDefeito,
-        custo_reparo: Number(c.custoReparo),
-        status: c.status as any,
-        data_abertura: c.dataAbertura.toISOString().substring(0, 10),
-        data_conclusao: c.dataConclusao ? c.dataConclusao.toISOString().substring(0, 10) : null
-      };
-    } catch (err) {
-      const index = this.inMemoryChamados.findIndex(c => c.id === Number(chamadoId));
-      if (index === -1) throw new Error("Chamado não encontrado.");
-      this.inMemoryChamados[index].status = status;
-      if (custoReparo !== undefined) this.inMemoryChamados[index].custo_reparo = custoReparo;
-      if (status === 'CONCLUIDO') this.inMemoryChamados[index].data_conclusao = dataConc;
-      return this.inMemoryChamados[index];
-    }
-  }
-
-  async aprovarChamadoManutencao(chamadoId: number, aprovar: boolean = true): Promise<ChamadoManutencao> {
-    const novoStatus: StatusChamado = aprovar ? 'APROVADO_ADM' : 'RECUSADO';
-    try {
-      const c = await (prisma as any).chamadoManutencao.update({
-        where: { id: Number(chamadoId) },
-        data: {
-          status: novoStatus
-        }
-      });
-      const index = this.inMemoryChamados.findIndex(ch => ch.id === Number(chamadoId));
-      if (index !== -1) {
-        this.inMemoryChamados[index].status = novoStatus;
-        this.inMemoryChamados[index].aprovado_adm = aprovar;
-        this.inMemoryChamados[index].data_aprovacao = new Date().toISOString().substring(0, 10);
-      }
-      return {
-        id: c.id,
-        unidade_id: c.unidadeId,
-        equipamento_id: c.equipamentoId,
-        tipo: c.tipo as any,
-        descricao_defeito: c.descricaoDefeito,
-        custo_reparo: Number(c.custoReparo),
-        status: c.status as any,
-        data_abertura: c.dataAbertura.toISOString().substring(0, 10),
-        data_conclusao: c.dataConclusao ? c.dataConclusao.toISOString().substring(0, 10) : null
-      };
-    } catch (err) {
-      const index = this.inMemoryChamados.findIndex(c => c.id === Number(chamadoId));
-      if (index !== -1) {
-        this.inMemoryChamados[index].status = novoStatus;
-        this.inMemoryChamados[index].aprovado_adm = aprovar;
-        this.inMemoryChamados[index].data_aprovacao = new Date().toISOString().substring(0, 10);
-        return this.inMemoryChamados[index];
-      }
-      throw new Error("Chamado não encontrado.");
-    }
-  }
-
-  // Regra Automatizada de Manutenção Preventiva
-  verificarAlertasPreventiva(): { equipamento: Equipamento; unidade: UnidadeSaude; mensagem: string }[] {
-    const alertas: { equipamento: Equipamento; unidade: UnidadeSaude; mensagem: string }[] = [];
-    const chamadosAbertos = this.inMemoryChamados.filter(c => c.status === 'ABERTO' || c.status === 'EM_ANDAMENTO');
-
-    this.inMemoryEquipamentos.forEach(eq => {
-      const temChamadoPendente = chamadosAbertos.some(c => c.equipamento_id === eq.id);
-      if (!temChamadoPendente) {
-        const uni = this.inMemoryUnidades.find(u => u.id === eq.unidade_id);
-        const nomeUni = uni ? uni.nome : `Unidade #${eq.unidade_id}`;
-        alertas.push({
-          equipamento: eq,
-          unidade: uni || { id: eq.unidade_id, nome: nomeUni, tipo: 'USF' },
-          mensagem: `O equipamento ${eq.nome} (${eq.numero_serie}) na ${nomeUni} não possui chamados de reparo/defeito pendentes. Recomenda-se agendar a Manutenção Preventiva periódica para garantir o bom funcionamento.`
-        });
-      }
-    });
-
-    return alertas;
-  }
-
-  // Consolidação Financeira Multiclínica por Unidade de Saúde
-  getConsolidacaoFinanceiraMulticlinica(): UnidadeConsolidacaoFinanceira[] {
-    return this.inMemoryUnidades.map(u => {
-      // 1. Insumos Atendidos (PBS)
-      const pedidosUnidade = this.inMemoryPedidos.filter(p => p.unidade_emitente_id === u.id && p.status !== 'CANCELADO');
-      let custoInsumos = 0;
-      pedidosUnidade.forEach(p => {
-        (p.itens || []).forEach(it => {
-          custoInsumos += (Number(it.qtd_atendida || 0) * Number(it.valor_unitario || 0));
-        });
-      });
-
-      // 2. Honorários Odontólogos
-      const honorariosUnidade = this.inMemoryHonorarios.filter(h => h.unidade_id === u.id);
-      const custoHonorarios = honorariosUnidade.reduce((acc, h) => acc + Number(h.valor_total || 0), 0);
-
-      // 3. Manutenção de Equipamentos
-      const chamadosUnidade = this.inMemoryChamados.filter(c => c.unidade_id === u.id);
-      const custoManutencao = chamadosUnidade.reduce((acc, c) => acc + Number(c.custo_reparo || 0), 0);
-
-      const custoTotalGeral = custoInsumos + custoHonorarios + custoManutencao;
-
-      return {
-        unidadeId: u.id,
-        nome: u.nome,
-        tipo: u.tipo,
-        custoInsumosAtendidos: custoInsumos,
-        custoHonorariosDentistas: custoHonorarios,
-        custoManutencaoEquipamentos: custoManutencao,
-        custoTotalGeral
-      };
+function expectStatus(actual: string, allowed: string[]) { if (!allowed.includes(actual)) throw new AppError(409, 'Operação incompatível com o status atual. Atualize os dados.'); }
+
+export class DataStore {
+  getUnidades = async (p: Page, unidadeId?: number) => (await prisma.unidadeSaude.findMany({ ...paging(p), where: { id: unidadeId } })).map(mapUnidade);
+  addUnidade = async (data: Input<'unidade'>) => mapUnidade(await prisma.unidadeSaude.create({ data }));
+  updateUnidade = async (id: number, data: Input<'unidade'>) => mapUnidade(await prisma.unidadeSaude.update({ where: { id }, data }));
+  async deleteUnidade(id: number) {
+    await prisma.$transaction(async tx => {
+      await tx.$queryRaw`SELECT id FROM unidades_saude WHERE id = ${id} FOR UPDATE`;
+      if (await tx.usuario.count({ where: { unidadeId: id } })) throw new AppError(409, 'Unidade vinculada a usuários; transfira os vínculos antes de excluir.');
+      await tx.unidadeSaude.delete({ where: { id } });
     });
   }
-
-  // Entradas e Aportes Financeiros
-  async getEntradas(): Promise<EntradaRecurso[]> {
-    try {
-      const list = await (prisma as any).entradaRecurso.findMany({
-        orderBy: { id: 'desc' }
-      });
-      if (list) {
-        return list.map((e: any) => ({
-          id: e.id,
-          unidade_id: e.unidadeId,
-          natureza: e.natureza,
-          tipo_recorrencia: e.tipoRecorrencia,
-          descricao: e.descricao,
-          valor: Number(e.valor),
-          data_credito: e.dataCredito ? e.dataCredito.toISOString().substring(0, 10) : '',
-          mes_referencia: e.mesReferencia,
-          observacoes: e.observacoes || undefined
-        }));
-      }
-    } catch (err) {}
-    return this.inMemoryEntradas;
+  getMateriais = async (p: Page) => (await prisma.material.findMany(paging(p))).map(mapMaterial);
+  async addMaterial(d: Input<'material'>) {
+    return mapMaterial(await prisma.material.create({ data: { descricao: d.descricao, unidadeMedida: d.unidade_medida, valorEstimado: d.valor_estimado, qtdEstoque: d.qtd_estoque, limiteMaxPedido: d.limite_max_pedido, fornecedor: d.fornecedor, natureza: d.natureza } }));
   }
-
-  async addEntrada(dados: Omit<EntradaRecurso, 'id'>): Promise<EntradaRecurso> {
-    try {
-      const e = await (prisma as any).entradaRecurso.create({
-        data: {
-          unidadeId: dados.unidade_id || null,
-          natureza: dados.natureza,
-          tipoRecorrencia: dados.tipo_recorrencia,
-          descricao: dados.descricao,
-          valor: Number(dados.valor),
-          dataCredito: new Date(dados.data_credito || Date.now()),
-          mesReferencia: dados.mes_referencia,
-          observacoes: dados.observacoes || null
+  async updateMaterial(id: number, d: Partial<Input<'material'>>) {
+    if (d.qtd_estoque !== undefined) throw new AppError(400, 'Use o ajuste de estoque para alterar quantidades.');
+    return mapMaterial(await prisma.material.update({ where: { id }, data: { descricao: d.descricao, unidadeMedida: d.unidade_medida, valorEstimado: d.valor_estimado, limiteMaxPedido: d.limite_max_pedido, fornecedor: d.fornecedor, natureza: d.natureza } }));
+  }
+  async atualizarEstoqueMaterial(id: number, d: Input<'estoque'>) {
+    return prisma.$transaction(async tx => {
+      const changed = await tx.material.updateMany({ where: { id, qtdEstoque: d.estoque_anterior }, data: { qtdEstoque: d.qtd_estoque } });
+      if (!changed.count) throw new AppError(409, 'O estoque foi alterado por outra operação. Atualize e tente novamente.');
+      return mapMaterial(await tx.material.findUniqueOrThrow({ where: { id } }));
+    });
+  }
+  deleteMaterial = async (id: number) => { await prisma.material.delete({ where: { id } }); };
+  getPedidos = async (p: Page, unidadeId?: number) => (await prisma.pedidoPBS.findMany({ ...paging(p), where: { unidadeEmitenteId: unidadeId }, include: { itens: { orderBy: { numeroItem: 'asc' } } } })).map(mapPedido);
+  async salvarPedido(d: Input<'pedido'>) {
+    const ids = d.itens.map(i => i.material_id);
+    if (new Set(ids).size !== ids.length) throw new AppError(400, 'Não repita o mesmo material no pedido.');
+    return prisma.$transaction(async tx => {
+      const materials = new Map((await tx.material.findMany({ where: { id: { in: ids } } })).map(m => [m.id, m]));
+      const itens = d.itens.map((i, index) => {
+        const m = materials.get(i.material_id);
+        if (!m) throw new AppError(400, 'Material inexistente. Atualize o catálogo.');
+        if (m.limiteMaxPedido && i.qtd_pedida > m.limiteMaxPedido) throw new AppError(400, `Quantidade excede o limite do material #${m.id}.`);
+        return { numeroItem: index + 1, materialId: m.id, qtdPedida: i.qtd_pedida, valorUnitario: m.valorEstimado, valorTotal: ensureTotal(money(m.valorEstimado).mul(i.qtd_pedida)), natureza: m.natureza };
+      });
+      const total = ensureTotal(itens.reduce((sum, i) => sum.add(i.valorTotal), money(0)));
+      const created = await tx.pedidoPBS.create({ data: {
+        unidadeEmitenteId: d.unidade_emitente_id, dataPedido: new Date(d.data_pedido), responsavelNome: d.responsavel_nome,
+        responsavelFuncao: d.responsavel_funcao, responsavelRegistro: d.responsavel_registro, atividadePrograma: d.atividade_programa,
+        elementoDespesa: d.elemento_despesa, observacoes: d.observacoes, valorTotalEstimado: total, itens: { create: itens },
+      } });
+      return mapPedido(await tx.pedidoPBS.update({ where: { id: created.id }, data: { numeroPbs: `PBS-${created.dataPedido.getUTCFullYear()}/${String(created.id).padStart(6, '0')}` }, include: { itens: true } }));
+    });
+  }
+  async confirmarRecebimento(id: number, d: Input<'receber'>) {
+    return prisma.$transaction(async tx => {
+      const p = await lockPedido(tx, id); expectStatus(p.status, ['SOLICITADO']);
+      if (d.data_recebimento < day(p.dataPedido)!) throw new AppError(400, 'Recebimento anterior à solicitação.');
+      return mapPedido(await tx.pedidoPBS.update({ where: { id }, data: { status: 'RECEBIDO', apontadorRecebimentoNome: d.apontador_recebimento_nome, dataRecebimento: new Date(d.data_recebimento) }, include: { itens: true } }));
+    });
+  }
+  async atenderPedido(id: number, updates: Input<'atender'>['itensAtendidos']) {
+    return prisma.$transaction(async tx => {
+      const p = await lockPedido(tx, id); expectStatus(p.status, ['RECEBIDO', 'ATENDIDO_PARCIAL', 'ATENDIDO_TOTAL']);
+      if (new Set(updates.map(i => i.item_id)).size !== updates.length) throw new AppError(400, 'Itens repetidos no atendimento.');
+      const changes = new Map(updates.map(i => [i.item_id, i]));
+      for (const update of updates) if (!p.itens.some(i => i.id === update.item_id && i.materialId === update.material_id)) throw new AppError(400, 'Item não pertence a este pedido.');
+      for (const item of p.itens) {
+        const update = changes.get(item.id); if (!update) continue;
+        if (update.qtd_atendida > item.qtdPedida) throw new AppError(400, 'Quantidade atendida maior que a solicitada.');
+        const delta = update.qtd_atendida - item.qtdAtendida;
+        if (delta !== 0) {
+          const changed = await tx.material.updateMany({ where: { id: item.materialId, ...(delta > 0 ? { qtdEstoque: { gte: delta } } : {}) }, data: { qtdEstoque: { decrement: delta } } });
+          if (!changed.count) throw new AppError(409, 'Estoque insuficiente para atender o pedido.');
+          await tx.itemPedidoPBS.update({ where: { id: item.id }, data: { qtdAtendida: update.qtd_atendida } });
         }
-      });
-      const nova: EntradaRecurso = {
-        id: e.id,
-        unidade_id: e.unidadeId,
-        natureza: e.natureza,
-        tipo_recorrencia: e.tipoRecorrencia,
-        descricao: e.descricao,
-        valor: Number(e.valor),
-        data_credito: e.dataCredito.toISOString().substring(0, 10),
-        mes_referencia: e.mesReferencia,
-        observacoes: e.observacoes || undefined
-      };
-      this.inMemoryEntradas.unshift(nova);
-      return nova;
-    } catch (err) {
-      const nextId = this.inMemoryEntradas.length ? Math.max(...this.inMemoryEntradas.map(e => e.id)) + 1 : 1;
-      const nova: EntradaRecurso = {
-        id: nextId,
-        ...dados,
-        valor: Number(dados.valor) || 0
-      };
-      this.inMemoryEntradas.unshift(nova);
-      return nova;
-    }
-  }
-
-  async deleteEntrada(id: number): Promise<void> {
-    try {
-      await (prisma as any).entradaRecurso.delete({
-        where: { id: Number(id) }
-      });
-    } catch (err) {}
-    this.inMemoryEntradas = this.inMemoryEntradas.filter(e => e.id !== Number(id));
-  }
-
-  async exportarSQL(): Promise<string> {
-    const unidades = await this.getUnidades();
-    const materiais = await this.getMateriais();
-    const pedidos = await this.getPedidos();
-
-    let sql = `-- =======================================================\n`;
-    sql += `-- SCRIPT SQL DUMP DE DADOS DA BASE ALMOXARIFADO DE SAÚDE\n`;
-    sql += `-- Gerado em: ${new Date().toLocaleString('pt-BR')}\n`;
-    sql += `-- =======================================================\n\n`;
-
-    sql += `USE almoxarifado_saude_db;\n\n`;
-
-    sql += `-- 1. Unidades de Saúde\n`;
-    unidades.forEach(u => {
-      sql += `INSERT INTO unidades_saude (id, nome, tipo) VALUES (${u.id}, '${u.nome.replace(/'/g, "''")}', '${u.tipo}') ON DUPLICATE KEY UPDATE nome=VALUES(nome);\n`;
+        item.qtdAtendida = update.qtd_atendida;
+      }
+      const status = p.itens.every(i => i.qtdAtendida === i.qtdPedida) ? 'ATENDIDO_TOTAL' : p.itens.some(i => i.qtdAtendida > 0) ? 'ATENDIDO_PARCIAL' : 'RECEBIDO';
+      return mapPedido(await tx.pedidoPBS.update({ where: { id }, data: { status }, include: { itens: true } }));
     });
-
-    sql += `\n-- 2. Materiais do Catálogo\n`;
-    materiais.forEach(m => {
-      sql += `INSERT INTO materiais (id, descricao, unidade_medida, qtd_estoque) VALUES (${m.id}, '${m.descricao.replace(/'/g, "''")}', '${m.unidade_medida}', ${m.qtd_estoque || 0}) ON DUPLICATE KEY UPDATE descricao=VALUES(descricao), qtd_estoque=VALUES(qtd_estoque);\n`;
-    });
-
-    sql += `\n-- 3. Pedidos PBS\n`;
-    pedidos.forEach(p => {
-      const apEnv = p.apontador_envio_nome ? `'${p.apontador_envio_nome.replace(/'/g, "''")}'` : 'NULL';
-      const dtEnv = p.data_envio ? `'${p.data_envio}'` : 'NULL';
-      const apRec = p.apontador_recebimento_nome ? `'${p.apontador_recebimento_nome.replace(/'/g, "''")}'` : 'NULL';
-      const dtRec = p.data_recebimento ? `'${p.data_recebimento}'` : 'NULL';
-      const obs = p.observacoes ? `'${p.observacoes.replace(/'/g, "''")}'` : 'NULL';
-
-      sql += `INSERT INTO pedidos_pbs (\n`;
-      sql += `    id, numero_pbs, unidade_emitente_id, data_pedido, responsavel_nome, responsavel_funcao, responsavel_registro,\n`;
-      sql += `    atividade_programa, elemento_despesa, observacoes, status, valor_total_estimado,\n`;
-      sql += `    apontador_envio_nome, data_envio, apontador_recebimento_nome, data_recebimento\n`;
-      sql += `) VALUES (\n`;
-      sql += `    ${p.id}, '${p.numero_pbs}', ${p.unidade_emitente_id}, '${p.data_pedido}', '${p.responsavel_nome.replace(/'/g, "''")}', '${(p.responsavel_funcao || '').replace(/'/g, "''")}', '${(p.responsavel_registro || '').replace(/'/g, "''")}',\n`;
-      sql += `    '${(p.atividade_programa||'').replace(/'/g, "''")}', '${(p.elemento_despesa||'').replace(/'/g, "''")}', ${obs}, '${p.status}', ${p.valor_total_estimado.toFixed(2)},\n`;
-      sql += `    ${apEnv}, ${dtEnv}, ${apRec}, ${dtRec}\n`;
-      sql += `) ON DUPLICATE KEY UPDATE status=VALUES(status), apontador_recebimento_nome=VALUES(apontador_recebimento_nome), data_recebimento=VALUES(data_recebimento), apontador_envio_nome=VALUES(apontador_envio_nome), data_envio=VALUES(data_envio);\n`;
-
-      sql += `-- Itens do Pedido ${p.numero_pbs}\n`;
-      (p.itens || []).forEach(it => {
-        sql += `INSERT INTO itens_pedido_pbs (id, pedido_id, numero_item, material_id, qtd_pedida, qtd_atendida, valor_unitario, valor_total) VALUES (${it.id}, ${p.id}, ${it.numero_item}, ${it.material_id}, ${it.qtd_pedida}, ${it.qtd_atendida}, ${it.valor_unitario.toFixed(2)}, ${it.valor_total.toFixed(2)});\n`;
-      });
-      sql += `\n`;
-    });
-
-    return sql;
   }
+  async confirmarEnvio(id: number, d: Input<'enviar'>) {
+    return prisma.$transaction(async tx => {
+      const p = await lockPedido(tx, id); expectStatus(p.status, ['ATENDIDO_PARCIAL', 'ATENDIDO_TOTAL']);
+      if (d.data_envio < day(p.dataRecebimento || p.dataPedido)!) throw new AppError(400, 'Envio anterior ao recebimento.');
+      return mapPedido(await tx.pedidoPBS.update({ where: { id }, data: { status: 'ENVIADO', apontadorEnvioNome: d.apontador_envio_nome, dataEnvio: new Date(d.data_envio) }, include: { itens: true } }));
+    });
+  }
+  async cancelarPedido(id: number, unidadeId?: number) {
+    return prisma.$transaction(async tx => {
+      const p = await lockPedido(tx, id);
+      if (unidadeId !== undefined && p.unidadeEmitenteId !== unidadeId) throw new AppError(404, 'Pedido não encontrado.');
+      expectStatus(p.status, unidadeId !== undefined ? ['SOLICITADO'] : ['SOLICITADO', 'RECEBIDO', 'ATENDIDO_PARCIAL', 'ATENDIDO_TOTAL']);
+      for (const item of p.itens) if (item.qtdAtendida > 0) await tx.material.update({ where: { id: item.materialId }, data: { qtdEstoque: { increment: item.qtdAtendida } } });
+      await tx.itemPedidoPBS.updateMany({ where: { pedidoId: id }, data: { qtdAtendida: 0 } });
+      return mapPedido(await tx.pedidoPBS.update({ where: { id }, data: { status: 'CANCELADO' }, include: { itens: true } }));
+    });
+  }
+  getHonorarios = async (p: Page) => (await prisma.honorarioOdontologo.findMany(paging(p))).map(mapHonorario);
+  async addHonorario(d: Input<'honorario'>) {
+    return mapHonorario(await prisma.honorarioOdontologo.create({ data: { unidadeId: d.unidade_id, nomeDentista: d.nome_dentista, cro: d.cro, tipoContrato: d.tipo_contrato, mesReferencia: d.mes_referencia, valorFixo: d.valor_fixo, valorComissao: d.valor_comissao, valorTotal: ensureTotal(money(d.valor_fixo).add(d.valor_comissao)), observacoes: d.observacoes } }));
+  }
+  getEquipamentos = async (p: Page, unidadeId?: number) => (await prisma.equipamento.findMany({ ...paging(p), where: { unidadeId } })).map(mapEquipamento);
+  async addEquipamento(d: Input<'equipamento'>) {
+    return mapEquipamento(await prisma.equipamento.create({ data: { unidadeId: d.unidade_id, nome: d.nome, numeroSerie: d.numero_serie, categoria: d.categoria, dataUltimaPreventiva: d.data_ultima_preventiva ? new Date(d.data_ultima_preventiva) : null } }));
+  }
+  async updateEquipamento(id: number, d: Partial<Input<'equipamento'>>) {
+    return prisma.$transaction(async tx => {
+      await tx.$queryRaw`SELECT id FROM equipamentos WHERE id = ${id} FOR UPDATE`;
+      const old = await tx.equipamento.findUniqueOrThrow({ where: { id } });
+      if (d.unidade_id && d.unidade_id !== old.unidadeId && await tx.chamadoManutencao.count({ where: { equipamentoId: id } })) throw new AppError(409, 'Equipamento com histórico de manutenção não pode ser transferido neste fluxo.');
+      return mapEquipamento(await tx.equipamento.update({ where: { id }, data: { unidadeId: d.unidade_id, nome: d.nome, numeroSerie: d.numero_serie, categoria: d.categoria, ...(d.data_ultima_preventiva !== undefined ? { dataUltimaPreventiva: d.data_ultima_preventiva ? new Date(d.data_ultima_preventiva) : null } : {}) } }));
+    });
+  }
+  getChamados = async (p: Page, unidadeId?: number, tecnico = false) => (await prisma.chamadoManutencao.findMany({ ...paging(p), where: { unidadeId, ...(tecnico ? { status: { in: ['APROVADO_ADM', 'EM_ANDAMENTO', 'CONCLUIDO'] } } : {}) } })).map(mapChamado);
+  async addChamado(d: Input<'chamado'>, unidadeId?: number) {
+    return prisma.$transaction(async tx => {
+      await tx.$queryRaw`SELECT id FROM equipamentos WHERE id = ${d.equipamento_id} FOR UPDATE`;
+      const eq = await tx.equipamento.findUniqueOrThrow({ where: { id: d.equipamento_id } });
+      if (eq.unidadeId !== d.unidade_id || (unidadeId !== undefined && eq.unidadeId !== unidadeId)) throw new AppError(403, 'Equipamento não pertence à unidade permitida.');
+      return mapChamado(await tx.chamadoManutencao.create({ data: { unidadeId: eq.unidadeId, equipamentoId: eq.id, tipo: d.tipo, descricaoDefeito: d.descricao_defeito, custoReparo: d.custo_reparo, status: 'ABERTO', dataAbertura: new Date(d.data_abertura), observacoes: d.observacoes } }));
+    });
+  }
+  async updateStatusChamado(id: number, d: Input<'status'>) {
+    return prisma.$transaction(async tx => {
+      await tx.$queryRaw`SELECT id FROM chamados_manutencao WHERE id = ${id} FOR UPDATE`;
+      const c = await tx.chamadoManutencao.findUniqueOrThrow({ where: { id } });
+      expectStatus(c.status, d.status === 'EM_ANDAMENTO' ? ['APROVADO_ADM'] : ['EM_ANDAMENTO']);
+      const now = new Date();
+      if (d.status === 'CONCLUIDO' && c.tipo === 'PREVENTIVA') await tx.equipamento.update({ where: { id: c.equipamentoId }, data: { dataUltimaPreventiva: now } });
+      return mapChamado(await tx.chamadoManutencao.update({ where: { id }, data: { status: d.status, custoReparo: d.custo_reparo, ...(d.status === 'CONCLUIDO' ? { dataConclusao: now } : {}) } }));
+    });
+  }
+  async aprovarChamadoManutencao(id: number, aprovar: boolean) {
+    return prisma.$transaction(async tx => {
+      const changed = await tx.chamadoManutencao.updateMany({ where: { id, status: 'ABERTO' }, data: { status: aprovar ? 'APROVADO_ADM' : 'RECUSADO' } });
+      if (!changed.count) throw new AppError(409, 'Somente chamados abertos podem ser aprovados ou recusados.');
+      return mapChamado(await tx.chamadoManutencao.findUniqueOrThrow({ where: { id } }));
+    });
+  }
+  async verificarAlertasPreventiva(unidadeId?: number) {
+    const cutoff = new Date(Date.now() - 180 * 86400000);
+    return (await prisma.equipamento.findMany({ where: { unidadeId, OR: [{ dataUltimaPreventiva: null }, { dataUltimaPreventiva: { lte: cutoff } }], chamados: { none: { status: { in: ['ABERTO', 'APROVADO_ADM', 'EM_ANDAMENTO'] } } } }, include: { unidade: true }, take: 500 })).map(e => ({ equipamento: mapEquipamento(e), unidade: mapUnidade(e.unidade), mensagem: 'Equipamento sem preventiva registrada nos últimos 180 dias.' }));
+  }
+  async getConsolidacaoFinanceiraMulticlinica() {
+    const [units, items, fees, repairs] = await prisma.$transaction([
+      prisma.unidadeSaude.findMany(),
+      prisma.$queryRaw<{ unidadeId: number; total: Prisma.Decimal }[]>`SELECT p.unidade_emitente_id AS unidadeId, COALESCE(SUM(i.qtd_atendida * i.valor_unitario), 0) AS total FROM pedidos_pbs p JOIN itens_pedido_pbs i ON i.pedido_id = p.id WHERE p.status <> 'CANCELADO' GROUP BY p.unidade_emitente_id`,
+      prisma.honorarioOdontologo.groupBy({ by: ['unidadeId'], orderBy: { unidadeId: 'asc' }, _sum: { valorTotal: true } }),
+      prisma.chamadoManutencao.groupBy({ by: ['unidadeId'], orderBy: { unidadeId: 'asc' }, where: { status: 'CONCLUIDO' }, _sum: { custoReparo: true } }),
+    ], { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead });
+    const im = new Map(items.map(i => [i.unidadeId, Number(i.total)]));
+    const fm = new Map(fees.map(f => [f.unidadeId, Number(f._sum?.valorTotal || 0)]));
+    const rm = new Map(repairs.map(r => [r.unidadeId, Number(r._sum?.custoReparo || 0)]));
+    return units.map(u => { const insumos = im.get(u.id) || 0, honorarios = fm.get(u.id) || 0, manutencao = rm.get(u.id) || 0; return { unidadeId: u.id, nome: u.nome, tipo: u.tipo, custoInsumosAtendidos: insumos, custoHonorariosDentistas: honorarios, custoManutencaoEquipamentos: manutencao, custoTotalGeral: insumos + honorarios + manutencao }; });
+  }
+  getEntradas = async (p: Page) => (await prisma.entradaRecurso.findMany(paging(p))).map(mapEntrada);
+  async addEntrada(d: Input<'entrada'>) {
+    return mapEntrada(await prisma.entradaRecurso.create({ data: { unidadeId: d.unidade_id, natureza: d.natureza, tipoRecorrencia: d.tipo_recorrencia, descricao: d.descricao, valor: d.valor, dataCredito: new Date(d.data_credito), mesReferencia: d.mes_referencia, observacoes: d.observacoes } }));
+  }
+  deleteEntrada = async (id: number) => { await prisma.entradaRecurso.delete({ where: { id } }); };
 }
-
 export const dataStore = new DataStore();

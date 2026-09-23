@@ -1,3 +1,4 @@
+-- ARQUIVO HISTÓRICO: não use para instalar ou atualizar. Use npm run db:migrate.
 CREATE DATABASE IF NOT EXISTS almoxarifado_saude_db
 DEFAULT CHARACTER SET utf8mb4
 DEFAULT COLLATE utf8mb4_unicode_ci;
@@ -105,10 +106,7 @@ INSERT INTO unidades_saude (id, nome, tipo) VALUES
 ON DUPLICATE KEY UPDATE nome=nome;
 
 -- 2. Cadastro Inicial de Usuários com Perfis
-INSERT INTO usuarios (id, email, senha_hash, nome, funcao, registro, perfil, unidade_id) VALUES
-(1, 'solicitante@saude.gov.br', '$2b$10$e8w6yQ6S0fP/JtYv.JpS3e8w6yQ6S0fP/JtYv.JpS3e8w6yQ6S0fP', 'Dra. Maria Fernanda Silva', 'Cirurgiã Dentista', 'CRO/PA 0592', 'SOLICITANTE', 1),
-(2, 'gestor@saude.gov.br', '$2b$10$e8w6yQ6S0fP/JtYv.JpS3e8w6yQ6S0fP/JtYv.JpS3e8w6yQ6S0fP', 'Carlos Eduardo Almoxarife', 'Gestor de Almoxarifado', 'SMS/PA 1020', 'GESTOR', 3)
-ON DUPLICATE KEY UPDATE email=email;
+-- Credenciais demonstrativas removidas. Use o cadastro seguro pelo aplicativo.
 
 -- 3. Catálogo de Materiais
 INSERT INTO materiais (id, descricao, unidade_medida, valor_estimado, qtd_estoque) VALUES
