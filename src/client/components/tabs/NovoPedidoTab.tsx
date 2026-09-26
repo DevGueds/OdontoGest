@@ -1,3 +1,4 @@
+import { today } from '../../../shared/dates';
 import React, { useState, useEffect } from 'react';
 import { UnidadeSaude, Material, PerfilUsuario } from '../../types';
 import { useAuth } from '../../context/AuthContext';
@@ -43,7 +44,7 @@ export const NovoPedidoTab: React.FC<Props> = ({
   const { user } = useAuth();
   const isGestor = perfilAtual === 'GESTOR';
   const [unidadeId, setUnidadeId] = useState<number | ''>(unidades[0]?.id || '');
-  const [dataPedido, setDataPedido] = useState(new Date().toISOString().substring(0, 10));
+  const [dataPedido, setDataPedido] = useState(today());
   const [responsavelNome, setResponsavelNome] = useState('');
   const [responsavelFuncao, setResponsavelFuncao] = useState('');
   const [responsavelRegistro, setResponsavelRegistro] = useState('');
@@ -132,16 +133,6 @@ export const NovoPedidoTab: React.FC<Props> = ({
     }));
   };
 
-  const handleValorUnitChange = (id: number, vUnit: number) => {
-    setItens(prev => prev.map(item => {
-      if (item.id === id) {
-        const vTotal = item.qtd_pedida * vUnit;
-        return { ...item, valor_unitario: vUnit, valor_total: vTotal };
-      }
-      return item;
-    }));
-  };
-
   const totalEstimado = itens.reduce((acc, item) => acc + item.valor_total, 0);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -196,54 +187,13 @@ export const NovoPedidoTab: React.FC<Props> = ({
 
   const isAdmin = perfilAtual === 'ADMINISTRADOR';
 
-  const listaMateriaisOpcoes = React.useMemo(() => {
-    if (isGestor) {
-      return materiais
-        .filter(m => (m.qtd_estoque ?? 0) > 0)
-        .map(m => ({
-          id: m.id,
-          descricaoLabel: m.fornecedor ? `${m.descricao} (${m.fornecedor})` : m.descricao,
-          material: m,
-          esgotado: false,
-          txtComplemento: ` [Estoque: ${m.qtd_estoque} ${m.unidade_medida}${m.limite_max_pedido ? ` | Limite Máx: ${m.limite_max_pedido} ${m.unidade_medida}` : ''}]`
-        }));
-    } else {
-      // Solicitante: Agrupar por descrição + unidade de medida
-      const agrupadosMap = new Map<string, Material[]>();
-      materiais.forEach(m => {
-        const chave = `${m.descricao.trim().toLowerCase()}___${m.unidade_medida.trim().toLowerCase()}`;
-        if (!agrupadosMap.has(chave)) {
-          agrupadosMap.set(chave, []);
-        }
-        agrupadosMap.get(chave)!.push(m);
-      });
-
-      const resultado = [];
-      for (const [, lista] of agrupadosMap.entries()) {
-        const principal = lista.find(m => (m.qtd_estoque ?? 0) > 0) || lista[0];
-        const estoqueTotal = lista.reduce((acc, curr) => acc + (curr.qtd_estoque ?? 0), 0);
-        const esgotado = estoqueTotal <= 0;
-
-        // Se estiver com estoque zerado, não exibe no select
-        if (esgotado) continue;
-
-        const limite = principal.limite_max_pedido;
-        let txtComplemento = '';
-        if (limite) {
-          txtComplemento = ` [Limite máx: ${limite} ${principal.unidade_medida}]`;
-        }
-
-        resultado.push({
-          id: principal.id,
-          descricaoLabel: principal.descricao,
-          material: principal,
-          esgotado: false,
-          txtComplemento
-        });
-      }
-      return resultado;
-    }
-  }, [materiais, isGestor]);
+  const listaMateriaisOpcoes = React.useMemo(() => materiais
+    .filter(m => (m.qtd_estoque ?? 0) > 0)
+    .map(m => ({
+      id: m.id,
+      descricaoLabel: '#' + m.id + ' — ' + m.descricao + (isAdmin && m.fornecedor ? ' (' + m.fornecedor + ')' : ''),
+      txtComplemento: m.limite_max_pedido ? ' [Limite: ' + m.limite_max_pedido + ' ' + m.unidade_medida + ']' : ''
+    })), [materiais, isAdmin]);
 
   return (
     <div className="card form-card">
@@ -316,6 +266,7 @@ export const NovoPedidoTab: React.FC<Props> = ({
               <input 
                 type="text" 
                 id="responsavel_nome" 
+                readOnly
                 className="form-control" 
                 placeholder="Ex: Dra. Maria Fernanda Silva" 
                 value={responsavelNome}
@@ -329,6 +280,7 @@ export const NovoPedidoTab: React.FC<Props> = ({
               <input 
                 type="text" 
                 id="responsavel_funcao" 
+                readOnly
                 className="form-control" 
                 placeholder="Ex: Cirurgiã Dentista / Enfermeira Chefe"
                 value={responsavelFuncao}
@@ -341,6 +293,7 @@ export const NovoPedidoTab: React.FC<Props> = ({
               <input 
                 type="text" 
                 id="responsavel_registro" 
+                readOnly
                 className="form-control" 
                 placeholder="Ex: CRO/PA 0592 ou COREN/PA 12345"
                 value={responsavelRegistro}
@@ -380,6 +333,7 @@ export const NovoPedidoTab: React.FC<Props> = ({
                       <td><strong>{index + 1}</strong></td>
                       <td>
                         <select 
+                          aria-label={`Material do item ${index + 1}`}
                           className="form-control"
                           style={{ maxWidth: '380px', width: '100%' }}
                           value={item.material_id}
@@ -394,9 +348,10 @@ export const NovoPedidoTab: React.FC<Props> = ({
                           ))}
                         </select>
                       </td>
-                      <td><input type="text" className="form-control" readOnly value={item.unidade_medida} placeholder="-" /></td>
+                      <td><input aria-label={`Unidade de medida do item ${index + 1}`} type="text" className="form-control" readOnly value={item.unidade_medida} placeholder="-" /></td>
                       <td>
                         <input 
+                          aria-label={`Quantidade pedida do item ${index + 1}`}
                           type="number" 
                           min="1"
                           max={limiteItem || undefined} 
@@ -414,19 +369,20 @@ export const NovoPedidoTab: React.FC<Props> = ({
                       {isGestor && (
                         <td>
                           <input 
+                            aria-label={`Valor unitário do catálogo, item ${index + 1}`}
+                            readOnly
                             type="number" 
                             step="0.01" 
                             className="form-control" 
                             value={item.valor_unitario}
-                            onChange={(e) => handleValorUnitChange(item.id, parseFloat(e.target.value) || 0)}
                           />
                         </td>
                       )}
                       {isGestor && (
-                        <td><input type="text" className="form-control" readOnly value={formatarMoeda(item.valor_total)} /></td>
+                        <td><input aria-label={`Valor total do item ${index + 1}`} type="text" className="form-control" readOnly value={formatarMoeda(item.valor_total)} /></td>
                       )}
                       <td>
-                        <button type="button" className="btn btn-outline btn-sm text-rose" onClick={() => handleRemoveLinha(item.id)}>
+                        <button type="button" aria-label={`Remover item ${index + 1}`} className="btn btn-outline btn-sm text-rose" onClick={() => handleRemoveLinha(item.id)}>
                           <i className="fa-solid fa-trash"></i>
                         </button>
                       </td>

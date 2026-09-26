@@ -10,7 +10,7 @@ const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(s => {
 }, 'Data inválida');
 const month = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/);
 const natureza = z.enum(['CUSTEIO', 'INVESTIMENTO']);
-const password = z.string().min(12).max(128);
+const password = z.string().min(8).max(128);
 export const schemas = {
   login: z.object({ email: z.string().trim().email().max(150), senha: z.string().min(1).max(128) }).strict(),
   password: z.object({ senha_atual: z.string().min(1).max(128), nova_senha: password }).strict(),

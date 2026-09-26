@@ -9,6 +9,7 @@ import {
   EntradaRecurso 
 } from '../../types';
 import { dbService } from '../../services/db';
+import { useAuth } from '../../context/AuthContext';
 
 interface Props {
   pedidos: PedidoPBS[];
@@ -41,6 +42,7 @@ export const DashboardTab: React.FC<Props> = ({
   formatarData,
   formatarMoeda
 }) => {
+  const canManage = useAuth().user?.perfil === 'ADMINISTRADOR';
   const [filtroAlerta, setFiltroAlerta] = useState<'todos' | 'esgotados' | 'baixo'>('todos');
   const [buscaAlerta, setBuscaAlerta] = useState('');
 
@@ -148,7 +150,7 @@ export const DashboardTab: React.FC<Props> = ({
       </div>
 
       {/* NÍVEL 1: MACRO KPIS DE ALTO IMPACTO (PIRÂMIDE DE INFORMAÇÃO) */}
-      <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+      <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: '1rem' }}>
         
         {/* KPI 1: Saldo Custeio */}
         <div className="card" style={{ padding: '1.2rem', position: 'relative', overflow: 'hidden', borderTop: '4px solid var(--primary)' }}>
@@ -260,7 +262,7 @@ export const DashboardTab: React.FC<Props> = ({
       </div>
 
       {/* NÍVEL 2: VISUALIZAÇÃO DE DADOS & COMPARAÇÕES (DATA VISUALIZATION) */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1.2rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))', gap: '1.2rem' }}>
         
         {/* GRÁFICO 1: Composição das Despesas de Custeio (Visual Bar Breakdown) */}
         <div className="card">
@@ -283,7 +285,7 @@ export const DashboardTab: React.FC<Props> = ({
             </div>
 
             {/* Visual Breakdown Legends */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.8rem', textAlign: 'center' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))', gap: '0.8rem', textAlign: 'center' }}>
               <div style={{ background: '#f8fafc', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
                   <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary)' }} />
@@ -329,7 +331,7 @@ export const DashboardTab: React.FC<Props> = ({
               const pct = Math.round((u.custoTotalGeral / maxGastoUnidade) * 100);
               return (
                 <div key={u.unidadeId}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.25rem' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.25rem' }}>
                     <strong>{u.nome} <span className="badge badge-cyan" style={{ padding: '1px 6px', fontSize: '0.7rem' }}>{u.tipo}</span></strong>
                     <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>{formatarMoeda(u.custoTotalGeral)}</span>
                   </div>
@@ -446,14 +448,14 @@ export const DashboardTab: React.FC<Props> = ({
                         </td>
                         <td>{formatarMoeda(m.valor_estimado || 0)}</td>
                         <td className="text-center">
-                          <div className="btn-group">
+                          {canManage && <div className="btn-group">
                             <button className="btn btn-emerald btn-sm" onClick={() => onAbrirAjusteEstoque(m)} title="Repor Estoque">
                               <i className="fa-solid fa-plus-circle"></i> Repor Estoque
                             </button>
                             <button className="btn btn-outline btn-sm" onClick={() => onAbrirEditarMaterial(m)} title="Editar Insumo">
                               <i className="fa-solid fa-pen"></i> Editar
                             </button>
-                          </div>
+                          </div>}
                         </td>
                       </tr>
                     );

@@ -1,3 +1,5 @@
+import { Modal } from '../Modal';
+import { today } from '../../../shared/dates';
 import React, { useState, useEffect } from 'react';
 import { PedidoPBS } from '../../types';
 
@@ -10,12 +12,12 @@ interface Props {
 
 export const ModalRecebimento: React.FC<Props> = ({ pedido, isOpen, onClose, onConfirm }) => {
   const [apontador, setApontador] = useState('');
-  const [dataRec, setDataRec] = useState(new Date().toISOString().substring(0, 10));
+  const [dataRec, setDataRec] = useState(today());
 
   useEffect(() => {
     if (isOpen) {
       setApontador('');
-      setDataRec(new Date().toISOString().substring(0, 10));
+      setDataRec(today());
     }
   }, [isOpen]);
 
@@ -27,14 +29,14 @@ export const ModalRecebimento: React.FC<Props> = ({ pedido, isOpen, onClose, onC
   };
 
   return (
-    <div className={`modal ${isOpen ? 'active' : ''}`}>
+    <Modal onClose={onClose}>
       <div className="modal-content">
         <div className="modal-header">
           <h3><i className="fa-solid fa-clipboard-check"></i> Registrar Recepção da Solicitação</h3>
-          <button className="modal-close" onClick={onClose}>&times;</button>
+          <button type="button" aria-label="Fechar janela" className="modal-close" onClick={onClose}>&times;</button>
         </div>
         <div className="modal-body">
-          <p>O Gestor do Almoxarifado Central irá confirmar o recebimento do pedido <strong>{pedido.numero_pbs}</strong>.</p>
+          <p>O administrador do almoxarifado irá confirmar o recebimento do pedido <strong>{pedido.numero_pbs}</strong>.</p>
           
           <form onSubmit={handleSubmit}>
             <div className="form-group margin-top-sm">
@@ -71,6 +73,6 @@ export const ModalRecebimento: React.FC<Props> = ({ pedido, isOpen, onClose, onC
           </form>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 };

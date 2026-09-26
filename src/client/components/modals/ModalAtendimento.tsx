@@ -1,3 +1,4 @@
+import { Modal } from '../Modal';
 import React, { useState, useEffect } from 'react';
 import { PedidoPBS, Material } from '../../types';
 
@@ -63,11 +64,11 @@ export const ModalAtendimento: React.FC<Props> = ({
   };
 
   return (
-    <div className={`modal ${isOpen ? 'active' : ''}`}>
+    <Modal onClose={onClose}>
       <div className="modal-content modal-lg">
         <div className="modal-header">
           <h3><i className="fa-solid fa-boxes-packing"></i> Conferência e Atendimento de Itens - {pedido.numero_pbs}</h3>
-          <button className="modal-close" onClick={onClose}>&times;</button>
+          <button type="button" aria-label="Fechar janela" className="modal-close" onClick={onClose}>&times;</button>
         </div>
         <div className="modal-body">
           <p>Informe a quantidade efetivamente atendida/entregue para cada item solicitado.</p>
@@ -92,7 +93,7 @@ export const ModalAtendimento: React.FC<Props> = ({
                     const un = mat ? mat.unidade_medida : 'un';
                     const estAtual = mat ? (mat.qtd_estoque ?? 0) : 0;
                     const qtdAtend = qtds[it.id] ?? (it.qtd_atendida || 0);
-                    const estMax = estAtual + (it.qtd_atendida || 0);
+                    const estMax = Math.min(it.qtd_pedida, estAtual + (it.qtd_atendida || 0));
 
                     let badgeEstoque = <span className="badge badge-emerald"><i className="fa-solid fa-boxes-stacked"></i> {estAtual} {un}</span>;
                     if (estAtual === 0) {
@@ -110,6 +111,7 @@ export const ModalAtendimento: React.FC<Props> = ({
                         <td>{badgeEstoque}</td>
                         <td>
                           <input 
+                            aria-label={`Quantidade atendida: ${desc}`}
                             type="number" 
                             min="0" 
                             max={estMax} 
@@ -135,6 +137,6 @@ export const ModalAtendimento: React.FC<Props> = ({
           </form>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 };

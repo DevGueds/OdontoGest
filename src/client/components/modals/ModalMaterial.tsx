@@ -1,3 +1,4 @@
+import { Modal } from '../Modal';
 import React, { useState } from 'react';
 import { NaturezaDespesa } from '../../types';
 
@@ -33,11 +34,11 @@ export const ModalMaterial: React.FC<Props> = ({ isOpen, onClose, onConfirm }) =
   };
 
   return (
-    <div className={`modal ${isOpen ? 'active' : ''}`}>
+    <Modal onClose={onClose}>
       <div className="modal-content">
         <div className="modal-header">
-          <h3><i className="fa-solid fa-box"></i> Cadastrar Novo Material (Gestor)</h3>
-          <button className="modal-close" onClick={onClose}>&times;</button>
+          <h3><i className="fa-solid fa-box"></i> Cadastrar novo material</h3>
+          <button type="button" aria-label="Fechar janela" className="modal-close" onClick={onClose}>&times;</button>
         </div>
         <div className="modal-body">
           <form onSubmit={handleSubmit}>
@@ -54,7 +55,7 @@ export const ModalMaterial: React.FC<Props> = ({ isOpen, onClose, onConfirm }) =
               />
             </div>
             <div className="form-group margin-top-sm">
-              <label htmlFor="mat_fornecedor">Fornecedor / Distribuidor (Visível apenas ao Gestor)</label>
+              <label htmlFor="mat_fornecedor">Fornecedor / Distribuidor</label>
               <input 
                 type="text" 
                 id="mat_fornecedor" 
@@ -64,7 +65,7 @@ export const ModalMaterial: React.FC<Props> = ({ isOpen, onClose, onConfirm }) =
                 onChange={(e) => setFornecedor(e.target.value)}
               />
               <small className="text-muted" style={{ fontSize: '0.75rem' }}>
-                O fornecedor é visível para o Gestor. O solicitante verá apenas a descrição ("{desc || 'Luvas (P)'}").
+                Informe o fornecedor associado a este registro de estoque.
               </small>
             </div>
             <div className="form-group margin-top-sm">
@@ -118,7 +119,7 @@ export const ModalMaterial: React.FC<Props> = ({ isOpen, onClose, onConfirm }) =
             </div>
             <div className="form-group margin-top-sm">
               <label htmlFor="mat_limite_max">
-                <i className="fa-solid fa-hand-halved text-rose"></i> Limite Máximo por Pedido (Gestor)
+                <i className="fa-solid fa-hand-halved text-rose"></i> Limite máximo por pedido
               </label>
               <input 
                 type="number" 
@@ -140,6 +141,6 @@ export const ModalMaterial: React.FC<Props> = ({ isOpen, onClose, onConfirm }) =
           </form>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 };

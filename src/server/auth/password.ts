@@ -6,8 +6,8 @@ const derive = (password: string, salt: Buffer) => new Promise<Buffer>((resolve,
   scrypt(password, salt, 64, options, (error, key) => error ? reject(error) : resolve(key));
 });
 export function validatePassword(password: string) {
-  if (password.length < 12 || password.length > 128 || /^(.)\1+$/.test(password) || /^(123456|password|senha123)/i.test(password)) {
-    throw new AppError(400, 'Use uma senha de 12 a 128 caracteres, evitando sequências comuns.');
+  if (password.length < 8 || password.length > 128 || /^(.)\1+$/.test(password) || /^(123456|password|senha123)/i.test(password)) {
+    throw new AppError(400, 'Use uma senha de 8 a 128 caracteres, evitando sequências comuns.');
   }
 }
 export async function hashPassword(password: string) {

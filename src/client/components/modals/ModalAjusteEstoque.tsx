@@ -1,3 +1,4 @@
+import { Modal } from '../Modal';
 import React, { useState, useEffect } from 'react';
 import { Material } from '../../types';
 
@@ -25,11 +26,11 @@ export const ModalAjusteEstoque: React.FC<Props> = ({ material, isOpen, onClose,
   };
 
   return (
-    <div className={`modal ${isOpen ? 'active' : ''}`}>
+    <Modal onClose={onClose}>
       <div className="modal-content">
         <div className="modal-header">
           <h3><i className="fa-solid fa-boxes-stacked"></i> Ajustar / Repor Estoque</h3>
-          <button className="modal-close" onClick={onClose}>&times;</button>
+          <button type="button" aria-label="Fechar janela" className="modal-close" onClick={onClose}>&times;</button>
         </div>
         <div className="modal-body">
           <p>Altere a quantidade total disponível em estoque para <strong>{material.descricao}</strong>.</p>
@@ -55,6 +56,6 @@ export const ModalAjusteEstoque: React.FC<Props> = ({ material, isOpen, onClose,
           </form>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 };

@@ -16,7 +16,7 @@ try {
     return result;
   });
   const json = JSON.stringify(snapshot, (_key, value) => typeof value === 'bigint' ? value.toString() : value);
-  const encrypted = execFileSync('powershell.exe', ['-NoProfile', '-Command', "Add-Type -AssemblyName System.Security; $backupBytes = [Text.Encoding]::UTF8.GetBytes([Console]::In.ReadToEnd()); [Convert]::ToBase64String([Security.Cryptography.ProtectedData]::Protect($backupBytes, $null, [Security.Cryptography.DataProtectionScope]::CurrentUser))"], { input: json, encoding: 'utf8', maxBuffer: 50 * 1024 * 1024 });
+  const encrypted = execFileSync('powershell.exe', ['-NoProfile', '-Command', "Add-Type -AssemblyName System.Security; $backupBytes = [Convert]::FromBase64String([Console]::In.ReadToEnd().Trim()); [Convert]::ToBase64String([Security.Cryptography.ProtectedData]::Protect($backupBytes, $null, [Security.Cryptography.DataProtectionScope]::CurrentUser))"], { input: Buffer.from(json, 'utf8').toString('base64'), encoding: 'utf8', maxBuffer: 50 * 1024 * 1024 });
   mkdirSync('.local', { recursive: true });
   const file = `.local/backup-${new Date().toISOString().replace(/[:.]/g, '-')}.dpapi`;
   writeFileSync(file, encrypted.trim());

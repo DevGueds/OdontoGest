@@ -6,6 +6,7 @@ import { RequestCache } from '../src/client/services/requestCache.js';
 import { escapeHtml, csvText } from '../src/client/services/exportSafety.js';
 import { sqlValue } from '../src/server/data/export.js';
 import { schemas } from '../src/server/validation.js';
+import { today, formatDateBr } from '../src/shared/dates.js';
 
 test('passwords use salted scrypt, reject wrong/legacy/malformed values', async () => {
   const password = 'Teste seguro 123!';
@@ -48,9 +49,20 @@ test('HTML, CSV and SQL export escape hostile user input', () => {
   assert.match(sql, /^CONVERT\(X'[a-f0-9]+' USING utf8mb4\)$/);
 });
 test('validation rejects coercion, mass assignment, invalid dates and negative quantities', () => {
+  assert.doesNotThrow(() => validatePassword('Dente@42'));
+  assert.throws(() => validatePassword('Dente@4'));
+  assert.equal(schemas.password.safeParse({ senha_atual: 'antiga', nova_senha: 'Dente@42' }).success, true);
+  assert.equal(schemas.password.safeParse({ senha_atual: 'antiga', nova_senha: 'Dente@4' }).success, false);
+  assert.equal(schemas.user.partial().safeParse({ senha: 'Dente@42' }).success, true);
   assert.equal(schemas.login.safeParse({ email: 'x@y.com', senha: { $ne: null } }).success, false);
   assert.equal(schemas.material.safeParse({ descricao: 'A', unidade_medida: 'UN', qtd_estoque: -1 }).success, false);
   assert.equal(schemas.material.safeParse({ descricao: 'A', unidade_medida: 'UN', qtd_estoque: '5' }).success, false);
   assert.equal(schemas.equipamento.safeParse({ unidade_id: 1, nome: 'A', numero_serie: 'X', data_ultima_preventiva: '2026-02-30' }).success, false);
   assert.equal(schemas.user.partial().safeParse({ senhaHash: 'attack', id: 1 }).success, false);
+});
+test('calendar dates do not shift a day and defaults use São Paulo time', () => {
+  assert.equal(formatDateBr('2026-09-23'), '23/09/2026');
+  assert.equal(today(new Date('2026-10-01T01:00:00Z')), '2026-09-30');
+  assert.equal(today(new Date('2026-10-01T04:00:00Z')), '2026-10-01');
+  assert.equal(formatDateBr('invalid'), 'N/D');
 });

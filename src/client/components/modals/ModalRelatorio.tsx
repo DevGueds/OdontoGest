@@ -1,3 +1,5 @@
+import { Modal } from '../Modal';
+import { today } from '../../../shared/dates';
 import { escapeHtml, csvText } from '../../services/exportSafety';
 import React, { useState, useMemo } from 'react';
 import { 
@@ -47,7 +49,7 @@ export const ModalRelatorio: React.FC<Props> = ({
     const setMeses = new Set<string>();
     
     // Default current month
-    const mesAtual = new Date().toISOString().substring(0, 7);
+    const mesAtual = today().slice(0, 7);
     setMeses.add(mesAtual);
 
     pedidos.forEach(p => {
@@ -181,7 +183,7 @@ export const ModalRelatorio: React.FC<Props> = ({
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `Relatorio_${tipoRelatorio}_${mesFiltro}_${new Date().toISOString().substring(0, 10)}.csv`;
+    link.download = `Relatorio_${tipoRelatorio}_${mesFiltro}_${today()}.csv`;
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -428,13 +430,13 @@ export const ModalRelatorio: React.FC<Props> = ({
   };
 
   return (
-    <div className="modal active">
+    <Modal onClose={onClose}>
       <div className="modal-content" style={{ maxWidth: '640px' }}>
         <div className="modal-header">
           <h3>
             <i className="fa-solid fa-file-export text-primary"></i> Exportar Relatórios (PDF & Excel)
           </h3>
-          <button className="modal-close" onClick={onClose}>&times;</button>
+          <button type="button" aria-label="Fechar janela" className="modal-close" onClick={onClose}>&times;</button>
         </div>
 
         <div className="modal-body">
@@ -527,6 +529,6 @@ export const ModalRelatorio: React.FC<Props> = ({
           </form>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 };

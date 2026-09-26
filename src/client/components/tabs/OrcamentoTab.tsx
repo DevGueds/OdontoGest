@@ -1,3 +1,4 @@
+import { today } from '../../../shared/dates';
 import React, { useState } from 'react';
 import { 
   UnidadeSaude, 
@@ -45,8 +46,8 @@ export const OrcamentoTab: React.FC<Props> = ({
   const [natureza, setNatureza] = useState<NaturezaDespesa>('CUSTEIO');
   const [tipoRecorrencia, setTipoRecorrencia] = useState<TipoRecorrencia>('RECORRENTE');
   const [unidadeId, setUnidadeId] = useState<string>('');
-  const [dataCredito, setDataCredito] = useState(new Date().toISOString().substring(0, 10));
-  const [mesReferencia, setMesReferencia] = useState(new Date().toISOString().substring(0, 7));
+  const [dataCredito, setDataCredito] = useState(today());
+  const [mesReferencia, setMesReferencia] = useState(today().slice(0, 7));
   const [observacoes, setObservacoes] = useState('');
 
   const [filtroNatureza, setFiltroNatureza] = useState<'TODOS' | NaturezaDespesa>('TODOS');
@@ -91,9 +92,9 @@ export const OrcamentoTab: React.FC<Props> = ({
         </div>
 
         <div className="card-body">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.2rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '1.2rem' }}>
             {/* Card Custeio */}
-            <div style={{ background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '1.2rem' }}>
+            <div className="budget-summary" style={{ background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '1.2rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
                 <strong style={{ color: 'var(--primary)', fontSize: '1.05rem' }}>
                   💳 FLUXO DE RECURSOS DE CUSTEIO
@@ -122,7 +123,7 @@ export const OrcamentoTab: React.FC<Props> = ({
             </div>
 
             {/* Card Investimento */}
-            <div style={{ background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '1.2rem' }}>
+            <div className="budget-summary" style={{ background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '1.2rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
                 <strong style={{ color: 'var(--purple)', fontSize: '1.05rem' }}>
                   🏗️ FLUXO DE RECURSOS DE INVESTIMENTO
@@ -161,7 +162,7 @@ export const OrcamentoTab: React.FC<Props> = ({
           </div>
           <div className="card-body">
             <form onSubmit={handleSubmit}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: '1rem' }}>
               <div className="form-group">
                 <label htmlFor="ent_descricao">Descrição do Aporte / Repasse *</label>
                 <input 
@@ -290,6 +291,7 @@ export const OrcamentoTab: React.FC<Props> = ({
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b' }}>Filtrar Natureza:</span>
             <select 
+              aria-label="Filtrar aportes por natureza"
               className="form-control" 
               style={{ width: 'auto', padding: '4px 10px', fontSize: '0.85rem' }}
               value={filtroNatureza}

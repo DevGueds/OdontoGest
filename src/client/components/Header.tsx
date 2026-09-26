@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import { ChangePassword } from './ChangePassword';
 import { PrivacyNotice } from './PrivacyNotice';
 import { PerfilUsuario } from '../types';
@@ -13,9 +13,17 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ perfilAtual, onExportarSQL, onAbrirModalRelatorios }) => {
   const { user, logout } = useAuth();
   const [passwordOpen, setPasswordOpen] = useState(false);
+  const [toolsOpen, setToolsOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+  useLayoutEffect(() => {
+    const header = headerRef.current!;
+    const observer = new ResizeObserver(() => document.documentElement.style.setProperty('--header-height', `${header.getBoundingClientRect().height}px`));
+    observer.observe(header);
+    return () => { observer.disconnect(); document.documentElement.style.removeProperty('--header-height'); };
+  }, []);
 
   return (
-    <header className="app-header">
+    <header className="app-header" ref={headerRef}>
       {passwordOpen && <ChangePassword onClose={() => setPasswordOpen(false)} />}
       <div className="header-container">
         <div className="brand">
@@ -28,9 +36,12 @@ export const Header: React.FC<HeaderProps> = ({ perfilAtual, onExportarSQL, onAb
           </div>
         </div>
 
-        <div className="header-controls" style={{ gap: '0.85rem' }}>
+        <button type="button" className="btn btn-secondary btn-sm header-menu-toggle" aria-expanded={toolsOpen} aria-controls="header-tools" onClick={() => setToolsOpen(open => !open)}>
+          <i className="fa-solid fa-ellipsis" aria-hidden="true" /> Opções
+        </button>
+        <div id="header-tools" className={`header-controls ${toolsOpen ? 'is-open' : ''}`} style={{ gap: '0.85rem' }}>
           {/* User Profile Badge Pill */}
-          <div style={{
+          <div className="user-profile" style={{
             background: 'rgba(255, 255, 255, 0.12)',
             backdropFilter: 'blur(8px)',
             border: '1px solid rgba(255, 255, 255, 0.2)',
@@ -55,7 +66,7 @@ export const Header: React.FC<HeaderProps> = ({ perfilAtual, onExportarSQL, onAb
               {user?.nome ? user.nome.charAt(0).toUpperCase() : 'U'}
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
+            <div className="user-profile-text" style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
               <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#fff' }}>
                 {user?.nome || 'Usuário'}
               </span>
@@ -91,7 +102,7 @@ export const Header: React.FC<HeaderProps> = ({ perfilAtual, onExportarSQL, onAb
             <button 
               className="btn btn-secondary btn-sm" 
               onClick={onExportarSQL} 
-              title="Exportar DUMP MySQL"
+              title="Exportar dados operacionais em SQL"
               style={{ borderRadius: '9999px', padding: '0.45rem 0.9rem', fontSize: '0.8rem' }}
             >
               <i className="fa-solid fa-database"></i> Exportar SQL

@@ -1,3 +1,5 @@
+import { Modal } from '../Modal';
+import { today, formatDateBr } from '../../../shared/dates';
 import React, { useState, useEffect } from 'react';
 import { 
   UnidadeSaude, 
@@ -78,7 +80,7 @@ export const EquipamentosTab: React.FC<Props> = ({
   const [chDescricaoDefeito, setChDescricaoDefeito] = useState('');
   const [chCustoReparo, setChCustoReparo] = useState('');
   const [chStatus, setChStatus] = useState<StatusChamado>('ABERTO');
-  const [chDataAbertura, setChDataAbertura] = useState(new Date().toISOString().substring(0, 10));
+  const [chDataAbertura, setChDataAbertura] = useState(today());
 
   // Edit status modal
   const [chamadoEmEdicao, setChamadoEmEdicao] = useState<ChamadoManutencao | null>(null);
@@ -184,6 +186,7 @@ export const EquipamentosTab: React.FC<Props> = ({
     setChDescricaoDefeito('');
     setChCustoReparo('');
     setModalChamadoOpen(false);
+    setModalPreventivaOpen(false);
   };
 
   const handleAbrirAgendamentoPreventiva = (eq: Equipamento) => {
@@ -255,6 +258,7 @@ export const EquipamentosTab: React.FC<Props> = ({
 
                   <button 
                     className="btn btn-outline btn-sm"
+                    disabled={isGestor || isTecnico}
                     style={{ borderColor: 'var(--cyan)', color: 'var(--cyan)', fontSize: '0.75rem', padding: '0.2rem 0.6rem' }}
                     onClick={() => handleAbrirAgendamentoPreventiva(item.equipamento)}
                   >
@@ -298,8 +302,9 @@ export const EquipamentosTab: React.FC<Props> = ({
           {/* Filtros */}
           <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.2rem', flexWrap: 'wrap' }}>
             <div style={{ minWidth: '220px' }}>
-              <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '0.3rem' }}>Filtrar por Unidade:</label>
+              <label htmlFor="equipamentos-unidade" style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '0.3rem' }}>Filtrar por Unidade:</label>
               <select 
+                id="equipamentos-unidade"
                 className="form-control"
                 value={isSolicitante && user?.unidade_id ? user.unidade_id : unidadeFiltro}
                 onChange={e => {
@@ -324,8 +329,9 @@ export const EquipamentosTab: React.FC<Props> = ({
             </div>
 
             <div style={{ minWidth: '240px' }}>
-              <label style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '0.3rem' }}>Filtrar por Equipamento:</label>
+              <label htmlFor="equipamentos-filtro" style={{ fontSize: '0.85rem', fontWeight: 600, display: 'block', marginBottom: '0.3rem' }}>Filtrar por Equipamento:</label>
               <select 
+                id="equipamentos-filtro"
                 className="form-control"
                 value={equipamentoSelecionadoId}
                 onChange={e => setEquipamentoSelecionadoId(e.target.value === 'TODOS' ? 'TODOS' : Number(e.target.value))}
@@ -370,7 +376,7 @@ export const EquipamentosTab: React.FC<Props> = ({
                               <td><strong>{uni ? uni.nome : `Unidade #${eq.unidade_id}`}</strong></td>
                               <td><strong>{eq.nome}</strong></td>
                               <td><span className="badge badge-secondary">{eq.numero_serie || 'Sem Patrimônio'}</span></td>
-                              <td>{eq.data_ultima_preventiva || 'Não registrada'}</td>
+                              <td>{eq.data_ultima_preventiva ? formatDateBr(eq.data_ultima_preventiva) : 'Não registrada'}</td>
                               <td>
                                 {chamadosAbertosEq.length > 0 ? (
                                   <span className="badge badge-rose"><i className="fa-solid fa-wrench"></i> Chamado Ativo</span>
@@ -453,7 +459,7 @@ export const EquipamentosTab: React.FC<Props> = ({
                                 </span>
                               </td>
                               <td>{ch.descricao_defeito}</td>
-                              <td>{ch.data_abertura}</td>
+                              <td>{formatDateBr(ch.data_abertura)}</td>
                               {!isSolicitante && <td style={{ fontWeight: 700 }}>{formatarMoeda(ch.custo_reparo)}</td>}
                               <td>{renderBadgeStatus(ch.status)}</td>
                               <td>
@@ -483,7 +489,7 @@ export const EquipamentosTab: React.FC<Props> = ({
                                     className="btn btn-primary btn-sm"
                                     onClick={() => {
                                       setChamadoEmEdicao(ch);
-                                      setNovoStatus('EM_ANDAMENTO');
+                                      setNovoStatus(ch.status === 'APROVADO_ADM' ? 'EM_ANDAMENTO' : 'CONCLUIDO');
                                       setNovoCusto(String(ch.custo_reparo || ''));
                                     }}
                                   >
@@ -495,7 +501,7 @@ export const EquipamentosTab: React.FC<Props> = ({
                                   <span className="text-muted text-sm"><i className="fa-solid fa-check"></i> Reparo Finalizado</span>
                                 )}
 
-                                {isAdmin && ch.status !== 'CONCLUIDO' && (
+                                {isGestor && ch.status !== 'CONCLUIDO' && (
                                   <span className="text-muted text-sm"><i className="fa-solid fa-lock"></i> Somente Leitura</span>
                                 )}
                               </td>
@@ -528,11 +534,11 @@ export const EquipamentosTab: React.FC<Props> = ({
 
       {/* Modal Novo Equipamento */}
       {modalEquipamentoOpen && (
-        <div className="modal active">
+        <Modal onClose={() => setModalEquipamentoOpen(false)}>
           <div className="modal-content">
             <div className="modal-header">
               <h3><i className="fa-solid fa-tooth"></i> Cadastrar Novo Equipamento</h3>
-              <button className="modal-close" onClick={() => setModalEquipamentoOpen(false)}>&times;</button>
+              <button type="button" aria-label="Fechar janela" className="modal-close" onClick={() => setModalEquipamentoOpen(false)}>&times;</button>
             </div>
             <div className="modal-body">
               <form onSubmit={handleSubmitEquipamento}>
@@ -590,16 +596,16 @@ export const EquipamentosTab: React.FC<Props> = ({
               </form>
             </div>
           </div>
-        </div>
+        </Modal>
       )}
 
       {/* Modal Editar Equipamento */}
       {modalEditEquipamentoOpen && equipamentoEdicao && (
-        <div className="modal active">
+        <Modal onClose={() => setModalEditEquipamentoOpen(false)}>
           <div className="modal-content">
             <div className="modal-header">
               <h3><i className="fa-solid fa-pen-to-square text-primary"></i> Editar Equipamento #{equipamentoEdicao.id}</h3>
-              <button className="modal-close" onClick={() => setModalEditEquipamentoOpen(false)}>&times;</button>
+              <button type="button" aria-label="Fechar janela" className="modal-close" onClick={() => setModalEditEquipamentoOpen(false)}>&times;</button>
             </div>
             <div className="modal-body">
               <form onSubmit={handleConfirmarEdicaoEquipamento}>
@@ -659,19 +665,19 @@ export const EquipamentosTab: React.FC<Props> = ({
               </form>
             </div>
           </div>
-        </div>
+        </Modal>
       )}
 
       {/* Modal Abrir Chamado de Reparo / Manutenção */}
       {(modalChamadoOpen || modalPreventivaOpen) && (
-        <div className="modal active">
+        <Modal onClose={() => { setModalChamadoOpen(false); setModalPreventivaOpen(false); }}>
           <div className="modal-content">
             <div className="modal-header">
               <h3>
                 <i className={`fa-solid ${chTipo === 'PREVENTIVA' ? 'fa-calendar-check text-cyan' : 'fa-triangle-exclamation text-rose'}`}></i>{' '}
                 {chTipo === 'PREVENTIVA' ? 'Agendar Checagem / Manutenção Preventiva' : 'Abrir Chamado de Reparo (Manutenção Corretiva)'}
               </h3>
-              <button className="modal-close" onClick={() => { setModalChamadoOpen(false); setModalPreventivaOpen(false); }}>&times;</button>
+              <button type="button" aria-label="Fechar janela" className="modal-close" onClick={() => { setModalChamadoOpen(false); setModalPreventivaOpen(false); }}>&times;</button>
             </div>
             <div className="modal-body">
               <form onSubmit={handleSubmitChamado}>
@@ -754,16 +760,16 @@ export const EquipamentosTab: React.FC<Props> = ({
               </form>
             </div>
           </div>
-        </div>
+        </Modal>
       )}
 
       {/* Modal Atualizar Status do Chamado */}
       {chamadoEmEdicao && (
-        <div className="modal active">
+        <Modal onClose={() => setChamadoEmEdicao(null)}>
           <div className="modal-content">
             <div className="modal-header">
               <h3><i className="fa-solid fa-pen"></i> Atualizar Status do Chamado #{chamadoEmEdicao.id}</h3>
-              <button className="modal-close" onClick={() => setChamadoEmEdicao(null)}>&times;</button>
+              <button type="button" aria-label="Fechar janela" className="modal-close" onClick={() => setChamadoEmEdicao(null)}>&times;</button>
             </div>
             <div className="modal-body">
               <form onSubmit={async (e) => {
@@ -779,9 +785,9 @@ export const EquipamentosTab: React.FC<Props> = ({
                     onChange={e => setNovoStatus(e.target.value as StatusChamado)}
                     required
                   >
-                    <option value="ABERTO">Aberto (Aguardando Atendimento)</option>
-                    <option value="EM_ANDAMENTO">Em Andamento (Com Técnico/Oficina)</option>
-                    <option value="CONCLUIDO">Concluído (Reparo Finalizado)</option>
+                    {chamadoEmEdicao.status === 'APROVADO_ADM'
+                      ? <option value="EM_ANDAMENTO">Em Andamento (Com Técnico/Oficina)</option>
+                      : <option value="CONCLUIDO">Concluído (Reparo Finalizado)</option>}
                   </select>
                 </div>
 
@@ -804,7 +810,7 @@ export const EquipamentosTab: React.FC<Props> = ({
               </form>
             </div>
           </div>
-        </div>
+        </Modal>
       )}
     </div>
   );

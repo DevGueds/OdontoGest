@@ -120,7 +120,7 @@ class ApiService {
     descricao: string, 
     unidade_medida: string, 
     valor_estimado: number = 0, 
-    qtd_estoque: number = 100,
+    qtd_estoque: number = 0,
     limite_max_pedido: number | null = null,
     fornecedor: string | null = null,
     natureza: NaturezaDespesa = 'CUSTEIO',
@@ -283,9 +283,10 @@ class ApiService {
   }
 
   async addHonorario(dados: Omit<HonorarioOdontologo, 'id'>, csrfToken?: string | null): Promise<HonorarioOdontologo> {
+    const { valor_total: _totalCalculadoPeloServidor, ...input } = dados;
     return this.request<HonorarioOdontologo>('/api/honorarios', {
       method: 'POST',
-      body: JSON.stringify(dados)
+      body: JSON.stringify(input)
     }, csrfToken);
   }
 

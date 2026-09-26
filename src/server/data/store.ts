@@ -2,6 +2,7 @@ import { Prisma, type Material, type UnidadeSaude, type HonorarioOdontologo, typ
 import { prisma } from '../db/prisma.js';
 import { AppError } from '../errors.js';
 import type { Input } from '../validation.js';
+import { today } from '../../shared/dates.js';
 
 const day = (d: Date | null) => d?.toISOString().slice(0, 10) ?? null;
 export const mapUnidade = (u: UnidadeSaude) => ({ id: u.id, nome: u.nome, tipo: u.tipo, orcamento_custeio: Number(u.orcamentoCusteio), orcamento_investimento: Number(u.orcamentoInvestimento), criado_em: u.criadoEm.toISOString() });
@@ -152,7 +153,7 @@ export class DataStore {
       await tx.$queryRaw`SELECT id FROM chamados_manutencao WHERE id = ${id} FOR UPDATE`;
       const c = await tx.chamadoManutencao.findUniqueOrThrow({ where: { id } });
       expectStatus(c.status, d.status === 'EM_ANDAMENTO' ? ['APROVADO_ADM'] : ['EM_ANDAMENTO']);
-      const now = new Date();
+      const now = new Date(today());
       if (d.status === 'CONCLUIDO' && c.tipo === 'PREVENTIVA') await tx.equipamento.update({ where: { id: c.equipamentoId }, data: { dataUltimaPreventiva: now } });
       return mapChamado(await tx.chamadoManutencao.update({ where: { id }, data: { status: d.status, custoReparo: d.custo_reparo, ...(d.status === 'CONCLUIDO' ? { dataConclusao: now } : {}) } }));
     });

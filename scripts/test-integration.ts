@@ -18,7 +18,8 @@ try {
   const env = { ...process.env, DATABASE_URL: url.toString(), NODE_ENV: 'test', COOKIE_SECRET: randomBytes(48).toString('hex'), APP_ORIGINS: 'http://localhost:3000,http://127.0.0.1:3417', TEST_DATABASE: database };
   const migration = spawnSync(process.execPath, ['node_modules/prisma/build/index.js', 'migrate', 'deploy'], { env, stdio: 'inherit' });
   if (migration.status !== 0) throw new Error('Falha ao preparar o banco isolado.');
-  const result = spawnSync(process.execPath, ['--import', 'tsx', '--test', '--test-concurrency=1', 'tests/integration/api.integration.ts'], { env, stdio: 'inherit' });
+  const testFile = process.argv.includes('--frontend') ? 'tests/integration/frontend.integration.ts' : 'tests/integration/api.integration.ts';
+  const result = spawnSync(process.execPath, ['--import', 'tsx', '--test', '--test-concurrency=1', testFile], { env, stdio: 'inherit' });
   process.exitCode = result.status ?? 1;
 } finally {
   if (created) await admin.$executeRawUnsafe(`DROP DATABASE \`${database}\``);

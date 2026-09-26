@@ -1,3 +1,4 @@
+import { Modal } from '../Modal';
 import React, { useState, useEffect } from 'react';
 import { UnidadeSaude } from '../../types';
 
@@ -26,11 +27,11 @@ export const ModalEditarUnidade: React.FC<Props> = ({ unidade, isOpen, onClose, 
   };
 
   return (
-    <div className={`modal ${isOpen ? 'active' : ''}`}>
+    <Modal onClose={onClose}>
       <div className="modal-content">
         <div className="modal-header">
           <h3><i className="fa-solid fa-pen-to-square"></i> Editar Nome do Estabelecimento de Saúde</h3>
-          <button className="modal-close" onClick={onClose}>&times;</button>
+          <button type="button" aria-label="Fechar janela" className="modal-close" onClick={onClose}>&times;</button>
         </div>
         <div className="modal-body">
           <form onSubmit={handleSubmit}>
@@ -55,6 +56,6 @@ export const ModalEditarUnidade: React.FC<Props> = ({ unidade, isOpen, onClose, 
           </form>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 };

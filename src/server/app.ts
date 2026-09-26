@@ -165,9 +165,9 @@ export async function buildApp(options: { logger?: boolean } = {}) {
     if (scope !== undefined && d.unidade_emitente_id !== scope) throw new AppError(403, 'Pedido fora da unidade permitida.');
     return dataStore.salvarPedido({ ...d, responsavel_nome: req.user!.nome, responsavel_funcao: req.user!.funcao, responsavel_registro: req.user!.registro });
   });
-  write('PUT', '/api/pedidos/:id/receber', admin, req => dataStore.confirmarRecebimento(routeId(req), { ...schemas.receber.parse(req.body), apontador_recebimento_nome: req.user!.nome }));
+  write('PUT', '/api/pedidos/:id/receber', admin, req => dataStore.confirmarRecebimento(routeId(req), schemas.receber.parse(req.body)));
   write('PUT', '/api/pedidos/:id/atender', admin, req => dataStore.atenderPedido(routeId(req), schemas.atender.parse(req.body).itensAtendidos));
-  write('PUT', '/api/pedidos/:id/enviar', admin, req => dataStore.confirmarEnvio(routeId(req), { ...schemas.enviar.parse(req.body), apontador_envio_nome: req.user!.nome }));
+  write('PUT', '/api/pedidos/:id/enviar', admin, req => dataStore.confirmarEnvio(routeId(req), schemas.enviar.parse(req.body)));
   write('PUT', '/api/pedidos/:id/cancelar', ['ADMINISTRADOR', 'SOLICITANTE'], req => dataStore.cancelarPedido(routeId(req), unitScope(req)));
   write('POST', '/api/honorarios', admin, req => dataStore.addHonorario(schemas.honorario.parse(req.body)));
   write('POST', '/api/equipamentos', admin, req => dataStore.addEquipamento(schemas.equipamento.parse(req.body)));
@@ -186,7 +186,7 @@ export async function buildApp(options: { logger?: boolean } = {}) {
     reply.type('text/sql; charset=utf-8').header('Content-Disposition', 'attachment; filename="odontogest-operacional.sql"'); return exportSql();
   });
   const staticPath = path.resolve('dist/public');
-  if (existsSync(staticPath)) await app.register(staticFiles, { root: staticPath, prefix: '/', setHeaders: (reply, filePath) => { reply.header('Cache-Control', filePath.includes(`${path.sep}assets${path.sep}`) ? 'public, max-age=31536000, immutable' : 'no-cache'); } });
+  if (existsSync(staticPath)) await app.register(staticFiles, { root: staticPath, prefix: '/', preCompressed: true, setHeaders: (reply, filePath) => { reply.header('Cache-Control', /[\\/]assets[\\/]/.test(filePath) ? 'public, max-age=31536000, immutable' : 'no-cache'); } });
   app.setNotFoundHandler((req, reply) => {
     if (!req.url.startsWith('/api') && req.method === 'GET' && existsSync(path.join(staticPath, 'index.html'))) return reply.header('Cache-Control', 'no-cache').sendFile('index.html');
     return reply.code(404).send({ error: 'Página ou endpoint não encontrado.' });

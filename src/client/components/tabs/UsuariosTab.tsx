@@ -1,3 +1,4 @@
+import { Modal } from '../Modal';
 import React, { useState } from 'react';
 import { UnidadeSaude, UserSistema, PerfilUsuario } from '../../types';
 import { useSortableData } from '../../hooks/useSortableData';
@@ -111,7 +112,7 @@ export const UsuariosTab: React.FC<Props> = ({
       <div className="card">
         <div className="card-header flex-between" style={{ flexWrap: 'wrap', gap: '1rem' }}>
           <div>
-            <h3><i className="fa-solid fa-users-gear text-primary"></i> Gestão de Usuários & Controle de Acesso (RBAC)</h3>
+            <h3><i className="fa-solid fa-users-gear text-primary"></i> Usuários e permissões de acesso</h3>
             <p className="text-muted text-sm">
               Cadastre e gerencie usuários vinculando-os às Unidades de Saúde do banco de dados, CRO/Registro e Perfil de permissões.
             </p>
@@ -202,14 +203,14 @@ export const UsuariosTab: React.FC<Props> = ({
 
       {/* Modal Novo/Editar Usuário */}
       {modalOpen && (
-        <div className="modal active">
+        <Modal onClose={() => setModalOpen(false)}>
           <div className="modal-content">
             <div className="modal-header">
               <h3>
                 <i className={`fa-solid ${usuarioEdicao ? 'fa-pen-to-square' : 'fa-user-plus'}`}></i>{' '}
                 {usuarioEdicao ? 'Editar Usuário do Sistema' : 'Cadastrar Novo Usuário (Administrador)'}
               </h3>
-              <button className="modal-close" onClick={() => setModalOpen(false)}>&times;</button>
+              <button type="button" aria-label="Fechar janela" className="modal-close" onClick={() => setModalOpen(false)}>&times;</button>
             </div>
             <div className="modal-body">
               <form onSubmit={handleSubmit}>
@@ -226,7 +227,7 @@ export const UsuariosTab: React.FC<Props> = ({
                   />
                 </div>
 
-                <div className="form-grid margin-top-sm">
+                <div className="form-grid user-form-grid margin-top-sm">
                   <div className="form-group">
                     <label htmlFor="usr_email">E-mail Corporativo (Login) *</label>
                     <input
@@ -244,11 +245,10 @@ export const UsuariosTab: React.FC<Props> = ({
                     <label htmlFor="usr_senha">
                       {usuarioEdicao ? 'Nova Senha (deixe em branco p/ manter)' : 'Senha de Acesso *'}
                     </label>
-                    <small>Por segurança, senhas existentes não são exibidas.</small>
                     <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                       <input
                         type={showModalSenha ? 'text' : 'password'}
-                        id="usr_senha" minLength={12} maxLength={128} autoComplete="new-password"
+                        id="usr_senha" minLength={8} maxLength={128} autoComplete="new-password"
                         className="form-control"
                         placeholder={usuarioEdicao ? "•••••••• (ou digite a nova)" : "••••••••"}
                         value={senha}
@@ -274,10 +274,11 @@ export const UsuariosTab: React.FC<Props> = ({
                         <i className={`fa-solid ${showModalSenha ? 'fa-eye-slash' : 'fa-eye'}`}></i>
                       </button>
                     </div>
+                    <small className="form-hint">Mínimo de 8 caracteres. Senhas existentes não são exibidas.</small>
                   </div>
                 </div>
 
-                <div className="form-grid margin-top-sm">
+                <div className="form-grid user-form-grid margin-top-sm">
                   <div className="form-group">
                     <label htmlFor="usr_funcao">Cargo / Função do Usuário *</label>
                     <input
@@ -346,7 +347,7 @@ export const UsuariosTab: React.FC<Props> = ({
               </form>
             </div>
           </div>
-        </div>
+        </Modal>
       )}
     </div>
   );

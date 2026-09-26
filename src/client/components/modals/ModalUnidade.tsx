@@ -1,3 +1,4 @@
+import { Modal } from '../Modal';
 import React, { useState } from 'react';
 
 interface Props {
@@ -19,11 +20,11 @@ export const ModalUnidade: React.FC<Props> = ({ isOpen, onClose, onConfirm }) =>
   };
 
   return (
-    <div className={`modal ${isOpen ? 'active' : ''}`}>
+    <Modal onClose={onClose}>
       <div className="modal-content">
         <div className="modal-header">
-          <h3><i className="fa-solid fa-hospital"></i> Cadastrar Novo Estabelecimento de Saúde (Gestor)</h3>
-          <button className="modal-close" onClick={onClose}>&times;</button>
+          <h3><i className="fa-solid fa-hospital"></i> Cadastrar estabelecimento de saúde</h3>
+          <button type="button" aria-label="Fechar janela" className="modal-close" onClick={onClose}>&times;</button>
         </div>
         <div className="modal-body">
           <form onSubmit={handleSubmit}>
@@ -46,6 +47,6 @@ export const ModalUnidade: React.FC<Props> = ({ isOpen, onClose, onConfirm }) =>
           </form>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 };

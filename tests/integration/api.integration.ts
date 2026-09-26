@@ -56,6 +56,11 @@ test('credentials never leave the API, cookies are signed/HttpOnly, errors and c
   assert.equal((await request(clients.ADMINISTRADOR, 'GET', '/api/materiais?limit=99999')).statusCode, 400);
   const res = await app.inject({ url: '/api/auth/csrf' });
   assert.match(String(res.headers['set-cookie']), /HttpOnly/); assert.match(String(res.headers['set-cookie']), /SameSite=Strict/);
+  const index = await app.inject({ url: '/' });
+  const asset = index.body.match(/src="([^"]+\.js)"/)?.[1]; assert.ok(asset);
+  const compressed = await app.inject({ url: asset, headers: { 'accept-encoding': 'gzip' } });
+  assert.equal(compressed.headers['content-encoding'], 'gzip');
+  assert.match(String(compressed.headers['cache-control']), /immutable/);
 });
 test('role rules and CSRF protect direct API calls including login', async () => {
   for (const role of ['SOLICITANTE', 'TECNICO', 'GESTOR']) {
@@ -189,6 +194,21 @@ test('browser login, scoped UI, no external requests, cache and logout cleanup',
     assert.equal(await page.evaluate(() => (window as any).PWNED), undefined);
     const before = calls.length; await page.getByRole('button', { name: 'Dashboard & Indicadores' }).click(); await page.getByRole('button', { name: 'Materiais & Unidades' }).click();
     assert.equal(calls.length, before);
+    for (const tab of ['Usuários & Acessos', 'Honorários & Salários', 'Aportes & Orçamento', 'Equipamentos & Manutenção', 'Central de Atendimento']) {
+      await page.locator('.sidebar-nav').getByRole('button', { name: tab }).click();
+      await expect(page.locator('.app-main .card').first()).toBeVisible();
+    }
+    await page.locator('.sidebar-nav').getByRole('button', { name: 'Novo Pedido (PBS)' }).click();
+    await page.locator('tbody select').first().selectOption(String(materialId));
+    const selectedBefore = await page.locator('tbody select').first().inputValue();
+    await page.route('**/api/pedidos', async route => {
+      if (route.request().method() === 'POST') await route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ error: 'Falha de gravação simulada' }) });
+      else await route.continue();
+    });
+    await page.getByRole('button', { name: /Emitir Solicitação de PBS/ }).click();
+    await expect(page.getByText('Falha de gravação simulada')).toBeVisible();
+    assert.equal(await page.locator('tbody select').first().inputValue(), selectedBefore);
+    await page.unroute('**/api/pedidos');
     await page.getByTitle('Encerrar Sessão').click().catch(async e => { console.log((await page.locator('body').innerText()).slice(0, 1000)); throw e; });
     await expect(page.getByRole('button', { name: 'Entrar no Sistema' })).toBeVisible();
     assert.equal(await page.locator('body').innerText().then(t => t.includes('<img src=x')), false);
@@ -196,6 +216,7 @@ test('browser login, scoped UI, no external requests, cache and logout cleanup',
     await expect(page.getByRole('button', { name: 'Dashboard & Indicadores' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Usuários & Acessos' })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Novo Pedido (PBS)' })).toHaveCount(0);
+    await expect(page.getByTitle('Repor Estoque')).toHaveCount(0);
     assert.deepEqual(external, []); assert.deepEqual(errors, []);
     console.log(`Browser: ${calls.length} chamadas API no fluxo, nenhuma chamada externa; troca de abas sem requisições.`);
   } finally { await browser.close(); }

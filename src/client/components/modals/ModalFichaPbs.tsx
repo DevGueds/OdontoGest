@@ -1,3 +1,4 @@
+import { Modal } from '../Modal';
 import { escapeHtml, csvText } from '../../services/exportSafety';
 import React from 'react';
 import { PedidoPBS, UnidadeSaude, Material, PerfilUsuario } from '../../types';
@@ -25,7 +26,7 @@ export const ModalFichaPbs: React.FC<Props> = ({
 }) => {
   if (!isOpen || !pedido) return null;
 
-  const isGestor = perfilAtual === 'GESTOR';
+  const isGestor = perfilAtual === 'GESTOR' || perfilAtual === 'ADMINISTRADOR';
   const u = unidades.find(uni => uni.id === pedido.unidade_emitente_id);
   const nomeUnidade = u ? u.nome : `Unidade #${pedido.unidade_emitente_id}`;
 
@@ -209,7 +210,7 @@ export const ModalFichaPbs: React.FC<Props> = ({
   };
 
   return (
-    <div className={`modal ${isOpen ? 'active' : ''}`}>
+    <Modal onClose={onClose}>
       <div className="modal-content modal-xl print-container">
         <div className="modal-header no-print">
           <h3><i className="fa-solid fa-print"></i> Visualizador e Impressão de Ficha PBS</h3>
@@ -217,7 +218,7 @@ export const ModalFichaPbs: React.FC<Props> = ({
             <button className="btn btn-primary btn-sm" onClick={handlePrint}>
               <i className="fa-solid fa-print"></i> Imprimir/Gerar PDF
             </button>
-            <button className="modal-close" onClick={onClose}>&times;</button>
+            <button type="button" aria-label="Fechar janela" className="modal-close" onClick={onClose}>&times;</button>
           </div>
         </div>
 
@@ -323,6 +324,6 @@ export const ModalFichaPbs: React.FC<Props> = ({
           </div>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 };

@@ -1,3 +1,4 @@
+import { Modal } from './Modal';
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { PrivacyNotice } from './PrivacyNotice';
@@ -31,7 +32,7 @@ export const LoginModal: React.FC = () => {
   };
 
   return (
-    <div className="modal active" style={{ backgroundColor: 'rgba(15, 23, 42, 0.88)' }}>
+    <Modal className="auth-overlay">
       <div className="modal-content" style={{ maxWidth: '460px', borderRadius: 'var(--radius-lg)' }}>
         <div className="modal-header" style={{ background: 'linear-gradient(135deg, var(--primary), var(--cyan))', color: '#fff', padding: '1.25rem 1.5rem' }}>
           <h3 style={{ color: '#fff', fontSize: '1.2rem' }}>
@@ -45,7 +46,7 @@ export const LoginModal: React.FC = () => {
           </p>
 
           {errorMsg && (
-            <div style={{ background: 'var(--rose-light)', color: 'var(--rose)', padding: '0.65rem 0.9rem', borderRadius: 'var(--radius-md)', fontSize: '0.85rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div role="alert" className="notice notice-error margin-bottom-sm">
               <i className="fa-solid fa-triangle-exclamation"></i>
               <span>{errorMsg}</span>
             </div>
@@ -115,6 +116,6 @@ export const LoginModal: React.FC = () => {
           <div className="margin-top-md"><PrivacyNotice /></div>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 };

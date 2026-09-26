@@ -1,3 +1,5 @@
+import { Modal } from '../Modal';
+import { today } from '../../../shared/dates';
 import React, { useState } from 'react';
 import { UnidadeSaude, HonorarioOdontologo, PerfilUsuario } from '../../types';
 
@@ -26,7 +28,7 @@ export const HonorariosTab: React.FC<Props> = ({
   const [unidadeId, setUnidadeId] = useState<number>(unidades[0]?.id || 1);
   const [nomeDentista, setNomeDentista] = useState('');
   const [cro, setCro] = useState('');
-  const [mesReferencia, setMesReferencia] = useState(new Date().toISOString().substring(0, 7));
+  const [mesReferencia, setMesReferencia] = useState(today().slice(0, 7));
   const [valorFixo, setValorFixo] = useState('');
   const [valorComissao, setValorComissao] = useState('');
   const [observacoes, setObservacoes] = useState('');
@@ -130,8 +132,9 @@ export const HonorariosTab: React.FC<Props> = ({
           {/* Controls & Filter bar */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', gap: '1rem', flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', flexWrap: 'wrap' }}>
-              <label style={{ fontSize: '0.85rem', fontWeight: 600 }}>Filtrar por Unidade:</label>
+              <label htmlFor="honorarios-unidade" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Filtrar por Unidade:</label>
               <select 
+                id="honorarios-unidade"
                 className="form-control"
                 value={unidadeFiltro}
                 onChange={e => setUnidadeFiltro(e.target.value === 'TODAS' ? 'TODAS' : Number(e.target.value))}
@@ -146,6 +149,7 @@ export const HonorariosTab: React.FC<Props> = ({
 
             <div style={{ minWidth: '220px' }}>
               <input 
+                aria-label="Pesquisar honorários por dentista ou CRO"
                 type="text" 
                 className="form-control"
                 placeholder="🔍 Pesquisar por dentista ou CRO..."
@@ -215,11 +219,11 @@ export const HonorariosTab: React.FC<Props> = ({
 
       {/* Modal Registrar Honorário */}
       {modalOpen && (
-        <div className="modal active">
+        <Modal onClose={() => setModalOpen(false)}>
           <div className="modal-content">
             <div className="modal-header">
               <h3><i className="fa-solid fa-user-doctor"></i> Registrar Salário / Honorário de Odontólogo</h3>
-              <button className="modal-close" onClick={() => setModalOpen(false)}>&times;</button>
+              <button type="button" aria-label="Fechar janela" className="modal-close" onClick={() => setModalOpen(false)}>&times;</button>
             </div>
             <div className="modal-body">
               <form onSubmit={handleSubmit}>
@@ -314,7 +318,7 @@ export const HonorariosTab: React.FC<Props> = ({
               </form>
             </div>
           </div>
-        </div>
+        </Modal>
       )}
     </div>
   );

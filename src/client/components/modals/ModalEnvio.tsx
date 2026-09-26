@@ -1,3 +1,5 @@
+import { Modal } from '../Modal';
+import { today } from '../../../shared/dates';
 import React, { useState, useEffect } from 'react';
 import { PedidoPBS } from '../../types';
 
@@ -10,12 +12,12 @@ interface Props {
 
 export const ModalEnvio: React.FC<Props> = ({ pedido, isOpen, onClose, onConfirm }) => {
   const [apontador, setApontador] = useState('');
-  const [dataEnv, setDataEnv] = useState(new Date().toISOString().substring(0, 10));
+  const [dataEnv, setDataEnv] = useState(today());
 
   useEffect(() => {
     if (isOpen) {
       setApontador('');
-      setDataEnv(new Date().toISOString().substring(0, 10));
+      setDataEnv(today());
     }
   }, [isOpen]);
 
@@ -27,11 +29,11 @@ export const ModalEnvio: React.FC<Props> = ({ pedido, isOpen, onClose, onConfirm
   };
 
   return (
-    <div className={`modal ${isOpen ? 'active' : ''}`}>
+    <Modal onClose={onClose}>
       <div className="modal-content">
         <div className="modal-header">
           <h3><i className="fa-solid fa-truck-ramp-box"></i> Registrar Envio / Despacho dos Materiais</h3>
-          <button className="modal-close" onClick={onClose}>&times;</button>
+          <button type="button" aria-label="Fechar janela" className="modal-close" onClick={onClose}>&times;</button>
         </div>
         <div className="modal-body">
           <p>Confirmar que o pedido <strong>{pedido.numero_pbs}</strong> foi despachado para a USF.</p>
@@ -71,6 +73,6 @@ export const ModalEnvio: React.FC<Props> = ({ pedido, isOpen, onClose, onConfirm
           </form>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 };

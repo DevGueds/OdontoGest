@@ -4,7 +4,7 @@ if (existsSync('.env')) loadEnvFile('.env');
 export function getConfig() {
   const production = process.env.NODE_ENV === 'production';
   const secret = process.env.COOKIE_SECRET || '';
-  if (secret.length < 32 || secret === 'super-secret-key-pbs-saude-owasp-2026') throw new Error('Configure COOKIE_SECRET com pelo menos 32 caracteres aleatórios.');
+  if (secret.length < 32 || /^(.)\1+$/.test(secret) || secret.includes('GERE_UM_SEGREDO') || secret === 'super-secret-key-pbs-saude-owasp-2026') throw new Error('Configure COOKIE_SECRET com pelo menos 32 caracteres aleatórios.');
   const origins = (process.env.APP_ORIGINS || 'http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001').split(',').map(s => s.trim());
   if (production && (!process.env.APP_ORIGINS || origins.some(o => !o.startsWith('https://')))) throw new Error('Em produção, APP_ORIGINS deve conter somente origens HTTPS explícitas.');
   for (const origin of origins) if (new URL(origin).origin !== origin) throw new Error('APP_ORIGINS deve conter origens sem caminhos.');

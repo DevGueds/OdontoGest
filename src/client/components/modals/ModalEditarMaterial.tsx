@@ -1,3 +1,4 @@
+import { Modal } from '../Modal';
 import React, { useState, useEffect } from 'react';
 import { Material, NaturezaDespesa } from '../../types';
 
@@ -46,11 +47,11 @@ export const ModalEditarMaterial: React.FC<Props> = ({ material, isOpen, onClose
   };
 
   return (
-    <div className={`modal ${isOpen ? 'active' : ''}`}>
+    <Modal onClose={onClose}>
       <div className="modal-content">
         <div className="modal-header">
           <h3><i className="fa-solid fa-pen-to-square"></i> Editar Insumo & Configurar Limite de Pedido</h3>
-          <button className="modal-close" onClick={onClose}>&times;</button>
+          <button type="button" aria-label="Fechar janela" className="modal-close" onClick={onClose}>&times;</button>
         </div>
         <div className="modal-body">
           <form onSubmit={handleSubmit}>
@@ -66,7 +67,7 @@ export const ModalEditarMaterial: React.FC<Props> = ({ material, isOpen, onClose
               />
             </div>
             <div className="form-group margin-top-sm">
-              <label htmlFor="edit_mat_fornecedor">Fornecedor / Distribuidor (Visível apenas ao Gestor)</label>
+              <label htmlFor="edit_mat_fornecedor">Fornecedor / Distribuidor</label>
               <input 
                 type="text" 
                 id="edit_mat_fornecedor" 
@@ -127,7 +128,7 @@ export const ModalEditarMaterial: React.FC<Props> = ({ material, isOpen, onClose
             </div>
             <div className="form-group margin-top-sm">
               <label htmlFor="edit_mat_limite_max">
-                <i className="fa-solid fa-hand-halved text-rose"></i> Limite Máximo por Pedido (Gestor)
+                <i className="fa-solid fa-hand-halved text-rose"></i> Limite máximo por pedido
               </label>
               <input 
                 type="number" 
@@ -151,6 +152,6 @@ export const ModalEditarMaterial: React.FC<Props> = ({ material, isOpen, onClose
           </form>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 };

@@ -7,14 +7,17 @@
   "scripts": {
     "dev": "concurrently \"vite\" \"tsx watch src/server/server.ts\"",
     "db:migrate": "tsx scripts/db-cli.ts migrate deploy",
-    "build": "prisma generate && tsc && vite build",
+    "postinstall": "prisma generate",
+    "build": "tsc && vite build && tsx scripts/compress-assets.ts",
     "start": "tsx src/server/server.ts",
+    "start:local": "tsx scripts/serve-local.ts",
     "serve": "tsx src/server/server.ts",
     "prisma:generate": "prisma generate",
     "prisma:db-push": "tsx scripts/db-cli.ts db push",
     "typecheck": "tsc --noEmit",
     "test": "node --import tsx --test tests/*.test.ts",
     "test:integration": "tsx scripts/test-integration.ts",
+    "test:frontend": "tsx scripts/test-integration.ts --frontend",
     "db:backup-local": "tsx scripts/backup-local.ts",
     "db:secure-local": "tsx scripts/secure-local.ts"
   },
@@ -52,7 +55,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
-    "@types/node": "^22.10.10",
+    "@types/node": "^22.20.4",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "@vitejs/plugin-react": "^4.3.4",

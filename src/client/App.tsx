@@ -1,3 +1,4 @@
+import { today, formatDateBr } from '../shared/dates';
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   PerfilUsuario, 
@@ -172,7 +173,7 @@ export const AppContent: React.FC = () => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `almoxarifado_saude_dump_${new Date().toISOString().substring(0, 10)}.sql`;
+      a.download = `almoxarifado_saude_dump_${today()}.sql`;
       a.click();
       URL.revokeObjectURL(url);
       showToast('Script SQL MySQL baixado com sucesso!', 'success');
@@ -189,6 +190,8 @@ export const AppContent: React.FC = () => {
       return;
     }
     setActiveTab(tabName);
+    document.querySelector<HTMLElement>('.app-main')?.focus({ preventScroll: true });
+    window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
   // Modals Actions with CSRF validation
@@ -484,20 +487,15 @@ export const AppContent: React.FC = () => {
     return (Number(valor) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   };
 
-  const formatarData = (dataStr?: string | null) => {
-    if (!dataStr) return 'N/D';
-    const d = new Date(dataStr);
-    if (isNaN(d.getTime())) return dataStr;
-    return d.toLocaleDateString('pt-BR');
-  };
+  const formatarData = formatDateBr;
 
   if (authLoading) {
     return (
       <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--bg-app)' }}>
         <div style={{ textAlign: 'center' }}>
           <i className="fa-solid fa-circle-notch fa-spin text-primary" style={{ fontSize: '3rem', marginBottom: '1rem' }}></i>
-          <h2>Validando Sessão HttpOnly & Tokens CSRF...</h2>
-          <p className="text-muted text-sm">Conformidade OWASP Top 10</p>
+          <h2>Carregando seu acesso…</h2>
+          <p className="text-muted text-sm">Aguarde um instante.</p>
         </div>
       </div>
     );
@@ -526,7 +524,7 @@ export const AppContent: React.FC = () => {
           onSelectTab={handleSelectTab}
         />
 
-        <main className="app-main">
+        <main className="app-main" tabIndex={-1} aria-label="Conteúdo principal">
         <React.Suspense fallback={<p role="status">Carregando tela…</p>}>
         {dataError && <div role="alert" className="card" style={{ padding: '1rem', color: 'var(--rose)' }}>{dataError} <button className="btn btn-secondary btn-sm" onClick={() => { dbService.clearCache(); void reloadData(); }}>Tentar novamente</button></div>}
         {activeTab === 'novo-pedido' && (

@@ -75,6 +75,7 @@ export const TriagemTab: React.FC<Props> = ({
 
         <div className="filter-controls">
           <select 
+            aria-label="Filtrar pedidos por status"
             className="form-control" 
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
@@ -89,6 +90,7 @@ export const TriagemTab: React.FC<Props> = ({
           </select>
 
           <input 
+            aria-label="Buscar pedido por número, unidade ou responsável"
             type="text" 
             className="form-control" 
             placeholder="Buscar por Nº PBS, USF..." 
@@ -182,9 +184,6 @@ export const TriagemTab: React.FC<Props> = ({
                                   <button className="btn btn-primary btn-sm" onClick={() => onAbrirAtendimento(p)}>
                                     <i className="fa-solid fa-boxes-packing"></i> 2. Conferir/Atender
                                   </button>
-                                  <button className="btn btn-emerald btn-sm" onClick={() => onAbrirEnvio(p)}>
-                                    <i className="fa-solid fa-truck"></i> 3. Informar Envio
-                                  </button>
                                 </>
                               )}
 
@@ -201,7 +200,7 @@ export const TriagemTab: React.FC<Props> = ({
                             </>
                           ) : (
                             <>
-                              {p.status === 'SOLICITADO' && (
+                              {perfilAtual === 'SOLICITANTE' && p.status === 'SOLICITADO' && (
                                 <button className="btn btn-rose btn-sm" onClick={() => onCancelarPedido(p)} style={{ marginRight: '8px' }}>
                                   <i className="fa-solid fa-ban"></i> Cancelar
                                 </button>
