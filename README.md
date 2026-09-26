@@ -4,6 +4,8 @@ Gestão local de materiais odontológicos, pedidos PBS, equipamentos, manutenç�
 
 Veja a análise, as correções e suas limitações no [relatório de auditoria](docs/AUDITORIA-2026-09.md).
 
+Para atualizar uma instalação da versão antiga, consulte primeiro a [revisão de compatibilidade e roteiro de atualização](docs/REVISAO-UPGRADE-2026-09.md). Fazer o merge e executar o build não migra o banco nem converte as senhas antigas.
+
 ## Executar nesta máquina
 
 Requisitos: Node.js 22.12 ou superior compatível com as dependências, npm e serviço Windows `MySQL80` em execução. Execute os comandos na raiz deste projeto.
@@ -29,11 +31,13 @@ Sessões expiram após 30 minutos sem atividade ou 8 horas desde o login. Reinic
 
 ## Configuração e banco
 
-`.env.example` contém somente um modelo. A configuração desta máquina já foi preparada:
+`.env.example` contém somente um modelo. A configuração esperada é:
 
 - `.env`: conexão da aplicação com usuário MySQL restrito, pool de 10 conexões e segredo aleatório dos cookies.
 - `.env.migrate`: conexão administrativa utilizada somente pelos comandos de migração e testes isolados.
 - `.local/`: credencial inicial, cópias criptografadas e arquivos locais de operação.
+
+A revisão de 26/09 encontrou novamente conexão root no `.env` deste checkout. Consulte a [pendência de configuração e o roteiro de atualização](docs/REVISAO-UPGRADE-2026-09.md) e execute `scripts/check-local.ts` para conferir os privilégios efetivos; não presuma que os arquivos locais estejam restritos apenas por existir `.env.migrate`.
 
 Esses arquivos estão fora do Git. Não envie `.env.migrate` para um servidor de aplicação. Alterar `COOKIE_SECRET` invalida a assinatura dos cookies existentes.
 
@@ -48,6 +52,10 @@ O build não modifica o banco. O cliente Prisma é gerado na instalação; após
 `npm run db:secure-local` é uma ferramenta de preparação/recuperação administrativa: converte senhas legadas, cria o primeiro administrador se ainda não houver um e rotaciona o segredo de cookies. Requer uma unidade já cadastrada; não é necessário executá-la a cada inicialização. `scripts/restrict-db-local.ts` foi usado uma vez para separar a conexão root e não deve ser repetido nesta instalação.
 
 ## Verificação
+
+`npm run db:check-upgrade` verifica dados e histórico de migrations somente por leitura. Retorna código 1 quando encontra bloqueios e apresenta avisos que também precisam de revisão. Não altera registros nem resolve migrations automaticamente.
+
+`npm run test:upgrade` reconstrói o schema do commit `f632233` em bancos aleatórios `odontogest_upgrade_<identificador>`, popula as nove tabelas legadas e ensaia a atualização, inclusive dados incompatíveis. Requer o histórico Git e permissão de criar/remover esses bancos em `.env.migrate`; remove apenas os bancos criados pelo próprio ensaio. No Windows, `npm run test:upgrade -- --backup .local/backup-antes-auditoria-utf8.dpapi` também restaura e migra uma cópia do backup legado, sem alterar o banco original. O ensaio rejeita backups que não contenham todas as colunas legadas.
 
 ```powershell
 npm run typecheck

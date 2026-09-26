@@ -18,6 +18,8 @@
     "test": "node --import tsx --test tests/*.test.ts",
     "test:integration": "tsx scripts/test-integration.ts",
     "test:frontend": "tsx scripts/test-integration.ts --frontend",
+    "test:upgrade": "tsx scripts/test-upgrade.ts",
+    "db:check-upgrade": "tsx scripts/check-upgrade.ts",
     "db:backup-local": "tsx scripts/backup-local.ts",
     "db:secure-local": "tsx scripts/secure-local.ts"
   },
