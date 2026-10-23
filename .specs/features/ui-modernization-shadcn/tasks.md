@@ -150,10 +150,10 @@ T13 → T14 → T15 → T16
 - Skill: NONE
 
 **Done when**:
-- [ ] ThemeContext provides theme, setTheme, and toggleTheme
-- [ ] Adds/removes 'dark' class on document.documentElement
-- [ ] Persists user choice in localStorage
-- [ ] Gate check passes: `npx tsc --noEmit`
+- [x] ThemeContext provides theme, setTheme, and toggleTheme
+- [x] Adds/removes 'dark' class on document.documentElement
+- [x] Persists user choice in localStorage
+- [x] Gate check passes: `npx tsc --noEmit`
 
 **Tests**: none
 **Gate**: Quick
