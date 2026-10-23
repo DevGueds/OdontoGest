@@ -173,9 +173,9 @@ T13 → T14 → T15 → T16
 - Skill: NONE
 
 **Done when**:
-- [ ] Primitives created in src/client/components/ui/
-- [ ] CVA variants configured for Modern Clinical colors
-- [ ] Gate check passes: `npx tsc --noEmit`
+- [x] Primitives created in src/client/components/ui/
+- [x] CVA variants configured for Modern Clinical colors
+- [x] Gate check passes: `npx tsc --noEmit`
 
 **Tests**: none
 **Gate**: Quick
