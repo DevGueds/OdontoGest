@@ -197,11 +197,11 @@ T13 → T14 → T15 → T16
 - Skill: NONE
 
 **Done when**:
-- [ ] Modern OdontoGest logo with cyan gradient badge
-- [ ] Integrated Sun/Moon toggle for Dark Mode
-- [ ] Replaced FontAwesome icons with Lucide icons
-- [ ] Preserved all props and handlers (onExportarSQL, onAbrirModalRelatorios, logout)
-- [ ] Gate check passes: `npx tsc --noEmit`
+- [x] Modern OdontoGest logo with cyan gradient badge
+- [x] Integrated Sun/Moon toggle for Dark Mode
+- [x] Replaced FontAwesome icons with Lucide icons
+- [x] Preserved all props and handlers (onExportarSQL, onAbrirModalRelatorios, logout)
+- [x] Gate check passes: `npx tsc --noEmit`
 
 **Tests**: none
 **Gate**: Quick
