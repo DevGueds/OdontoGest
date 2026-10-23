@@ -106,8 +106,9 @@ ON DUPLICATE KEY UPDATE nome=nome;
 
 -- 2. Cadastro Inicial de Usuários com Perfis
 INSERT INTO usuarios (id, email, senha_hash, nome, funcao, registro, perfil, unidade_id) VALUES
-(1, 'solicitante@saude.gov.br', '$2b$10$e8w6yQ6S0fP/JtYv.JpS3e8w6yQ6S0fP/JtYv.JpS3e8w6yQ6S0fP', 'Dra. Maria Fernanda Silva', 'Cirurgiã Dentista', 'CRO/PA 0592', 'SOLICITANTE', 1),
-(2, 'gestor@saude.gov.br', '$2b$10$e8w6yQ6S0fP/JtYv.JpS3e8w6yQ6S0fP/JtYv.JpS3e8w6yQ6S0fP', 'Carlos Eduardo Almoxarife', 'Gestor de Almoxarifado', 'SMS/PA 1020', 'GESTOR', 3)
+(1, 'solicitante@saude.gov.br', '123456', 'Dra. Maria Fernanda Silva', 'Cirurgiã Dentista', 'CRO/PA 0592', 'SOLICITANTE', 1),
+(2, 'gestor@saude.gov.br', '123456', 'Carlos Eduardo Almoxarife', 'Gestor de Almoxarifado', 'SMS/PA 1020', 'GESTOR', 3),
+(3, 'admin@saude.gov.br', '123456', 'Dr. Roberto Sotillo (Administrador)', 'Administrador Geral SMS', 'ADM/PA 001', 'ADMINISTRADOR', 3)
 ON DUPLICATE KEY UPDATE email=email;
 
 -- 3. Catálogo de Materiais
