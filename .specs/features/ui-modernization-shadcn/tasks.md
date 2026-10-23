@@ -404,9 +404,9 @@ T13 → T14 → T15 → T16
 - Skill: NONE
 
 **Done when**:
-- [ ] Material catalog and unit listings restyled with search inputs
-- [ ] User role badges color-coded with Modern Clinical tokens
-- [ ] Gate check passes: `npx tsc --noEmit`
+- [x] Material catalog and unit listings restyled with search inputs
+- [x] User role badges color-coded with Modern Clinical tokens
+- [x] Gate check passes: `npx tsc --noEmit`
 
 **Tests**: none
 **Gate**: Quick

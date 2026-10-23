@@ -1,6 +1,27 @@
 import React from 'react';
 import { UnidadeSaude, Material, PerfilUsuario } from '../../types';
 import { useSortableData } from '../../hooks/useSortableData';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui/card';
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '../ui/table';
+import { Badge } from '../ui/badge';
+import { Button } from '../ui/button';
+import { 
+  Building2, 
+  Package, 
+  Plus, 
+  Pencil, 
+  Trash2, 
+  Lock, 
+  Boxes, 
+  CheckCircle2, 
+  XCircle, 
+  AlertTriangle, 
+  Landmark, 
+  Receipt, 
+  Truck,
+  Layers,
+  ArrowUpDown
+} from 'lucide-react';
 
 interface Props {
   unidades: UnidadeSaude[];
@@ -37,171 +58,259 @@ export const CatalogoTab: React.FC<Props> = ({
   const { items: sortedMateriais, requestSort: requestSortMateriais, getSortIndicator: getSortMateriais } = useSortableData(materiais, { key: 'descricao', direction: 'asc' });
 
   return (
-    <div className="panel-stack">
+    <div className="space-y-8">
       {/* Unidades / Estabelecimentos de Saúde */}
-      <div className="card">
-        <div className="card-header flex-between">
-          <div>
-            <h3><i className="fa-solid fa-hospital-user"></i> Estabelecimentos / Postos de Saúde</h3>
-            <p className="text-muted text-sm">{isReadOnly ? 'Visualização em Modo Somente Leitura (Gestor)' : 'Gerenciamento do Administrador'}</p>
+      <Card className="shadow-sm">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-4">
+          <div className="space-y-1">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Building2 className="w-5 h-5 text-primary" />
+              Estabelecimentos / Postos de Saúde
+            </CardTitle>
+            <CardDescription>
+              {isReadOnly ? 'Visualização em Modo Somente Leitura (Gestor)' : 'Gerenciamento dos postos e unidades de atendimento cadastradas'}
+            </CardDescription>
           </div>
           {!isReadOnly && (
-            <button className="btn btn-primary btn-sm" onClick={onAbrirModalUnidade}>
-              <i className="fa-solid fa-plus"></i> Novo Estabelecimento
-            </button>
+            <Button size="sm" onClick={onAbrirModalUnidade} className="gap-2">
+              <Plus className="w-4 h-4" />
+              Novo Estabelecimento
+            </Button>
           )}
-        </div>
-        <div className="card-body">
-          <div className="table-responsive">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th onClick={() => requestSortUnidades('id')} style={{cursor: 'pointer'}}>ID{getSortUnidades('id')}</th>
-                  <th onClick={() => requestSortUnidades('nome')} style={{cursor: 'pointer'}}>Nome do Estabelecimento{getSortUnidades('nome')}</th>
-                  <th onClick={() => requestSortUnidades('criado_em')} style={{cursor: 'pointer'}}>Data Cadastro{getSortUnidades('criado_em')}</th>
-                  <th className="text-center">Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sortedUnidades.map(u => (
-                  <tr key={u.id}>
-                    <td><strong>#{u.id}</strong></td>
-                    <td><strong>{u.nome}</strong></td>
-                    <td>{formatarData(u.criado_em)}</td>
-                    <td className="text-center">
-                      {!isReadOnly ? (
-                        <div className="btn-group">
-                          <button 
-                            className="btn btn-primary btn-sm" 
-                            onClick={() => onAbrirEditarUnidade(u)}
-                            title="Editar Estabelecimento"
-                          >
-                            <i className="fa-solid fa-pen"></i> Editar
-                          </button>
-                          <button 
-                            className="btn btn-rose btn-sm" 
-                            onClick={() => {
-                              if (confirm(`Deseja realmente apagar o estabelecimento "${u.nome}"?`)) {
-                                onDeletarUnidade(u.id);
-                              }
-                            }}
-                            title="Apagar Estabelecimento"
-                          >
-                            <i className="fa-solid fa-trash"></i> Apagar
-                          </button>
-                        </div>
-                      ) : (
-                        <span className="text-muted text-sm"><i className="fa-solid fa-lock"></i> Somente Leitura</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead onClick={() => requestSortUnidades('id')} className="cursor-pointer select-none w-20">
+                    <span className="flex items-center gap-1">ID {getSortUnidades('id')}</span>
+                  </TableHead>
+                  <TableHead onClick={() => requestSortUnidades('nome')} className="cursor-pointer select-none">
+                    <span className="flex items-center gap-1">Nome do Estabelecimento {getSortUnidades('nome')}</span>
+                  </TableHead>
+                  <TableHead onClick={() => requestSortUnidades('criado_em')} className="cursor-pointer select-none">
+                    <span className="flex items-center gap-1">Data Cadastro {getSortUnidades('criado_em')}</span>
+                  </TableHead>
+                  <TableHead className="text-center w-36">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sortedUnidades.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                      Nenhum estabelecimento cadastrado.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  sortedUnidades.map(u => (
+                    <TableRow key={u.id}>
+                      <TableCell className="font-semibold text-muted-foreground">#{u.id}</TableCell>
+                      <TableCell className="font-semibold text-foreground">{u.nome}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{formatarData(u.criado_em)}</TableCell>
+                      <TableCell className="text-center">
+                        {!isReadOnly ? (
+                          <div className="flex items-center justify-center gap-1.5">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => onAbrirEditarUnidade(u)}
+                              title="Editar Estabelecimento"
+                              className="h-8 gap-1 text-primary hover:text-primary hover:bg-primary/10"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                              <span className="hidden sm:inline text-xs">Editar</span>
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => {
+                                if (confirm(`Deseja realmente apagar o estabelecimento "${u.nome}"?`)) {
+                                  onDeletarUnidade(u.id);
+                                }
+                              }}
+                              title="Apagar Estabelecimento"
+                              className="h-8 gap-1 text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              <span className="hidden sm:inline text-xs">Apagar</span>
+                            </Button>
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground text-xs flex items-center justify-center gap-1">
+                            <Lock className="w-3 h-3" /> Somente Leitura
+                          </span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Catálogo de Materiais / Insumos */}
-      <div className="card">
-        <div className="card-header flex-between">
-          <div>
-            <h3><i className="fa-solid fa-boxes-stacked"></i> Catálogo de Materiais & Insumos</h3>
-            <p className="text-muted text-sm">Insumos disponíveis para solicitação</p>
+      <Card className="shadow-sm">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-4">
+          <div className="space-y-1">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Boxes className="w-5 h-5 text-primary" />
+              Catálogo de Materiais & Insumos
+            </CardTitle>
+            <CardDescription>
+              Insumos odontológicos e clínicos disponíveis para requisições
+            </CardDescription>
           </div>
           {!isReadOnly && (
-            <button className="btn btn-primary btn-sm" onClick={onAbrirModalMaterial}>
-              <i className="fa-solid fa-plus"></i> Novo Insumo/Material
-            </button>
+            <Button size="sm" onClick={onAbrirModalMaterial} className="gap-2">
+              <Plus className="w-4 h-4" />
+              Novo Insumo/Material
+            </Button>
           )}
-        </div>
-        <div className="card-body">
-          <div className="table-responsive">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th onClick={() => requestSortMateriais('descricao')} style={{cursor: 'pointer'}}>Descrição do Material / Insumo{getSortMateriais('descricao')}</th>
-                  <th onClick={() => requestSortMateriais('natureza')} style={{cursor: 'pointer'}}>Natureza{getSortMateriais('natureza')}</th>
-                  <th onClick={() => requestSortMateriais('fornecedor')} style={{cursor: 'pointer'}}>Fornecedor / Distribuidor{getSortMateriais('fornecedor')}</th>
-                  <th onClick={() => requestSortMateriais('unidade_medida')} style={{cursor: 'pointer'}}>Unidade Medida{getSortMateriais('unidade_medida')}</th>
-                  <th onClick={() => requestSortMateriais('valor_estimado')} style={{cursor: 'pointer'}}>Val. Estimado{getSortMateriais('valor_estimado')}</th>
-                  <th onClick={() => requestSortMateriais('qtd_estoque')} style={{cursor: 'pointer'}}>Estoque Atual{getSortMateriais('qtd_estoque')}</th>
-                  <th onClick={() => requestSortMateriais('limite_max_pedido')} style={{cursor: 'pointer'}}>Limite Máx. p/ Pedido{getSortMateriais('limite_max_pedido')}</th>
-                  <th>Ação</th>
-                </tr>
-              </thead>
-              <tbody>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead onClick={() => requestSortMateriais('descricao')} className="cursor-pointer select-none">
+                    <span className="flex items-center gap-1">Descrição do Material / Insumo {getSortMateriais('descricao')}</span>
+                  </TableHead>
+                  <TableHead onClick={() => requestSortMateriais('natureza')} className="cursor-pointer select-none">
+                    <span className="flex items-center gap-1">Natureza {getSortMateriais('natureza')}</span>
+                  </TableHead>
+                  <TableHead onClick={() => requestSortMateriais('fornecedor')} className="cursor-pointer select-none">
+                    <span className="flex items-center gap-1">Fornecedor {getSortMateriais('fornecedor')}</span>
+                  </TableHead>
+                  <TableHead onClick={() => requestSortMateriais('unidade_medida')} className="cursor-pointer select-none">
+                    <span className="flex items-center gap-1">Unid. {getSortMateriais('unidade_medida')}</span>
+                  </TableHead>
+                  <TableHead onClick={() => requestSortMateriais('valor_estimado')} className="cursor-pointer select-none text-right">
+                    <span className="flex items-center justify-end gap-1">Val. Estimado {getSortMateriais('valor_estimado')}</span>
+                  </TableHead>
+                  <TableHead onClick={() => requestSortMateriais('qtd_estoque')} className="cursor-pointer select-none">
+                    <span className="flex items-center gap-1">Estoque {getSortMateriais('qtd_estoque')}</span>
+                  </TableHead>
+                  <TableHead onClick={() => requestSortMateriais('limite_max_pedido')} className="cursor-pointer select-none">
+                    <span className="flex items-center gap-1">Limite Máx. {getSortMateriais('limite_max_pedido')}</span>
+                  </TableHead>
+                  <TableHead className="text-center w-56">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {sortedMateriais.map(m => {
                   const est = m.qtd_estoque ?? 0;
-                  let badgeEstoque = <span className="badge badge-emerald"><i className="fa-solid fa-circle-check"></i> {est} {m.unidade_medida}</span>;
+                  let badgeEstoque = (
+                    <Badge variant="success" className="gap-1">
+                      <CheckCircle2 className="w-3 h-3" /> {est} {m.unidade_medida}
+                    </Badge>
+                  );
                   if (est <= 0) {
-                    badgeEstoque = <span className="badge badge-rose"><i className="fa-solid fa-circle-xmark"></i> 0 {m.unidade_medida} (Esgotado)</span>;
+                    badgeEstoque = (
+                      <Badge variant="destructive" className="gap-1">
+                        <XCircle className="w-3 h-3" /> 0 {m.unidade_medida} (Esgotado)
+                      </Badge>
+                    );
                   } else if (est < 20) {
-                    badgeEstoque = <span className="badge badge-amber"><i className="fa-solid fa-triangle-exclamation"></i> {est} {m.unidade_medida} (Baixo)</span>;
+                    badgeEstoque = (
+                      <Badge variant="warning" className="gap-1">
+                        <AlertTriangle className="w-3 h-3" /> {est} {m.unidade_medida} (Baixo)
+                      </Badge>
+                    );
                   }
 
                   const txtLimite = m.limite_max_pedido ? (
-                    <span className="badge badge-amber">
-                      <i className="fa-solid fa-hand-halved"></i> Máx. {m.limite_max_pedido} {m.unidade_medida}
-                    </span>
+                    <Badge variant="warning" className="gap-1">
+                      Máx. {m.limite_max_pedido} {m.unidade_medida}
+                    </Badge>
                   ) : (
-                    <span className="text-muted" style={{ fontSize: '0.8rem' }}>Sem limite</span>
+                    <span className="text-muted-foreground text-xs">Sem limite</span>
                   );
 
                   return (
-                    <tr key={m.id}>
-                      <td><strong>{m.descricao}</strong></td>
-                      <td>
+                    <TableRow key={m.id}>
+                      <TableCell className="font-semibold text-foreground">{m.descricao}</TableCell>
+                      <TableCell>
                         {m.natureza === 'INVESTIMENTO' ? (
-                          <span className="badge badge-purple"><i className="fa-solid fa-building-columns"></i> Investimento</span>
+                          <Badge variant="purple" className="flex items-center gap-1 w-fit">
+                            <Landmark className="w-3 h-3" /> Investimento
+                          </Badge>
                         ) : (
-                          <span className="badge badge-cyan"><i className="fa-solid fa-receipt"></i> Custeio</span>
+                          <Badge variant="info" className="flex items-center gap-1 w-fit">
+                            <Receipt className="w-3 h-3" /> Custeio
+                          </Badge>
                         )}
-                      </td>
-                      <td>
+                      </TableCell>
+                      <TableCell>
                         {m.fornecedor ? (
-                          <span className="badge badge-cyan"><i className="fa-solid fa-truck-field"></i> {m.fornecedor}</span>
+                          <Badge variant="secondary" className="flex items-center gap-1 w-fit">
+                            <Truck className="w-3 h-3 text-muted-foreground" /> {m.fornecedor}
+                          </Badge>
                         ) : (
-                          <span className="text-muted" style={{ fontSize: '0.8rem' }}>Padrão / Não inf.</span>
+                          <span className="text-muted-foreground text-xs">Padrão / Não inf.</span>
                         )}
-                      </td>
-                      <td><span className="badge badge-blue">{m.unidade_medida}</span></td>
-                      <td>{formatarMoeda(m.valor_estimado || 0)}</td>
-                      <td>{badgeEstoque}</td>
-                      <td>{txtLimite}</td>
-                      <td>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{m.unidade_medida}</Badge>
+                      </TableCell>
+                      <TableCell className="text-right font-medium text-foreground">
+                        {formatarMoeda(m.valor_estimado || 0)}
+                      </TableCell>
+                      <TableCell>{badgeEstoque}</TableCell>
+                      <TableCell>{txtLimite}</TableCell>
+                      <TableCell className="text-center">
                         {!isReadOnly ? (
-                          <div className="btn-group">
-                            <button className="btn btn-primary btn-sm" onClick={() => onAbrirEditarMaterial(m)}>
-                              <i className="fa-solid fa-pen"></i> Editar Insumo
-                            </button>
-                            <button className="btn btn-outline btn-sm" onClick={() => onAbrirAjusteEstoque(m)}>
-                              <i className="fa-solid fa-boxes-stacked"></i> Repor Estoque
-                            </button>
-                            <button 
-                              className="btn btn-rose btn-sm" 
+                          <div className="flex items-center justify-center gap-1">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => onAbrirEditarMaterial(m)}
+                              title="Editar Insumo"
+                              className="h-8 px-2 text-primary hover:text-primary hover:bg-primary/10 text-xs gap-1"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                              <span className="hidden xl:inline">Editar</span>
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => onAbrirAjusteEstoque(m)}
+                              title="Repor Estoque"
+                              className="h-8 px-2 text-xs gap-1"
+                            >
+                              <Boxes className="w-3.5 h-3.5 text-muted-foreground" />
+                              <span className="hidden xl:inline">Estoque</span>
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
                               onClick={() => {
                                 if (confirm(`Deseja realmente excluir o insumo "${m.descricao}"?`)) {
                                   onDeletarMaterial(m.id);
                                 }
                               }}
                               title="Excluir Insumo"
+                              className="h-8 px-2 text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-xs"
                             >
-                              <i className="fa-solid fa-trash"></i> Excluir
-                            </button>
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
                           </div>
                         ) : (
-                          <span className="text-muted text-sm"><i className="fa-solid fa-lock"></i> Somente Leitura</span>
+                          <span className="text-muted-foreground text-xs flex items-center justify-center gap-1">
+                            <Lock className="w-3 h-3" /> Somente Leitura
+                          </span>
                         )}
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   );
                 })}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
