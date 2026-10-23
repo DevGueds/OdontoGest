@@ -336,9 +336,9 @@ T13 → T14 → T15 → T16
 - Skill: NONE
 
 **Done when**:
-- [ ] Modal backdrops feature backdrop-blur with smooth fade-in
-- [ ] ModalFichaPbs formatted cleanly for print/view
-- [ ] Gate check passes: `npx tsc --noEmit && npx vite build`
+- [x] Modal backdrops feature backdrop-blur with smooth fade-in
+- [x] ModalFichaPbs formatted cleanly for print/view
+- [x] Gate check passes: `npx tsc --noEmit && npx vite build`
 
 **Tests**: none
 **Gate**: Full
