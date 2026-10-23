@@ -1,4 +1,8 @@
 import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Building2, Plus } from 'lucide-react';
 
 interface Props {
   isOpen: boolean;
@@ -9,8 +13,6 @@ interface Props {
 export const ModalUnidade: React.FC<Props> = ({ isOpen, onClose, onConfirm }) => {
   const [nome, setNome] = useState('');
 
-  if (!isOpen) return null;
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!nome.trim()) return;
@@ -19,33 +21,44 @@ export const ModalUnidade: React.FC<Props> = ({ isOpen, onClose, onConfirm }) =>
   };
 
   return (
-    <div className={`modal ${isOpen ? 'active' : ''}`}>
-      <div className="modal-content">
-        <div className="modal-header">
-          <h3><i className="fa-solid fa-hospital"></i> Cadastrar Novo Estabelecimento de Saúde (Gestor)</h3>
-          <button className="modal-close" onClick={onClose}>&times;</button>
-        </div>
-        <div className="modal-body">
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label htmlFor="uni_nome">Nome do Estabelecimento *</label>
-              <input 
-                type="text" 
-                id="uni_nome" 
-                className="form-control" 
-                placeholder="Ex: USF BAIRRO NOVO" 
-                value={nome}
-                onChange={(e) => setNome(e.target.value)}
-                required 
-              />
-            </div>
-            <div className="form-actions margin-top-md">
-              <button type="button" className="btn btn-secondary" onClick={onClose}>Cancelar</button>
-              <button type="submit" className="btn btn-primary">Cadastrar Estabelecimento</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Building2 className="w-5 h-5 text-primary" />
+            Cadastrar Estabelecimento de Saúde
+          </DialogTitle>
+          <DialogDescription>
+            Insira o nome da nova unidade de saúde básica ou especializada.
+          </DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+          <div className="space-y-1.5">
+            <label htmlFor="uni_nome" className="text-xs font-semibold text-foreground uppercase tracking-wider">
+              Nome do Estabelecimento *
+            </label>
+            <Input 
+              type="text" 
+              id="uni_nome" 
+              placeholder="Ex: USF BAIRRO NOVO" 
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
+              required 
+            />
+          </div>
+
+          <div className="flex justify-end gap-2 pt-3 border-t border-border">
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancelar
+            </Button>
+            <Button type="submit" className="gap-2">
+              <Plus className="w-4 h-4" />
+              Cadastrar Estabelecimento
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 };

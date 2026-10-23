@@ -9,6 +9,9 @@ import {
   UnidadeConsolidacaoFinanceira 
 } from '../../types';
 import { dbService } from '../../services/db';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
+import { Button } from '../ui/button';
+import { FileDown, FileSpreadsheet, FileText, Layers, Calendar, Building2 } from 'lucide-react';
 
 export type TipoRelatorio = 'FINANCEIRO' | 'INSUMOS' | 'MANUTENCAO' | 'COMPLETO';
 
@@ -425,105 +428,108 @@ export const ModalRelatorio: React.FC<Props> = ({
   };
 
   return (
-    <div className="modal active">
-      <div className="modal-content" style={{ maxWidth: '640px' }}>
-        <div className="modal-header">
-          <h3>
-            <i className="fa-solid fa-file-export text-primary"></i> Exportar Relatórios (PDF & Excel)
-          </h3>
-          <button className="modal-close" onClick={onClose}>&times;</button>
-        </div>
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <FileDown className="w-5 h-5 text-primary" />
+            Exportar Relatórios Gerenciais
+          </DialogTitle>
+          <DialogDescription>
+            Exporte planilhas estruturadas para o Excel (.CSV) ou gere documentos analíticos formatados para impressão e PDF.
+          </DialogDescription>
+        </DialogHeader>
 
-        <div className="modal-body">
-          <p className="text-muted text-sm" style={{ marginBottom: '1.2rem' }}>
-            Selecione o tipo de relatório desejado e o filtro mensal/estabelecimento para exportar planilhas para o Microsoft Excel ou documento formatado em PDF.
-          </p>
+        <form onSubmit={(e) => e.preventDefault()} className="space-y-4 pt-2">
+          {/* Tipo de Relatório */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <Layers className="w-3.5 h-3.5 text-primary" />
+              Tipo de Relatório *
+            </label>
+            <select 
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              value={tipoRelatorio}
+              onChange={e => setTipoRelatorio(e.target.value as TipoRelatorio)}
+            >
+              <option value="FINANCEIRO">💰 Fluxo Financeiro & Consolidação Multiclínica</option>
+              <option value="INSUMOS">📦 Gestão de Insumos & Estoque de Materiais</option>
+              <option value="MANUTENCAO">🛠️ Manutenção de Equipamentos & Chamados</option>
+              <option value="COMPLETO">📊 Relatório Geral Consolidado (Todas as Áreas)</option>
+            </select>
+          </div>
 
-          <form onSubmit={(e) => e.preventDefault()}>
-            {/* Tipo de Relatório */}
-            <div className="form-group">
-              <label style={{ fontWeight: 700, marginBottom: '0.4rem', display: 'block' }}>
-                <i className="fa-solid fa-layer-group text-primary"></i> Tipo de Relatório *
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Filtro Mensal */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-amber-500" />
+                Período / Mês *
               </label>
               <select 
-                className="form-control"
-                value={tipoRelatorio}
-                onChange={e => setTipoRelatorio(e.target.value as TipoRelatorio)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                value={mesFiltro}
+                onChange={e => setMesFiltro(e.target.value)}
               >
-                <option value="FINANCEIRO">💰 Fluxo Financeiro & Consolidação Multiclínica</option>
-                <option value="INSUMOS">📦 Gestão de Insumos & Estoque de Materiais</option>
-                <option value="MANUTENCAO">🛠️ Manutenção de Equipamentos & Chamados</option>
-                <option value="COMPLETO">📊 Relatório Geral Consolidado (Todas as Áreas)</option>
+                <option value="TODOS">📅 Todos os Meses</option>
+                {mesesDisponiveis.map(m => (
+                  <option key={m} value={m}>📆 {m}</option>
+                ))}
               </select>
             </div>
 
-            {/* Filtro Mensal */}
-            <div className="form-grid margin-top-sm">
-              <div className="form-group">
-                <label style={{ fontWeight: 700, marginBottom: '0.4rem', display: 'block' }}>
-                  <i className="fa-solid fa-calendar-days text-amber"></i> Filtro Mensal / Período *
-                </label>
-                <select 
-                  className="form-control"
-                  value={mesFiltro}
-                  onChange={e => setMesFiltro(e.target.value)}
-                >
-                  <option value="TODOS">📅 Todos os Meses</option>
-                  {mesesDisponiveis.map(m => (
-                    <option key={m} value={m}>📆 {m}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Filtro por Unidade */}
-              <div className="form-group">
-                <label style={{ fontWeight: 700, marginBottom: '0.4rem', display: 'block' }}>
-                  <i className="fa-solid fa-hospital text-emerald"></i> Unidade de Saúde *
-                </label>
-                <select 
-                  className="form-control"
-                  value={unidadeFiltro}
-                  onChange={e => setUnidadeFiltro(e.target.value === 'TODAS' ? 'TODAS' : Number(e.target.value))}
-                >
-                  <option value="TODAS">🏥 Todas as Unidades de Saúde</option>
-                  {unidades.map(u => (
-                    <option key={u.id} value={u.id}>{u.nome} ({u.tipo})</option>
-                  ))}
-                </select>
-              </div>
+            {/* Filtro por Unidade */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                <Building2 className="w-3.5 h-3.5 text-emerald-500" />
+                Unidade de Saúde *
+              </label>
+              <select 
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                value={unidadeFiltro}
+                onChange={e => setUnidadeFiltro(e.target.value === 'TODAS' ? 'TODAS' : Number(e.target.value))}
+              >
+                <option value="TODAS">🏥 Todas as Unidades de Saúde</option>
+                {unidades.map(u => (
+                  <option key={u.id} value={u.id}>{u.nome} ({u.tipo})</option>
+                ))}
+              </select>
             </div>
+          </div>
 
-            {/* Action Buttons */}
-            <div className="form-actions margin-top-md" style={{ gap: '0.75rem', flexWrap: 'wrap' }}>
-              <button 
-                type="button" 
-                className="btn btn-secondary" 
-                onClick={onClose}
-              >
-                Cancelar
-              </button>
+          {/* Action Buttons */}
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-4 border-t border-border">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={onClose}
+            >
+              Cancelar
+            </Button>
 
-              <button 
-                type="button" 
-                className="btn btn-emerald" 
-                onClick={handleExportarExcel}
-                title="Download de Planilha Excel (.CSV)"
-              >
-                <i className="fa-solid fa-file-excel"></i> Exportar Excel (.CSV)
-              </button>
+            <Button 
+              type="button" 
+              variant="emerald" 
+              onClick={handleExportarExcel}
+              className="gap-2"
+              title="Download de Planilha Excel (.CSV)"
+            >
+              <FileSpreadsheet className="w-4 h-4" />
+              Excel (.CSV)
+            </Button>
 
-              <button 
-                type="button" 
-                className="btn btn-primary" 
-                onClick={handleGerarPDF}
-                title="Gerar Visualização e Salvar em PDF"
-              >
-                <i className="fa-solid fa-file-pdf"></i> Gerar Relatório PDF
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+            <Button 
+              type="button" 
+              onClick={handleGerarPDF}
+              className="gap-2"
+              title="Gerar Visualização e Salvar em PDF"
+            >
+              <FileText className="w-4 h-4" />
+              Relatório PDF
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 };

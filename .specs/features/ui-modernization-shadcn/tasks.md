@@ -426,10 +426,10 @@ T13 → T14 → T15 → T16
 - Skill: NONE
 
 **Done when**:
-- [ ] All editing and creation modals modernized with shadcn Dialog
-- [ ] Report generation filters (PDF/Excel) formatted cleanly
-- [ ] FontAwesome CDN reference removed from index.html
-- [ ] Gate check passes: `npm run build`
+- [x] All editing and creation modals modernized with shadcn Dialog
+- [x] Report generation filters (PDF/Excel) formatted cleanly
+- [x] FontAwesome CDN reference removed from index.html
+- [x] Gate check passes: `npm run build`
 
 **Tests**: none
 **Gate**: Build
