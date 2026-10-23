@@ -360,9 +360,9 @@ T13 → T14 → T15 → T16
 - Skill: NONE
 
 **Done when**:
-- [ ] Equipment list and maintenance ticket tables modernized
-- [ ] Technician and Manager view modes preserved
-- [ ] Gate check passes: `npx tsc --noEmit`
+- [x] Equipment list and maintenance ticket tables modernized
+- [x] Technician and Manager view modes preserved
+- [x] Gate check passes: `npx tsc --noEmit`
 
 **Tests**: none
 **Gate**: Quick
