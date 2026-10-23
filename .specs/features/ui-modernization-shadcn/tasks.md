@@ -221,10 +221,10 @@ T13 → T14 → T15 → T16
 - Skill: NONE
 
 **Done when**:
-- [ ] Sidebar supports expanded and compact icon-only modes
-- [ ] Tooltips displayed on hover in compact mode
-- [ ] Role-based access control tabs preserved
-- [ ] Gate check passes: `npx tsc --noEmit`
+- [x] Sidebar supports expanded and compact icon-only modes
+- [x] Tooltips displayed on hover in compact mode
+- [x] Role-based access control tabs preserved
+- [x] Gate check passes: `npx tsc --noEmit`
 
 **Tests**: none
 **Gate**: Quick
