@@ -13,10 +13,10 @@
 ## Handoff
 
 - **Feature**: .specs/features/ui-modernization-shadcn
-- **Phase / Task**: Phase 1 / Specify
-- **Completed**: none
-- **In-progress** (file:line): `.specs/features/ui-modernization-shadcn/spec.md`
-- **Next step**: Finalizar e validar o spec.md e context.md com validate_spec.py.
+- **Phase / Task**: Phase 4 / Validation Complete
+- **Completed**: T1 through T16 (Phases 1-4 completed; UI modernized with Tailwind, shadcn/ui, Lucide React; FontAwesome removed; validation passed)
+- **In-progress** (file:line): none
+- **Next step**: User acceptance testing or deployment.
 - **Blockers**: none
 - **Uncommitted files**: none
 - **Branch**: main
