@@ -11,6 +11,27 @@ import {
   PerfilUsuario 
 } from '../../types';
 import { dbService } from '../../services/db';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui/card';
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '../ui/table';
+import { Badge } from '../ui/badge';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { 
+  Landmark, 
+  Wallet, 
+  Receipt, 
+  TrendingUp, 
+  TrendingDown, 
+  PlusCircle, 
+  Check, 
+  Trash2, 
+  Lock, 
+  Filter, 
+  RotateCw, 
+  Zap, 
+  Building2,
+  DollarSign
+} from 'lucide-react';
 
 interface Props {
   unidades: UnidadeSaude[];
@@ -79,219 +100,270 @@ export const OrcamentoTab: React.FC<Props> = ({
   });
 
   return (
-    <div className="panel-stack">
+    <div className="space-y-6">
       {/* Resumo de Saldos e Fluxo Orçamentário */}
-      <div className="card" style={{ borderLeft: '5px solid var(--primary)' }}>
-        <div className="card-header flex-between" style={{ flexWrap: 'wrap', gap: '1rem' }}>
-          <div>
-            <h3><i className="fa-solid fa-sack-dollar text-primary"></i> Visão Geral das Entradas & Saldos Segregados</h3>
-            <p className="text-muted text-sm">Entradas de recursos cadastrados (Aportes/Repasses) deduzidos das saídas reais consolidadas (Insumos + RH + Manutenção).</p>
+      <Card className="border-l-4 border-l-primary shadow-sm">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-border">
+          <div className="space-y-1">
+            <CardTitle className="text-xl flex items-center gap-2">
+              <Landmark className="w-5 h-5 text-primary" />
+              Visão Geral das Entradas & Saldos Segregados
+            </CardTitle>
+            <CardDescription>
+              Entradas de recursos cadastrados (Aportes/Repasses) deduzidos das saídas reais consolidadas (Insumos + RH + Manutenção).
+            </CardDescription>
           </div>
-          <span className="badge badge-cyan"><i className="fa-solid fa-building-columns"></i> Gestão de Recursos SMS</span>
-        </div>
+          <Badge variant="info" className="flex items-center gap-1.5 self-start sm:self-auto py-1 px-3">
+            <Building2 className="w-3.5 h-3.5" />
+            Gestão de Recursos SMS
+          </Badge>
+        </CardHeader>
 
-        <div className="card-body">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.2rem' }}>
+        <CardContent className="pt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Card Custeio */}
-            <div style={{ background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '1.2rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
-                <strong style={{ color: 'var(--primary)', fontSize: '1.05rem' }}>
-                  💳 FLUXO DE RECURSOS DE CUSTEIO
-                </strong>
-                <span className="badge badge-cyan">{saldos.percentualCusteioComprometido.toFixed(1)}% Comprometido</span>
+            <div className="bg-muted/40 dark:bg-muted/20 border border-border rounded-xl p-5 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Wallet className="w-5 h-5 text-primary" />
+                  <span className="font-bold text-sm tracking-wide text-foreground">
+                    FLUXO DE RECURSOS DE CUSTEIO
+                  </span>
+                </div>
+                <Badge variant="info">
+                  {saldos.percentualCusteioComprometido.toFixed(1)}% Comprometido
+                </Badge>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', margin: '0.4rem 0', fontSize: '0.9rem' }}>
-                <span className="text-muted">(+) Entradas Cadastradas (Custeio):</span>
-                <strong style={{ color: 'var(--emerald)' }}>{formatarMoeda(saldos.orcamentoCusteioTotal)}</strong>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between items-center text-muted-foreground">
+                  <span>(+) Entradas Cadastradas (Custeio):</span>
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                    {formatarMoeda(saldos.orcamentoCusteioTotal)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-muted-foreground">
+                  <span>(-) Total Saídas (Pedidos + RH + Manut.):</span>
+                  <span className="font-semibold text-rose-600 dark:text-rose-400">
+                    {formatarMoeda(saldos.gastoCusteioTotal)}
+                  </span>
+                </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', margin: '0.4rem 0', fontSize: '0.9rem' }}>
-                <span className="text-muted">(-) Total Saídas (Pedidos + RH + Manut.):</span>
-                <strong style={{ color: 'var(--rose)' }}>{formatarMoeda(saldos.gastoCusteioTotal)}</strong>
-              </div>
+              <div className="h-px bg-border my-2" />
 
-              <div style={{ height: '1px', background: '#cbd5e1', margin: '0.75rem 0' }} />
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '1.1rem', fontWeight: 800 }}>
-                <span>(=) SALDO DE CUSTEIO DISPONÍVEL:</span>
-                <span style={{ color: saldos.saldoCusteioDisponivel >= 0 ? 'var(--emerald)' : 'var(--rose)' }}>
+              <div className="flex justify-between items-center text-base font-bold">
+                <span className="text-foreground text-sm">(=) SALDO DE CUSTEIO DISPONÍVEL:</span>
+                <span className={saldos.saldoCusteioDisponivel >= 0 ? 'text-emerald-600 dark:text-emerald-400 text-lg' : 'text-rose-600 dark:text-rose-400 text-lg'}>
                   {formatarMoeda(saldos.saldoCusteioDisponivel)}
                 </span>
               </div>
             </div>
 
             {/* Card Investimento */}
-            <div style={{ background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '1.2rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
-                <strong style={{ color: 'var(--purple)', fontSize: '1.05rem' }}>
-                  🏗️ FLUXO DE RECURSOS DE INVESTIMENTO
-                </strong>
-                <span className="badge badge-purple">{saldos.percentualInvestimentoComprometido.toFixed(1)}% Comprometido</span>
+            <div className="bg-muted/40 dark:bg-muted/20 border border-border rounded-xl p-5 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Landmark className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                  <span className="font-bold text-sm tracking-wide text-foreground">
+                    FLUXO DE RECURSOS DE INVESTIMENTO
+                  </span>
+                </div>
+                <Badge variant="purple">
+                  {saldos.percentualInvestimentoComprometido.toFixed(1)}% Comprometido
+                </Badge>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', margin: '0.4rem 0', fontSize: '0.9rem' }}>
-                <span className="text-muted">(+) Entradas Cadastradas (Investimento):</span>
-                <strong style={{ color: 'var(--emerald)' }}>{formatarMoeda(saldos.orcamentoInvestimentoTotal)}</strong>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between items-center text-muted-foreground">
+                  <span>(+) Entradas Cadastradas (Investimento):</span>
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                    {formatarMoeda(saldos.orcamentoInvestimentoTotal)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-muted-foreground">
+                  <span>(-) Total Saídas (Equipamentos Permanentes):</span>
+                  <span className="font-semibold text-rose-600 dark:text-rose-400">
+                    {formatarMoeda(saldos.gastoInvestimentoTotal)}
+                  </span>
+                </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', margin: '0.4rem 0', fontSize: '0.9rem' }}>
-                <span className="text-muted">(-) Total Saídas (Equipamentos Permanentes):</span>
-                <strong style={{ color: 'var(--rose)' }}>{formatarMoeda(saldos.gastoInvestimentoTotal)}</strong>
-              </div>
+              <div className="h-px bg-border my-2" />
 
-              <div style={{ height: '1px', background: '#cbd5e1', margin: '0.75rem 0' }} />
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '1.1rem', fontWeight: 800 }}>
-                <span>(=) SALDO DE INVESTIMENTO DISPONÍVEL:</span>
-                <span style={{ color: saldos.saldoInvestimentoDisponivel >= 0 ? 'var(--purple)' : 'var(--rose)' }}>
+              <div className="flex justify-between items-center text-base font-bold">
+                <span className="text-foreground text-sm">(=) SALDO DE INVESTIMENTO DISPONÍVEL:</span>
+                <span className={saldos.saldoInvestimentoDisponivel >= 0 ? 'text-purple-600 dark:text-purple-400 text-lg' : 'text-rose-600 dark:text-rose-400 text-lg'}>
                   {formatarMoeda(saldos.saldoInvestimentoDisponivel)}
                 </span>
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Formulário de Novo Lançamento de Entrada */}
       {!isReadOnly && (
-        <div className="card">
-          <div className="card-header">
-            <h3><i className="fa-solid fa-plus-circle text-emerald"></i> Cadastrar Nova Entrada / Aporte Financeiro</h3>
-          </div>
-          <div className="card-body">
-            <form onSubmit={handleSubmit}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
-              <div className="form-group">
-                <label htmlFor="ent_descricao">Descrição do Aporte / Repasse *</label>
-                <input 
-                  type="text" 
-                  id="ent_descricao" 
-                  className="form-control" 
-                  placeholder="Ex: Repasse FNS Custeio Atenção Primária"
-                  value={descricao}
-                  onChange={(e) => setDescricao(e.target.value)}
-                  required 
-                />
+        <Card className="shadow-sm">
+          <CardHeader className="border-b border-border pb-4">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <PlusCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+              Cadastrar Nova Entrada / Aporte Financeiro
+            </CardTitle>
+            <CardDescription>
+              Informe os dados de novos aportes para compor o orçamento das unidades ou fundo geral.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="space-y-1.5 lg:col-span-2">
+                  <label htmlFor="ent_descricao" className="text-xs font-semibold text-foreground uppercase tracking-wider">
+                    Descrição do Aporte / Repasse *
+                  </label>
+                  <Input 
+                    type="text" 
+                    id="ent_descricao" 
+                    placeholder="Ex: Repasse FNS Custeio Atenção Primária"
+                    value={descricao}
+                    onChange={(e) => setDescricao(e.target.value)}
+                    required 
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label htmlFor="ent_valor" className="text-xs font-semibold text-foreground uppercase tracking-wider">
+                    Valor Total do Aporte (R$) *
+                  </label>
+                  <Input 
+                    type="number" 
+                    step="0.01" 
+                    id="ent_valor" 
+                    placeholder="0.00"
+                    value={valor}
+                    onChange={(e) => setValor(e.target.value)}
+                    required 
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label htmlFor="ent_natureza" className="text-xs font-semibold text-foreground uppercase tracking-wider">
+                    Natureza do Saldo / Recurso *
+                  </label>
+                  <select 
+                    id="ent_natureza" 
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={natureza}
+                    onChange={(e) => setNatureza(e.target.value as NaturezaDespesa)}
+                    required
+                  >
+                    <option value="CUSTEIO">💳 Custeio (Consumo / Operacional / RH / Manutenção)</option>
+                    <option value="INVESTIMENTO">🏗️ Investimento (Bens Permanentes / Capital)</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label htmlFor="ent_recorrencia" className="text-xs font-semibold text-foreground uppercase tracking-wider">
+                    Tipo de Entrada *
+                  </label>
+                  <select 
+                    id="ent_recorrencia" 
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={tipoRecorrencia}
+                    onChange={(e) => setTipoRecorrencia(e.target.value as TipoRecorrencia)}
+                    required
+                  >
+                    <option value="RECORRENTE">🔄 Recorrente (Repasse Mensal Ordinário)</option>
+                    <option value="PARCELA_UNICA">⚡ Parcela Única (Emenda / Aporte Extra)</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label htmlFor="ent_unidade" className="text-xs font-semibold text-foreground uppercase tracking-wider">
+                    Destino / Unidade Beneficiada
+                  </label>
+                  <select 
+                    id="ent_unidade" 
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={unidadeId}
+                    onChange={(e) => setUnidadeId(e.target.value)}
+                  >
+                    <option value="">🌐 GLOBAL / Todas as Unidades (Fundo SMS)</option>
+                    {unidades.map(u => (
+                      <option key={u.id} value={u.id}>{u.nome} ({u.tipo})</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label htmlFor="ent_data" className="text-xs font-semibold text-foreground uppercase tracking-wider">
+                    Data do Crédito / Depósito *
+                  </label>
+                  <Input 
+                    type="date" 
+                    id="ent_data" 
+                    value={dataCredito}
+                    onChange={(e) => setDataCredito(e.target.value)}
+                    required 
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label htmlFor="ent_mes" className="text-xs font-semibold text-foreground uppercase tracking-wider">
+                    Mês de Referência (YYYY-MM) *
+                  </label>
+                  <Input 
+                    type="month" 
+                    id="ent_mes" 
+                    value={mesReferencia}
+                    onChange={(e) => setMesReferencia(e.target.value)}
+                    required 
+                  />
+                </div>
+
+                <div className="space-y-1.5 lg:col-span-4">
+                  <label htmlFor="ent_obs" className="text-xs font-semibold text-foreground uppercase tracking-wider">
+                    Observações / N° da Portaria
+                  </label>
+                  <Input 
+                    type="text" 
+                    id="ent_obs" 
+                    placeholder="Ex: Portaria FNS N° 1.204/2026"
+                    value={observacoes}
+                    onChange={(e) => setObservacoes(e.target.value)}
+                  />
+                </div>
               </div>
 
-              <div className="form-group">
-                <label htmlFor="ent_valor">Valor Total do Aporte (R$) *</label>
-                <input 
-                  type="number" 
-                  step="0.01" 
-                  id="ent_valor" 
-                  className="form-control" 
-                  placeholder="0.00"
-                  value={valor}
-                  onChange={(e) => setValor(e.target.value)}
-                  required 
-                />
+              <div className="flex justify-end pt-2">
+                <Button type="submit" variant="emerald" className="gap-2">
+                  <Check className="w-4 h-4" />
+                  Registrar Entrada de Recursos
+                </Button>
               </div>
-
-              <div className="form-group">
-                <label htmlFor="ent_natureza">Natureza do Saldo / Recurso *</label>
-                <select 
-                  id="ent_natureza" 
-                  className="form-control"
-                  value={natureza}
-                  onChange={(e) => setNatureza(e.target.value as NaturezaDespesa)}
-                  required
-                >
-                  <option value="CUSTEIO">💳 Custeio (Consumo / Operacional / RH / Manutenção)</option>
-                  <option value="INVESTIMENTO">🏗️ Investimento (Bens Permanentes / Capital)</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="ent_recorrencia">Tipo de Entrada *</label>
-                <select 
-                  id="ent_recorrencia" 
-                  className="form-control"
-                  value={tipoRecorrencia}
-                  onChange={(e) => setTipoRecorrencia(e.target.value as TipoRecorrencia)}
-                  required
-                >
-                  <option value="RECORRENTE">🔄 Recorrente (Repasse Mensal Ordinário)</option>
-                  <option value="PARCELA_UNICA">⚡ Parcela Única (Emenda / Aporte Extra)</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="ent_unidade">Destino / Unidade Beneficiada</label>
-                <select 
-                  id="ent_unidade" 
-                  className="form-control"
-                  value={unidadeId}
-                  onChange={(e) => setUnidadeId(e.target.value)}
-                >
-                  <option value="">🌐 GLOBAL / Todas as Unidades (Fundo SMS)</option>
-                  {unidades.map(u => (
-                    <option key={u.id} value={u.id}>{u.nome} ({u.tipo})</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="ent_data">Data do Crédito / Depósito *</label>
-                <input 
-                  type="date" 
-                  id="ent_data" 
-                  className="form-control"
-                  value={dataCredito}
-                  onChange={(e) => setDataCredito(e.target.value)}
-                  required 
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="ent_mes">Mês de Referência (YYYY-MM) *</label>
-                <input 
-                  type="month" 
-                  id="ent_mes" 
-                  className="form-control"
-                  value={mesReferencia}
-                  onChange={(e) => setMesReferencia(e.target.value)}
-                  required 
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="ent_obs">Observações / N° da Portaria</label>
-                <input 
-                  type="text" 
-                  id="ent_obs" 
-                  className="form-control"
-                  placeholder="Ex: Portaria FNS N° 1.204/2026"
-                  value={observacoes}
-                  onChange={(e) => setObservacoes(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div style={{ marginTop: '1rem', textAlign: 'right' }}>
-              <button type="submit" className="btn btn-emerald">
-                <i className="fa-solid fa-check"></i> Registrar Entrada de Recursos
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
+            </form>
+          </CardContent>
+        </Card>
       )}
 
       {/* Tabela de Histórico de Entradas Cadastradas */}
-      <div className="card">
-        <div className="card-header flex-between" style={{ flexWrap: 'wrap', gap: '1rem' }}>
-          <div>
-            <h3><i className="fa-solid fa-list-check"></i> Histórico de Entradas & Repasses Registrados</h3>
-            <p className="text-muted text-sm">Entradas de capital que compõem os orçamentos de Custeio e Investimento</p>
+      <Card className="shadow-sm">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-4">
+          <div className="space-y-1">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Receipt className="w-5 h-5 text-primary" />
+              Histórico de Entradas & Repasses Registrados
+            </CardTitle>
+            <CardDescription>
+              Entradas de capital que compõem os orçamentos de Custeio e Investimento
+            </CardDescription>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b' }}>Filtrar Natureza:</span>
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            <Filter className="w-4 h-4 text-muted-foreground" />
+            <span className="text-xs font-semibold text-muted-foreground">Natureza:</span>
             <select 
-              className="form-control" 
-              style={{ width: 'auto', padding: '4px 10px', fontSize: '0.85rem' }}
+              className="h-9 rounded-md border border-input bg-background px-2 py-1 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               value={filtroNatureza}
               onChange={(e) => setFiltroNatureza(e.target.value as any)}
             >
@@ -300,75 +372,89 @@ export const OrcamentoTab: React.FC<Props> = ({
               <option value="INVESTIMENTO">Apenas Investimento</option>
             </select>
           </div>
-        </div>
+        </CardHeader>
 
-        <div className="card-body">
-          <div className="table-responsive">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Descrição do Repasse / Aporte</th>
-                  <th>Natureza</th>
-                  <th>Recorrência</th>
-                  <th>Destino</th>
-                  <th>Data Crédito</th>
-                  <th>Mês Ref.</th>
-                  <th className="text-right">Valor Aporte (R$)</th>
-                  <th className="text-center">Ações</th>
-                </tr>
-              </thead>
-              <tbody>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-16">ID</TableHead>
+                  <TableHead>Descrição do Repasse / Aporte</TableHead>
+                  <TableHead>Natureza</TableHead>
+                  <TableHead>Recorrência</TableHead>
+                  <TableHead>Destino</TableHead>
+                  <TableHead>Data Crédito</TableHead>
+                  <TableHead>Mês Ref.</TableHead>
+                  <TableHead className="text-right">Valor Aporte (R$)</TableHead>
+                  <TableHead className="text-center w-20">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {entradasFiltradas.length === 0 ? (
-                  <tr>
-                    <td colSpan={9} className="text-center text-muted" style={{ padding: '2rem' }}>
+                  <TableRow>
+                    <TableCell colSpan={9} className="text-center text-muted-foreground py-10">
                       Nenhum aporte financeiro registrado para o filtro selecionado.
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ) : (
                   entradasFiltradas.map(ent => {
                     const uni = unidades.find(u => u.id === ent.unidade_id);
                     return (
-                      <tr key={ent.id}>
-                        <td><strong>#{ent.id}</strong></td>
-                        <td>
-                          <strong>{ent.descricao}</strong>
+                      <TableRow key={ent.id}>
+                        <TableCell className="font-semibold text-muted-foreground">#{ent.id}</TableCell>
+                        <TableCell>
+                          <div className="font-medium text-foreground">{ent.descricao}</div>
                           {ent.observacoes && (
-                            <div className="text-muted" style={{ fontSize: '0.78rem' }}>
+                            <div className="text-xs text-muted-foreground mt-0.5">
                               {ent.observacoes}
                             </div>
                           )}
-                        </td>
-                        <td>
+                        </TableCell>
+                        <TableCell>
                           {ent.natureza === 'INVESTIMENTO' ? (
-                            <span className="badge badge-purple"><i className="fa-solid fa-building-columns"></i> Investimento</span>
+                            <Badge variant="purple" className="flex items-center gap-1 w-fit">
+                              <Landmark className="w-3 h-3" /> Investimento
+                            </Badge>
                           ) : (
-                            <span className="badge badge-cyan"><i className="fa-solid fa-receipt"></i> Custeio</span>
+                            <Badge variant="info" className="flex items-center gap-1 w-fit">
+                              <Receipt className="w-3 h-3" /> Custeio
+                            </Badge>
                           )}
-                        </td>
-                        <td>
+                        </TableCell>
+                        <TableCell>
                           {ent.tipo_recorrencia === 'RECORRENTE' ? (
-                            <span className="badge badge-emerald"><i className="fa-solid fa-rotate"></i> Recorrente</span>
+                            <Badge variant="success" className="flex items-center gap-1 w-fit">
+                              <RotateCw className="w-3 h-3" /> Recorrente
+                            </Badge>
                           ) : (
-                            <span className="badge badge-amber"><i className="fa-solid fa-bolt"></i> Parcela Única</span>
+                            <Badge variant="warning" className="flex items-center gap-1 w-fit">
+                              <Zap className="w-3 h-3" /> Parcela Única
+                            </Badge>
                           )}
-                        </td>
-                        <td>
+                        </TableCell>
+                        <TableCell>
                           {uni ? (
-                            <span className="badge badge-blue">{uni.nome}</span>
+                            <Badge variant="secondary" className="w-fit">{uni.nome}</Badge>
                           ) : (
-                            <span className="badge badge-cyan">GLOBAL (SMS)</span>
+                            <Badge variant="info" className="w-fit">GLOBAL (SMS)</Badge>
                           )}
-                        </td>
-                        <td>{formatarData(ent.data_credito)}</td>
-                        <td><span className="badge badge-purple">{ent.mes_referencia}</span></td>
-                        <td className="text-right" style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--emerald)' }}>
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {formatarData(ent.data_credito)}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="purple">{ent.mes_referencia}</Badge>
+                        </TableCell>
+                        <TableCell className="text-right font-bold text-emerald-600 dark:text-emerald-400">
                           {formatarMoeda(ent.valor)}
-                        </td>
-                        <td className="text-center">
+                        </TableCell>
+                        <TableCell className="text-center">
                           {!isReadOnly ? (
-                            <button 
-                              className="btn btn-rose btn-sm" 
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40 h-8 w-8"
                               title="Remover Entrada"
                               onClick={() => {
                                 if (confirm(`Deseja remover o aporte "${ent.descricao}" no valor de ${formatarMoeda(ent.valor)}?`)) {
@@ -376,21 +462,23 @@ export const OrcamentoTab: React.FC<Props> = ({
                                 }
                               }}
                             >
-                              <i className="fa-solid fa-trash"></i>
-                            </button>
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
                           ) : (
-                            <span className="text-muted text-sm"><i className="fa-solid fa-lock"></i> Somente Leitura</span>
+                            <span className="text-muted-foreground text-xs flex items-center justify-center gap-1">
+                              <Lock className="w-3 h-3" />
+                            </span>
                           )}
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     );
                   })
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

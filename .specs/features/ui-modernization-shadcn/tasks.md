@@ -382,9 +382,9 @@ T13 → T14 → T15 → T16
 - Skill: NONE
 
 **Done when**:
-- [ ] Financial balance cards and transaction tables restyled
-- [ ] Currency formatters and calculations remain intact
-- [ ] Gate check passes: `npx tsc --noEmit`
+- [x] Financial balance cards and transaction tables restyled
+- [x] Currency formatters and calculations remain intact
+- [x] Gate check passes: `npx tsc --noEmit`
 
 **Tests**: none
 **Gate**: Quick
