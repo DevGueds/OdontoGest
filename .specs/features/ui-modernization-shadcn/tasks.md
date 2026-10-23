@@ -266,10 +266,10 @@ T13 → T14 → T15 → T16
 - Skill: NONE
 
 **Done when**:
-- [ ] AppContent wrapped in ThemeProvider
-- [ ] Layout dynamically adjusts to sidebar expanded/collapsed state
-- [ ] No regression in data loading or modal state handlers
-- [ ] Gate check passes: `npx tsc --noEmit && npx vite build`
+- [x] AppContent wrapped in ThemeProvider
+- [x] Layout dynamically adjusts to sidebar expanded/collapsed state
+- [x] No regression in data loading or modal state handlers
+- [x] Gate check passes: `npx tsc --noEmit && npx vite build`
 
 **Tests**: none
 **Gate**: Full

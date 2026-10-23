@@ -20,6 +20,7 @@ import { Header } from './components/Header';
 import { Navigation } from './components/Navigation';
 import { Toast } from './components/Toast';
 import { LoginModal } from './components/LoginModal';
+import { Loader2 } from 'lucide-react';
 
 import { NovoPedidoTab } from './components/tabs/NovoPedidoTab';
 import { TriagemTab } from './components/tabs/TriagemTab';
@@ -47,6 +48,24 @@ export const AppContent: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const prevUserIdRef = React.useRef<number | null>(null);
+
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('odontogest-sidebar-collapsed') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const handleToggleSidebar = () => {
+    setIsSidebarCollapsed(prev => {
+      const next = !prev;
+      try {
+        localStorage.setItem('odontogest-sidebar-collapsed', String(next));
+      } catch {}
+      return next;
+    });
+  };
 
   const [unidades, setUnidades] = useState<UnidadeSaude[]>([]);
   const [materiais, setMateriais] = useState<Material[]>([]);
@@ -418,11 +437,11 @@ export const AppContent: React.FC = () => {
 
   if (authLoading) {
     return (
-      <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--bg-app)' }}>
-        <div style={{ textAlign: 'center' }}>
-          <i className="fa-solid fa-circle-notch fa-spin text-primary" style={{ fontSize: '3rem', marginBottom: '1rem' }}></i>
-          <h2>Validando Sessão HttpOnly & Tokens CSRF...</h2>
-          <p className="text-muted text-sm">Conformidade OWASP Top 10</p>
+      <div className="flex h-screen w-full items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100">
+        <div className="flex flex-col items-center gap-3 p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl max-w-sm text-center">
+          <Loader2 className="h-10 w-10 animate-spin text-teal-600 dark:text-teal-400" />
+          <h2 className="text-base font-bold font-display">Validando Sessão Segura...</h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Autenticação HttpOnly & Proteção CSRF OWASP</p>
         </div>
       </div>
     );
@@ -435,22 +454,24 @@ export const AppContent: React.FC = () => {
   const pendentesCount = pedidos.filter(p => p.status === 'SOLICITADO' || p.status === 'RECEBIDO').length;
 
   return (
-    <div className="app-layout">
+    <div className="min-h-screen flex flex-col bg-slate-50/70 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200">
       <Header 
         perfilAtual={perfilAtual}
         onExportarSQL={handleExportarSQL}
         onAbrirModalRelatorios={() => setModalRelatoriosOpen(true)}
       />
 
-      <div className="app-body">
+      <div className="flex flex-1 overflow-hidden">
         <Navigation 
           activeTab={activeTab}
           perfilAtual={perfilAtual}
           pendentesCount={pendentesCount}
           onSelectTab={handleSelectTab}
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={handleToggleSidebar}
         />
 
-        <main className="app-main">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 space-y-6">
         {activeTab === 'novo-pedido' && (
           <div className="tab-content active">
             <NovoPedidoTab 
