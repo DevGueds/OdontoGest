@@ -83,9 +83,9 @@ T13 → T14 → T15 → T16
 - Skill: NONE
 
 **Done when**:
-- [ ] Dependencies added to package.json and installed via npm
-- [ ] No installation errors or conflicts with React 19
-- [ ] Gate check passes: `npx tsc --noEmit`
+- [x] Dependencies added to package.json and installed via npm
+- [x] No installation errors or conflicts with React 19
+- [x] Gate check passes: `npx tsc --noEmit`
 
 **Tests**: none
 **Gate**: Quick
