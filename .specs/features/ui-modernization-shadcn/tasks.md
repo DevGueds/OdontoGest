@@ -105,10 +105,10 @@ T13 → T14 → T15 → T16
 - Skill: NONE
 
 **Done when**:
-- [ ] tailwind.config.js configured with dark mode class and color tokens
-- [ ] postcss.config.js configured with tailwindcss and autoprefixer
-- [ ] index.css contains @tailwind directives and Modern Clinical HSL variables
-- [ ] Gate check passes: `npx tsc --noEmit`
+- [x] tailwind.config.js configured with dark mode class and color tokens
+- [x] postcss.config.js configured with tailwindcss and autoprefixer
+- [x] index.css contains @tailwind directives and Modern Clinical HSL variables
+- [x] Gate check passes: `npx tsc --noEmit`
 
 **Tests**: none
 **Gate**: Quick
