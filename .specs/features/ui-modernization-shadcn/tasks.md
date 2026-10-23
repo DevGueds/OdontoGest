@@ -244,9 +244,9 @@ T13 → T14 → T15 → T16
 - Skill: NONE
 
 **Done when**:
-- [ ] Toast notifications render with smooth animations and Lucide icons
-- [ ] LoginModal uses modern card/dialog styling with high contrast inputs
-- [ ] Gate check passes: `npx tsc --noEmit`
+- [x] Toast notifications render with smooth animations and Lucide icons
+- [x] LoginModal uses modern card/dialog styling with high contrast inputs
+- [x] Gate check passes: `npx tsc --noEmit`
 
 **Tests**: none
 **Gate**: Quick

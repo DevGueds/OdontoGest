@@ -1,12 +1,24 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { 
+  Lock, 
+  Mail, 
+  KeyRound, 
+  Eye, 
+  EyeOff, 
+  LogIn, 
+  Loader2, 
+  AlertTriangle,
+  Activity
+} from 'lucide-react';
 
 export const LoginModal: React.FC = () => {
   const { login, loading } = useAuth();
   const [email, setEmail] = useState<string>('');
   const [senha, setSenha] = useState<string>('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-
   const [showSenha, setShowSenha] = useState<boolean>(false);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -26,81 +38,96 @@ export const LoginModal: React.FC = () => {
   };
 
   return (
-    <div className="modal active" style={{ backgroundColor: 'rgba(15, 23, 42, 0.88)' }}>
-      <div className="modal-content" style={{ maxWidth: '460px', borderRadius: 'var(--radius-lg)' }}>
-        <div className="modal-header" style={{ background: 'linear-gradient(135deg, var(--primary), var(--cyan))', color: '#fff', padding: '1.25rem 1.5rem' }}>
-          <h3 style={{ color: '#fff', fontSize: '1.2rem' }}>
-            <i className="fa-solid fa-lock"></i> Autenticação de Usuário
-          </h3>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in-0 duration-200">
+      <div className="w-full max-w-md rounded-2xl border border-slate-200/80 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900 overflow-hidden">
+        {/* Modal Header */}
+        <div className="bg-gradient-to-tr from-teal-600 via-teal-700 to-cyan-600 p-6 text-white text-center relative">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm shadow-md mb-3 border border-white/20">
+            <Activity className="h-6 w-6 text-white" />
+          </div>
+          <h2 className="text-xl font-bold font-display tracking-tight">
+            Acesso ao OdontoGest
+          </h2>
+          <p className="mt-1 text-xs text-teal-100 font-medium">
+            Sistema de Gestão Odontológica & Almoxarifado
+          </p>
         </div>
 
-        <div className="modal-body" style={{ padding: '1.5rem' }}>
-          <p className="text-muted text-sm margin-bottom-sm">
-            Informe suas credenciais para acessar o sistema. O perfil <strong>Administrador</strong> permite cadastrar os demais usuários e unidades.
+        {/* Modal Body */}
+        <div className="p-6 md:p-8 space-y-5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 text-center leading-relaxed">
+            Informe suas credenciais para acessar o painel. O perfil <strong>Administrador</strong> possui permissão para gerenciar cadastros e estoques.
           </p>
 
           {errorMsg && (
-            <div style={{ background: 'var(--rose-light)', color: 'var(--rose)', padding: '0.65rem 0.9rem', borderRadius: 'var(--radius-md)', fontSize: '0.85rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <i className="fa-solid fa-triangle-exclamation"></i>
+            <div className="flex items-center gap-2.5 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-700 dark:border-rose-800/60 dark:bg-rose-950/50 dark:text-rose-300">
+              <AlertTriangle className="h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400" />
               <span>{errorMsg}</span>
             </div>
           )}
 
-          <form onSubmit={handleLogin}>
-            <div className="form-group margin-bottom-sm">
-              <label htmlFor="loginEmail">Email *</label>
-              <input 
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-1.5">
+              <label htmlFor="loginEmail" className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <Mail className="h-3.5 w-3.5 text-teal-600 dark:text-teal-400" />
+                E-mail institucional *
+              </label>
+              <Input
                 type="email"
-                id="loginEmail" 
-                className="form-control"
-                placeholder="exemplo@dominio.com"
+                id="loginEmail"
+                placeholder="seu.email@saude.gov.br"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                className="h-10"
               />
             </div>
 
-            <div className="form-group margin-bottom-md">
-              <label htmlFor="loginSenha">Senha de Acesso *</label>
-              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                <input 
-                  type={showSenha ? "text" : "password"}
-                  id="loginSenha" 
-                  className="form-control"
+            <div className="space-y-1.5">
+              <label htmlFor="loginSenha" className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <KeyRound className="h-3.5 w-3.5 text-teal-600 dark:text-teal-400" />
+                Senha de Acesso *
+              </label>
+              <div className="relative">
+                <Input
+                  type={showSenha ? 'text' : 'password'}
+                  id="loginSenha"
                   placeholder="••••••••"
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}
                   required
-                  style={{ paddingRight: '2.5rem' }}
+                  className="h-10 pr-10"
                 />
                 <button
                   type="button"
                   onClick={() => setShowSenha(!showSenha)}
-                  style={{
-                    position: 'absolute',
-                    right: '0.5rem',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    color: 'var(--text-muted)',
-                    padding: '0.25rem 0.5rem',
-                    fontSize: '0.95rem'
-                  }}
-                  title={showSenha ? "Ocultar senha" : "Ver senha"}
+                  className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                  title={showSenha ? 'Ocultar senha' : 'Ver senha'}
                 >
-                  <i className={`fa-solid ${showSenha ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                  {showSenha ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </div>
 
-            <div className="form-actions margin-top-md">
-              <button type="submit" className="btn btn-primary btn-lg" style={{ width: '100%' }} disabled={loading}>
+            <div className="pt-2">
+              <Button
+                type="submit"
+                size="lg"
+                className="w-full text-sm font-semibold"
+                disabled={loading}
+              >
                 {loading ? (
-                  <><i className="fa-solid fa-spinner fa-spin"></i> Autenticando...</>
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Autenticando...</span>
+                  </>
                 ) : (
-                  <><i className="fa-solid fa-right-to-bracket"></i> Entrar no Sistema</>
+                  <>
+                    <LogIn className="h-4 w-4" />
+                    <span>Entrar no Sistema</span>
+                  </>
                 )}
-              </button>
+              </Button>
             </div>
           </form>
         </div>
