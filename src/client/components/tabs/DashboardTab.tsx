@@ -9,6 +9,42 @@ import {
   EntradaRecurso 
 } from '../../types';
 import { dbService } from '../../services/db';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui/card';
+import { Badge } from '../ui/badge';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { 
+  Table, 
+  TableHeader, 
+  TableBody, 
+  TableFooter, 
+  TableHead, 
+  TableRow, 
+  TableCell 
+} from '../ui/table';
+import { 
+  TrendingUp, 
+  CheckCircle2, 
+  CreditCard, 
+  Landmark, 
+  Clock, 
+  AlertTriangle, 
+  PieChart, 
+  BarChart3, 
+  Boxes, 
+  Calculator, 
+  ClipboardList, 
+  FileSpreadsheet, 
+  PlusCircle, 
+  Edit2, 
+  ArrowRight, 
+  FileText, 
+  Check, 
+  Truck, 
+  Ban, 
+  Search,
+  PackageCheck
+} from 'lucide-react';
 
 interface Props {
   pedidos: PedidoPBS[];
@@ -47,10 +83,6 @@ export const DashboardTab: React.FC<Props> = ({
   // 1. Cálculos de Estatísticas e Saldos Segregados
   const pendentesCount = useMemo(() => 
     pedidos.filter(p => p.status === 'SOLICITADO' || p.status === 'RECEBIDO').length
-  , [pedidos]);
-
-  const estatsGastos = useMemo(() => 
-    dbService.getEstatisticasGastos(pedidos)
   , [pedidos]);
 
   const saldosNatureza = useMemo(() => 
@@ -93,495 +125,575 @@ export const DashboardTab: React.FC<Props> = ({
   // Renderização semântica de badges de status
   const renderBadgeStatus = (status: StatusPedido) => {
     switch (status) {
-      case 'SOLICITADO': return <span className="badge badge-amber"><i className="fa-solid fa-clock"></i> SOLICITADO</span>;
-      case 'RECEBIDO': return <span className="badge badge-cyan"><i className="fa-solid fa-box-archive"></i> RECEBIDO</span>;
-      case 'ATENDIDO_PARCIAL': return <span className="badge badge-purple"><i className="fa-solid fa-boxes-stacked"></i> ATENDIDO PARCIAL</span>;
-      case 'ATENDIDO_TOTAL': return <span className="badge badge-emerald"><i className="fa-solid fa-check"></i> ATENDIDO TOTAL</span>;
-      case 'ENVIADO': return <span className="badge badge-blue"><i className="fa-solid fa-truck"></i> ENVIADO</span>;
-      case 'CANCELADO': return <span className="badge badge-rose"><i className="fa-solid fa-ban"></i> CANCELADO</span>;
-      default: return <span className="badge badge-blue">{status}</span>;
+      case 'SOLICITADO':
+        return <Badge variant="warning"><Clock className="h-3 w-3" /> SOLICITADO</Badge>;
+      case 'RECEBIDO':
+        return <Badge variant="info"><PackageCheck className="h-3 w-3" /> RECEBIDO</Badge>;
+      case 'ATENDIDO_PARCIAL':
+        return <Badge variant="purple"><Boxes className="h-3 w-3" /> PARCIAL</Badge>;
+      case 'ATENDIDO_TOTAL':
+        return <Badge variant="success"><Check className="h-3 w-3" /> ATENDIDO</Badge>;
+      case 'ENVIADO':
+        return <Badge variant="default"><Truck className="h-3 w-3" /> ENVIADO</Badge>;
+      case 'CANCELADO':
+        return <Badge variant="destructive"><Ban className="h-3 w-3" /> CANCELADO</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
     }
   };
 
-  // Cálculo de percentual das categorias em Custeio para a Data Visualization
   const totalCusteio = saldosNatureza.gastoCusteioTotal || 1;
   const pctInsumos = Math.round((saldosNatureza.detalhamentoCusteio.insumos / totalCusteio) * 100);
   const pctRh = Math.round((saldosNatureza.detalhamentoCusteio.rhHonorarios / totalCusteio) * 100);
   const pctManutencao = Math.round((saldosNatureza.detalhamentoCusteio.manutencao / totalCusteio) * 100);
 
-  // Maior gasto entre unidades para normalização de barras
   const maxGastoUnidade = useMemo(() => {
     return Math.max(...consolidacaoUnidades.map(u => u.custoTotalGeral), 1);
   }, [consolidacaoUnidades]);
 
   return (
-    <div className="panel-stack" style={{ gap: '1.5rem' }}>
+    <div className="space-y-6">
       
       {/* HEADER DE CONTEXTO E NÍVEL ESTRATÉGICO */}
-      <div className="card" style={{ borderLeft: '5px solid var(--primary)', background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)' }}>
-        <div className="card-header flex-between" style={{ flexWrap: 'wrap', gap: '1rem', paddingBottom: '0.5rem' }}>
+      <Card className="border-l-4 border-l-teal-600 bg-gradient-to-r from-white via-white to-slate-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800/60">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.2rem' }}>
-              <span className="badge badge-cyan" style={{ fontSize: '0.75rem', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-                <i className="fa-solid fa-chart-line"></i> Dashboard Estratégico & Tático
-              </span>
-              <span className="badge badge-emerald" style={{ fontSize: '0.75rem' }}>
-                <i className="fa-solid fa-circle-check"></i> Operação Normal
-              </span>
+            <div className="flex items-center gap-2 mb-2">
+              <Badge variant="info">
+                <TrendingUp className="h-3 w-3" />
+                DASHBOARD ESTRATÉGICO
+              </Badge>
+              <Badge variant="success">
+                <CheckCircle2 className="h-3 w-3" />
+                Operação Ativa
+              </Badge>
             </div>
-            <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)' }}>
+            <CardTitle className="text-xl md:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
               Consolidação Financeira & Gestão de Recursos de Saúde Bucal
-            </h2>
-            <p className="text-muted text-sm">
-              Visão macro dos aportes, saldos disponíveis segregados por natureza, liquidez de insumos e despesas por unidade.
-            </p>
+            </CardTitle>
+            <CardDescription className="mt-1">
+              Visão consolidada dos aportes, saldos disponíveis por natureza, liquidez de insumos e despesas por unidade.
+            </CardDescription>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
-            {onAbrirModalRelatorios && (
-              <button className="btn btn-emerald" onClick={onAbrirModalRelatorios} title="Gerar Relatórios em PDF e Excel">
-                <i className="fa-solid fa-file-export"></i> Exportar Relatórios (PDF / Excel)
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
+          {onAbrirModalRelatorios && (
+            <Button 
+              variant="emerald" 
+              onClick={onAbrirModalRelatorios} 
+              title="Gerar Relatórios em PDF e Excel"
+              className="shrink-0"
+            >
+              <FileSpreadsheet className="h-4 w-4 mr-1" />
+              Exportar Relatórios
+            </Button>
+          )}
+        </CardHeader>
+      </Card>
 
-      {/* NÍVEL 1: MACRO KPIS DE ALTO IMPACTO (PIRÂMIDE DE INFORMAÇÃO) */}
-      <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+      {/* NÍVEL 1: MACRO KPIS DE ALTO IMPACTO */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
         {/* KPI 1: Saldo Custeio */}
-        <div className="card" style={{ padding: '1.2rem', position: 'relative', overflow: 'hidden', borderTop: '4px solid var(--primary)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.6rem' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Saldo Disponível (Custeio)
-            </span>
-            <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'var(--primary-light)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <i className="fa-solid fa-credit-card"></i>
+        <Card className="border-t-4 border-t-teal-600 relative overflow-hidden">
+          <CardContent className="p-5">
+            <div className="flex items-start justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Saldo Custeio (Disponível)
+              </span>
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-50 text-teal-700 dark:bg-teal-950/80 dark:text-teal-300">
+                <CreditCard className="h-5 w-5" />
+              </div>
             </div>
-          </div>
-          
-          <h3 style={{ fontSize: '1.65rem', fontWeight: 800, color: saldosNatureza.saldoCusteioDisponivel >= 0 ? 'var(--emerald)' : 'var(--rose)', margin: '0.2rem 0' }}>
-            {formatarMoeda(saldosNatureza.saldoCusteioDisponivel)}
-          </h3>
+            
+            <div className={`text-2xl font-black mt-2 font-display ${saldosNatureza.saldoCusteioDisponivel >= 0 ? 'text-teal-600 dark:text-teal-400' : 'text-rose-600 dark:text-rose-400'}`}>
+              {formatarMoeda(saldosNatureza.saldoCusteioDisponivel)}
+            </div>
 
-          <div style={{ marginTop: '0.6rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>
-              <span>Comprometido: <strong>{saldosNatureza.percentualCusteioComprometido.toFixed(1)}%</strong></span>
-              <span>Total: {formatarMoeda(saldosNatureza.orcamentoCusteioTotal)}</span>
+            <div className="mt-3 space-y-1.5">
+              <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
+                <span>Comprometido: <strong className="text-slate-800 dark:text-slate-200">{saldosNatureza.percentualCusteioComprometido.toFixed(1)}%</strong></span>
+                <span>Total: {formatarMoeda(saldosNatureza.orcamentoCusteioTotal)}</span>
+              </div>
+              <div className="h-2 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                <div 
+                  className={`h-full transition-all duration-500 rounded-full ${
+                    saldosNatureza.percentualCusteioComprometido > 85 
+                      ? 'bg-rose-500' 
+                      : saldosNatureza.percentualCusteioComprometido > 60 
+                      ? 'bg-amber-500' 
+                      : 'bg-teal-500'
+                  }`}
+                  style={{ width: `${Math.min(100, saldosNatureza.percentualCusteioComprometido)}%` }}
+                />
+              </div>
             </div>
-            {/* Progress Bar */}
-            <div style={{ width: '100%', height: '6px', background: '#e2e8f0', borderRadius: '999px', overflow: 'hidden' }}>
-              <div 
-                style={{ 
-                  width: `${Math.min(100, saldosNatureza.percentualCusteioComprometido)}%`, 
-                  height: '100%', 
-                  background: saldosNatureza.percentualCusteioComprometido > 85 ? 'var(--rose)' : (saldosNatureza.percentualCusteioComprometido > 60 ? 'var(--amber)' : 'var(--primary)'),
-                  transition: 'width 0.4s ease'
-                }} 
-              />
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* KPI 2: Saldo Investimento */}
-        <div className="card" style={{ padding: '1.2rem', position: 'relative', overflow: 'hidden', borderTop: '4px solid var(--purple)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.6rem' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Saldo Disponível (Investimento)
-            </span>
-            <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'var(--purple-light)', color: 'var(--purple)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <i className="fa-solid fa-building-columns"></i>
+        <Card className="border-t-4 border-t-purple-600 relative overflow-hidden">
+          <CardContent className="p-5">
+            <div className="flex items-start justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Saldo Investimento (Disponível)
+              </span>
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-purple-50 text-purple-700 dark:bg-purple-950/80 dark:text-purple-300">
+                <Landmark className="h-5 w-5" />
+              </div>
             </div>
-          </div>
 
-          <h3 style={{ fontSize: '1.65rem', fontWeight: 800, color: saldosNatureza.saldoInvestimentoDisponivel >= 0 ? 'var(--purple)' : 'var(--rose)', margin: '0.2rem 0' }}>
-            {formatarMoeda(saldosNatureza.saldoInvestimentoDisponivel)}
-          </h3>
+            <div className={`text-2xl font-black mt-2 font-display ${saldosNatureza.saldoInvestimentoDisponivel >= 0 ? 'text-purple-600 dark:text-purple-400' : 'text-rose-600 dark:text-rose-400'}`}>
+              {formatarMoeda(saldosNatureza.saldoInvestimentoDisponivel)}
+            </div>
 
-          <div style={{ marginTop: '0.6rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>
-              <span>Comprometido: <strong>{saldosNatureza.percentualInvestimentoComprometido.toFixed(1)}%</strong></span>
-              <span>Total: {formatarMoeda(saldosNatureza.orcamentoInvestimentoTotal)}</span>
+            <div className="mt-3 space-y-1.5">
+              <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
+                <span>Comprometido: <strong className="text-slate-800 dark:text-slate-200">{saldosNatureza.percentualInvestimentoComprometido.toFixed(1)}%</strong></span>
+                <span>Total: {formatarMoeda(saldosNatureza.orcamentoInvestimentoTotal)}</span>
+              </div>
+              <div className="h-2 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                <div 
+                  className="h-full bg-purple-500 transition-all duration-500 rounded-full"
+                  style={{ width: `${Math.min(100, saldosNatureza.percentualInvestimentoComprometido)}%` }}
+                />
+              </div>
             </div>
-            {/* Progress Bar */}
-            <div style={{ width: '100%', height: '6px', background: '#e2e8f0', borderRadius: '999px', overflow: 'hidden' }}>
-              <div 
-                style={{ 
-                  width: `${Math.min(100, saldosNatureza.percentualInvestimentoComprometido)}%`, 
-                  height: '100%', 
-                  background: 'var(--purple)',
-                  transition: 'width 0.4s ease'
-                }} 
-              />
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* KPI 3: Pedidos Pendentes */}
-        <div className="card" style={{ padding: '1.2rem', position: 'relative', borderTop: '4px solid var(--amber)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.6rem' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Pedidos Pendentes
-            </span>
-            <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'var(--amber-light)', color: 'var(--amber)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <i className="fa-solid fa-clock"></i>
+        <Card className="border-t-4 border-t-amber-500 relative overflow-hidden">
+          <CardContent className="p-5">
+            <div className="flex items-start justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Pedidos Pendentes
+              </span>
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50 text-amber-700 dark:bg-amber-950/80 dark:text-amber-300">
+                <Clock className="h-5 w-5" />
+              </div>
             </div>
-          </div>
 
-          <h3 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--text-main)', margin: '0.2rem 0' }}>
-            {pendentesCount}
-          </h3>
+            <div className="text-2xl font-black mt-2 font-display text-slate-900 dark:text-white">
+              {pendentesCount}
+            </div>
 
-          <span className="text-muted" style={{ fontSize: '0.8rem' }}>
-            {pendentesCount > 0 ? '⚠️ Necessita atenção do Almoxarifado' : '✅ Nenhuma solicitação pendente'}
-          </span>
-        </div>
+            <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+              {pendentesCount > 0 ? '⚠️ Requer atendimento pelo Almoxarifado' : '✅ Nenhuma solicitação pendente'}
+            </p>
+          </CardContent>
+        </Card>
 
         {/* KPI 4: Insumos Críticos */}
-        <div className="card" style={{ padding: '1.2rem', position: 'relative', borderTop: '4px solid var(--rose)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.6rem' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Insumos p/ Reabastecer
-            </span>
-            <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'var(--rose-light)', color: 'var(--rose)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <i className="fa-solid fa-triangle-exclamation"></i>
+        <Card className="border-t-4 border-t-rose-500 relative overflow-hidden">
+          <CardContent className="p-5">
+            <div className="flex items-start justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Insumos p/ Reabastecer
+              </span>
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-rose-50 text-rose-700 dark:bg-rose-950/80 dark:text-rose-300">
+                <AlertTriangle className="h-5 w-5" />
+              </div>
             </div>
-          </div>
 
-          <h3 style={{ fontSize: '1.65rem', fontWeight: 800, color: materiaisCriticos.length > 0 ? 'var(--rose)' : 'var(--emerald)', margin: '0.2rem 0' }}>
-            {materiaisCriticos.length}
-          </h3>
+            <div className={`text-2xl font-black mt-2 font-display ${materiaisCriticos.length > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+              {materiaisCriticos.length}
+            </div>
 
-          <span className="text-muted" style={{ fontSize: '0.8rem' }}>
-            {esgotadosCount > 0 ? `🚨 ${esgotadosCount} com estoque esgotado` : 'Insumos com estoque baixo (<20 un)'}
-          </span>
-        </div>
+            <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+              {esgotadosCount > 0 ? `🚨 ${esgotadosCount} com estoque esgotado` : 'Insumos com estoque baixo (<20 un)'}
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* NÍVEL 2: VISUALIZAÇÃO DE DADOS & COMPARAÇÕES (DATA VISUALIZATION) */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1.2rem' }}>
+      {/* NÍVEL 2: VISUALIZAÇÃO DE DADOS & COMPARAÇÕES */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
-        {/* GRÁFICO 1: Composição das Despesas de Custeio (Visual Bar Breakdown) */}
-        <div className="card">
-          <div className="card-header flex-between">
+        {/* GRÁFICO 1: Composição das Despesas de Custeio */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-3">
             <div>
-              <h3><i className="fa-solid fa-chart-pie text-primary"></i> Composição das Saídas de Custeio</h3>
-              <p className="text-muted text-sm">Distribuição percentual dos gastos operacionais realizados</p>
+              <CardTitle className="text-base font-bold">
+                <PieChart className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+                Composição das Saídas de Custeio
+              </CardTitle>
+              <CardDescription>
+                Distribuição percentual dos gastos operacionais realizados
+              </CardDescription>
             </div>
-            <span className="badge badge-cyan">{formatarMoeda(saldosNatureza.gastoCusteioTotal)}</span>
-          </div>
+            <Badge variant="info">{formatarMoeda(saldosNatureza.gastoCusteioTotal)}</Badge>
+          </CardHeader>
 
-          <div className="card-body">
+          <CardContent className="space-y-4">
             {/* Multi-Segmented Progress Bar */}
-            <div style={{ marginBottom: '1.2rem' }}>
-              <div style={{ display: 'flex', height: '14px', borderRadius: '6px', overflow: 'hidden', background: '#e2e8f0' }}>
-                <div style={{ width: `${pctInsumos}%`, background: 'var(--primary)', transition: 'width 0.4s ease' }} title={`Insumos: ${pctInsumos}%`} />
-                <div style={{ width: `${pctRh}%`, background: 'var(--purple)', transition: 'width 0.4s ease' }} title={`RH: ${pctRh}%`} />
-                <div style={{ width: `${pctManutencao}%`, background: 'var(--amber)', transition: 'width 0.4s ease' }} title={`Manutenção: ${pctManutencao}%`} />
-              </div>
+            <div className="flex h-3.5 w-full rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800">
+              <div style={{ width: `${pctInsumos}%` }} className="bg-teal-600 transition-all duration-300" title={`Insumos: ${pctInsumos}%`} />
+              <div style={{ width: `${pctRh}%` }} className="bg-purple-600 transition-all duration-300" title={`RH: ${pctRh}%`} />
+              <div style={{ width: `${pctManutencao}%` }} className="bg-amber-500 transition-all duration-300" title={`Manutenção: ${pctManutencao}%`} />
             </div>
 
             {/* Visual Breakdown Legends */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.8rem', textAlign: 'center' }}>
-              <div style={{ background: '#f8fafc', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary)' }} />
+            <div className="grid grid-cols-3 gap-3 text-center pt-2">
+              <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-3 dark:border-slate-800 dark:bg-slate-800/40">
+                <div className="flex items-center justify-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
+                  <span className="h-2 w-2 rounded-full bg-teal-600" />
                   Insumos (PBS)
                 </div>
-                <strong style={{ display: 'block', fontSize: '0.95rem', marginTop: '0.2rem' }}>{formatarMoeda(saldosNatureza.detalhamentoCusteio.insumos)}</strong>
-                <span className="text-muted" style={{ fontSize: '0.75rem' }}>{pctInsumos}% do total</span>
+                <div className="text-sm font-bold text-slate-800 dark:text-slate-100 mt-1">
+                  {formatarMoeda(saldosNatureza.detalhamentoCusteio.insumos)}
+                </div>
+                <span className="text-[11px] text-slate-400">{pctInsumos}% do total</span>
               </div>
 
-              <div style={{ background: '#f8fafc', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--purple)' }} />
+              <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-3 dark:border-slate-800 dark:bg-slate-800/40">
+                <div className="flex items-center justify-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
+                  <span className="h-2 w-2 rounded-full bg-purple-600" />
                   Salários (RH)
                 </div>
-                <strong style={{ display: 'block', fontSize: '0.95rem', marginTop: '0.2rem' }}>{formatarMoeda(saldosNatureza.detalhamentoCusteio.rhHonorarios)}</strong>
-                <span className="text-muted" style={{ fontSize: '0.75rem' }}>{pctRh}% do total</span>
+                <div className="text-sm font-bold text-slate-800 dark:text-slate-100 mt-1">
+                  {formatarMoeda(saldosNatureza.detalhamentoCusteio.rhHonorarios)}
+                </div>
+                <span className="text-[11px] text-slate-400">{pctRh}% do total</span>
               </div>
 
-              <div style={{ background: '#f8fafc', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--amber)' }} />
+              <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-3 dark:border-slate-800 dark:bg-slate-800/40">
+                <div className="flex items-center justify-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
+                  <span className="h-2 w-2 rounded-full bg-amber-500" />
                   Manutenções
                 </div>
-                <strong style={{ display: 'block', fontSize: '0.95rem', marginTop: '0.2rem' }}>{formatarMoeda(saldosNatureza.detalhamentoCusteio.manutencao)}</strong>
-                <span className="text-muted" style={{ fontSize: '0.75rem' }}>{pctManutencao}% do total</span>
+                <div className="text-sm font-bold text-slate-800 dark:text-slate-100 mt-1">
+                  {formatarMoeda(saldosNatureza.detalhamentoCusteio.manutencao)}
+                </div>
+                <span className="text-[11px] text-slate-400">{pctManutencao}% do total</span>
               </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
-        {/* GRÁFICO 2: Comparativo de Gastos Por Unidade de Saúde (Data Visualization Chart) */}
-        <div className="card">
-          <div className="card-header flex-between">
+        {/* GRÁFICO 2: Comparativo de Gastos Por Unidade de Saúde */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-3">
             <div>
-              <h3><i className="fa-solid fa-chart-bar text-purple"></i> Comparativo de Gastos por Unidade</h3>
-              <p className="text-muted text-sm">Volume financeiro total consumido por cada posto/unidade</p>
+              <CardTitle className="text-base font-bold">
+                <BarChart3 className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                Comparativo de Gastos por Unidade
+              </CardTitle>
+              <CardDescription>
+                Volume financeiro total consumido por cada posto/unidade
+              </CardDescription>
             </div>
-            <span className="badge badge-purple">{unidades.length} Unidades</span>
-          </div>
+            <Badge variant="purple">{unidades.length} Unidades</Badge>
+          </CardHeader>
 
-          <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-            {consolidacaoUnidades.map(u => {
+          <CardContent className="space-y-3 max-h-[260px] overflow-y-auto pr-1">
+            {consolidacaoUnidades.map((u) => {
               const pct = Math.round((u.custoTotalGeral / maxGastoUnidade) * 100);
               return (
-                <div key={u.unidadeId}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.25rem' }}>
-                    <strong>{u.nome} <span className="badge badge-cyan" style={{ padding: '1px 6px', fontSize: '0.7rem' }}>{u.tipo}</span></strong>
-                    <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>{formatarMoeda(u.custoTotalGeral)}</span>
+                <div key={u.unidadeId} className="space-y-1">
+                  <div className="flex justify-between text-xs">
+                    <span className="font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                      {u.nome}
+                      <span className="rounded bg-teal-50 px-1.5 py-0.2 text-[10px] font-semibold text-teal-700 dark:bg-teal-950 dark:text-teal-300">
+                        {u.tipo}
+                      </span>
+                    </span>
+                    <span className="font-bold text-slate-900 dark:text-slate-100">
+                      {formatarMoeda(u.custoTotalGeral)}
+                    </span>
                   </div>
-                  <div style={{ width: '100%', height: '10px', background: '#f1f5f9', borderRadius: '6px', overflow: 'hidden' }}>
+                  <div className="h-2 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                     <div 
-                      style={{ 
-                        width: `${pct}%`, 
-                        height: '100%', 
-                        background: 'linear-gradient(90deg, var(--primary) 0%, var(--purple) 100%)', 
-                        borderRadius: '6px',
-                        transition: 'width 0.4s ease'
-                      }} 
+                      className="h-full bg-gradient-to-r from-teal-500 to-purple-600 rounded-full transition-all duration-300"
+                      style={{ width: `${pct}%` }}
                     />
                   </div>
                 </div>
               );
             })}
-          </div>
-        </div>
-
+          </CardContent>
+        </Card>
       </div>
 
-      {/* NÍVEL 3: DETALHAMENTO OPERACIONAL & FOCO NA AÇÃO (DRILL-DOWN TABELAS) */}
+      {/* NÍVEL 3: DETALHAMENTO OPERACIONAL */}
 
-      {/* Painel Alerta de Insumos Críticos (Lista com Ações Diretas) */}
-      <div className="card" style={{ borderLeft: '4px solid var(--rose)' }}>
-        <div className="card-header flex-between" style={{ flexWrap: 'wrap', gap: '1rem' }}>
+      {/* Painel Alerta de Insumos Críticos */}
+      <Card className="border-l-4 border-l-rose-500">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h3><i className="fa-solid fa-boxes-stacked text-rose"></i> Alertas de Reabastecimento de Insumos Críticos</h3>
-            <p className="text-muted text-sm">Ações rápidas para reposição de estoque e reordenamento</p>
+            <CardTitle className="text-base font-bold text-rose-700 dark:text-rose-400">
+              <Boxes className="h-4 w-4" />
+              Alertas de Reabastecimento de Insumos Críticos
+            </CardTitle>
+            <CardDescription>
+              Ações rápidas para reposição de estoque e reordenamento
+            </CardDescription>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-            <input 
-              type="text" 
-              className="form-control" 
-              style={{ width: '180px', padding: '4px 10px', fontSize: '0.82rem' }}
-              placeholder="Buscar insumo..."
-              value={buscaAlerta}
-              onChange={(e) => setBuscaAlerta(e.target.value)}
-            />
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="relative w-44">
+              <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
+              <Input
+                type="text"
+                placeholder="Buscar insumo..."
+                value={buscaAlerta}
+                onChange={(e) => setBuscaAlerta(e.target.value)}
+                className="h-8 pl-8 text-xs"
+              />
+            </div>
 
-            <div className="btn-group">
-              <button 
-                className={`btn btn-sm ${filtroAlerta === 'todos' ? 'btn-primary' : 'btn-outline'}`}
+            <div className="flex rounded-lg border border-slate-200 dark:border-slate-800 p-0.5 bg-slate-100 dark:bg-slate-800/60">
+              <button
+                type="button"
                 onClick={() => setFiltroAlerta('todos')}
+                className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${
+                  filtroAlerta === 'todos'
+                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                }`}
               >
                 Todos ({materiaisCriticos.length})
               </button>
-              <button 
-                className={`btn btn-sm ${filtroAlerta === 'esgotados' ? 'btn-rose' : 'btn-outline'}`}
+              <button
+                type="button"
                 onClick={() => setFiltroAlerta('esgotados')}
+                className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${
+                  filtroAlerta === 'esgotados'
+                    ? 'bg-rose-600 text-white shadow-sm'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                }`}
               >
                 Esgotados ({esgotadosCount})
               </button>
-              <button 
-                className={`btn btn-sm ${filtroAlerta === 'baixo' ? 'btn-amber' : 'btn-outline'}`}
+              <button
+                type="button"
                 onClick={() => setFiltroAlerta('baixo')}
+                className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${
+                  filtroAlerta === 'baixo'
+                    ? 'bg-amber-500 text-white shadow-sm'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                }`}
               >
-                Estoque Baixo ({baixoCount})
+                Baixo ({baixoCount})
               </button>
             </div>
           </div>
-        </div>
+        </CardHeader>
 
-        <div className="card-body">
-          <div className="table-responsive">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Insumo / Material</th>
-                  <th>Natureza</th>
-                  <th>Fornecedor</th>
-                  <th>Estoque Atual</th>
-                  <th>Valor Est.</th>
-                  <th className="text-center">Ações de Reposição</th>
-                </tr>
-              </thead>
-              <tbody>
-                {materiaisExibidos.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="text-center text-muted" style={{ padding: '1.5rem' }}>
-                      ✅ Nenhum insumo necessita de reposição para o filtro selecionado.
-                    </td>
-                  </tr>
-                ) : (
-                  materiaisExibidos.map(m => {
-                    const est = m.qtd_estoque ?? 0;
-                    return (
-                      <tr key={m.id}>
-                        <td><strong>#{m.id}</strong></td>
-                        <td><strong>{m.descricao}</strong></td>
-                        <td>
-                          {m.natureza === 'INVESTIMENTO' ? (
-                            <span className="badge badge-purple">Investimento</span>
-                          ) : (
-                            <span className="badge badge-cyan">Custeio</span>
-                          )}
-                        </td>
-                        <td>
-                          {m.fornecedor ? (
-                            <span className="text-muted" style={{ fontSize: '0.82rem' }}>{m.fornecedor}</span>
-                          ) : (
-                            <span className="text-muted" style={{ fontSize: '0.82rem' }}>Não inf.</span>
-                          )}
-                        </td>
-                        <td>
-                          {est <= 0 ? (
-                            <span className="badge badge-rose"><i className="fa-solid fa-circle-xmark"></i> 0 {m.unidade_medida} (Esgotado)</span>
-                          ) : (
-                            <span className="badge badge-amber"><i className="fa-solid fa-triangle-exclamation"></i> {est} {m.unidade_medida} (Baixo)</span>
-                          )}
-                        </td>
-                        <td>{formatarMoeda(m.valor_estimado || 0)}</td>
-                        <td className="text-center">
-                          <div className="btn-group">
-                            <button className="btn btn-emerald btn-sm" onClick={() => onAbrirAjusteEstoque(m)} title="Repor Estoque">
-                              <i className="fa-solid fa-plus-circle"></i> Repor Estoque
-                            </button>
-                            <button className="btn btn-outline btn-sm" onClick={() => onAbrirEditarMaterial(m)} title="Editar Insumo">
-                              <i className="fa-solid fa-pen"></i> Editar
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-16">ID</TableHead>
+                <TableHead>Insumo / Material</TableHead>
+                <TableHead>Natureza</TableHead>
+                <TableHead>Fornecedor</TableHead>
+                <TableHead>Estoque Atual</TableHead>
+                <TableHead>Valor Est.</TableHead>
+                <TableHead className="text-center">Ações de Reposição</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {materiaisExibidos.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center text-slate-500 py-6">
+                    ✅ Nenhum insumo necessita de reposição para o filtro selecionado.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                materiaisExibidos.map((m) => {
+                  const est = m.qtd_estoque ?? 0;
+                  return (
+                    <TableRow key={m.id}>
+                      <TableCell className="font-mono text-xs text-slate-500">#{m.id}</TableCell>
+                      <TableCell className="font-semibold text-slate-900 dark:text-slate-100">{m.descricao}</TableCell>
+                      <TableCell>
+                        {m.natureza === 'INVESTIMENTO' ? (
+                          <Badge variant="purple">Investimento</Badge>
+                        ) : (
+                          <Badge variant="info">Custeio</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-xs text-slate-500">
+                        {m.fornecedor || 'Não inf.'}
+                      </TableCell>
+                      <TableCell>
+                        {est <= 0 ? (
+                          <Badge variant="destructive">0 {m.unidade_medida} (Esgotado)</Badge>
+                        ) : (
+                          <Badge variant="warning">{est} {m.unidade_medida} (Baixo)</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="font-medium text-xs">
+                        {formatarMoeda(m.valor_estimado || 0)}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <Button
+                            variant="emerald"
+                            size="sm"
+                            onClick={() => onAbrirAjusteEstoque(m)}
+                            title="Repor Estoque"
+                            className="h-7 text-xs"
+                          >
+                            <PlusCircle className="h-3.5 w-3.5 mr-1" /> Repor
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => onAbrirEditarMaterial(m)}
+                            title="Editar Insumo"
+                            className="h-7 text-xs"
+                          >
+                            <Edit2 className="h-3 w-3 mr-1" /> Editar
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
 
       {/* Tabela de Consolidação Financeira Multiclínica por Unidade */}
-      <div className="card">
-        <div className="card-header flex-between" style={{ flexWrap: 'wrap', gap: '1rem' }}>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <h3><i className="fa-solid fa-calculator text-primary"></i> Consolidação Financeira por Unidade de Saúde</h3>
-            <p className="text-muted text-sm">Detalhamento por posto de saúde unindo Gastos com Insumos, Salários/Honorários e Manutenções.</p>
+            <CardTitle className="text-base font-bold">
+              <Calculator className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+              Consolidação Financeira por Unidade de Saúde
+            </CardTitle>
+            <CardDescription>
+              Detalhamento por posto de saúde unindo Insumos, Salários e Manutenções
+            </CardDescription>
           </div>
-          <span className="badge badge-cyan"><i className="fa-solid fa-table"></i> Tabela Executiva</span>
-        </div>
+          <Badge variant="info">Tabela Executiva</Badge>
+        </CardHeader>
 
-        <div className="card-body">
-          <div className="table-responsive">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Unidade de Saúde</th>
-                  <th>Tipo</th>
-                  <th className="text-right">Gastos em Insumos (R$)</th>
-                  <th className="text-right">Salários / Honorários (R$)</th>
-                  <th className="text-right">Manutenção Equipamentos (R$)</th>
-                  <th className="text-right">Total Geral (R$)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {consolidacaoUnidades.map(c => (
-                  <tr key={c.unidadeId}>
-                    <td><strong>{c.nome}</strong></td>
-                    <td><span className="badge badge-cyan">{c.tipo}</span></td>
-                    <td className="text-right">{formatarMoeda(c.custoInsumosAtendidos)}</td>
-                    <td className="text-right">{formatarMoeda(c.custoHonorariosDentistas)}</td>
-                    <td className="text-right">{formatarMoeda(c.custoManutencaoEquipamentos)}</td>
-                    <td className="text-right" style={{ fontWeight: 800, color: 'var(--text-main)' }}>
-                      {formatarMoeda(c.custoTotalGeral)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                <tr style={{ background: '#f8fafc', fontWeight: 800 }}>
-                  <td colSpan={2}><strong>TOTAL CONSOLIDADO MUNICIPAL:</strong></td>
-                  <td className="text-right">
-                    {formatarMoeda(consolidacaoUnidades.reduce((a, b) => a + b.custoInsumosAtendidos, 0))}
-                  </td>
-                  <td className="text-right">
-                    {formatarMoeda(consolidacaoUnidades.reduce((a, b) => a + b.custoHonorariosDentistas, 0))}
-                  </td>
-                  <td className="text-right">
-                    {formatarMoeda(consolidacaoUnidades.reduce((a, b) => a + b.custoManutencaoEquipamentos, 0))}
-                  </td>
-                  <td className="text-right" style={{ fontSize: '1.05rem', color: 'var(--primary)' }}>
-                    <strong>{formatarMoeda(consolidacaoUnidades.reduce((a, b) => a + b.custoTotalGeral, 0))}</strong>
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-        </div>
-      </div>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Unidade de Saúde</TableHead>
+                <TableHead>Tipo</TableHead>
+                <TableHead className="text-right">Insumos (R$)</TableHead>
+                <TableHead className="text-right">Salários / Honorários (R$)</TableHead>
+                <TableHead className="text-right">Manutenções (R$)</TableHead>
+                <TableHead className="text-right">Total Geral (R$)</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {consolidacaoUnidades.map((c) => (
+                <TableRow key={c.unidadeId}>
+                  <TableCell className="font-semibold text-slate-900 dark:text-slate-100">{c.nome}</TableCell>
+                  <TableCell><Badge variant="outline">{c.tipo}</Badge></TableCell>
+                  <TableCell className="text-right font-mono text-xs">{formatarMoeda(c.custoInsumosAtendidos)}</TableCell>
+                  <TableCell className="text-right font-mono text-xs">{formatarMoeda(c.custoHonorariosDentistas)}</TableCell>
+                  <TableCell className="text-right font-mono text-xs">{formatarMoeda(c.custoManutencaoEquipamentos)}</TableCell>
+                  <TableCell className="text-right font-mono text-xs font-bold text-teal-700 dark:text-teal-300">
+                    {formatarMoeda(c.custoTotalGeral)}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+            <TableFooter>
+              <TableRow className="bg-slate-100/70 dark:bg-slate-800/70 font-bold">
+                <TableCell colSpan={2}>TOTAL MUNICIPAL CONSOLIDADO:</TableCell>
+                <TableCell className="text-right font-mono">
+                  {formatarMoeda(consolidacaoUnidades.reduce((a, b) => a + b.custoInsumosAtendidos, 0))}
+                </TableCell>
+                <TableCell className="text-right font-mono">
+                  {formatarMoeda(consolidacaoUnidades.reduce((a, b) => a + b.custoHonorariosDentistas, 0))}
+                </TableCell>
+                <TableCell className="text-right font-mono">
+                  {formatarMoeda(consolidacaoUnidades.reduce((a, b) => a + b.custoManutencaoEquipamentos, 0))}
+                </TableCell>
+                <TableCell className="text-right font-mono text-base text-teal-600 dark:text-teal-400">
+                  {formatarMoeda(consolidacaoUnidades.reduce((a, b) => a + b.custoTotalGeral, 0))}
+                </TableCell>
+              </TableRow>
+            </TableFooter>
+          </Table>
+        </CardContent>
+      </Card>
 
-      {/* Pedidos Recentes (Drill-Down e Foco na Ação) */}
-      <div className="card">
-        <div className="card-header flex-between">
+      {/* Pedidos Recentes */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <h3><i className="fa-solid fa-clipboard-list text-primary"></i> Solicitações Recentes de Insumos (PBS)</h3>
-            <p className="text-muted text-sm">Clique na solicitação para visualizar ou imprimir a Ficha PBS</p>
+            <CardTitle className="text-base font-bold">
+              <ClipboardList className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+              Solicitações Recentes de Insumos (PBS)
+            </CardTitle>
+            <CardDescription>
+              Clique para visualizar ou imprimir a Ficha PBS
+            </CardDescription>
           </div>
-          <button className="btn btn-outline btn-sm" onClick={() => onSwitchTab('triagem')}>
-            Ver Todos os Pedidos <i className="fa-solid fa-arrow-right"></i>
-          </button>
-        </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => onSwitchTab('triagem')}
+            className="text-xs"
+          >
+            Ver Todos <ArrowRight className="h-3.5 w-3.5 ml-1" />
+          </Button>
+        </CardHeader>
 
-        <div className="card-body">
-          <div className="table-responsive">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>N° PBS</th>
-                  <th>Unidade Emitente</th>
-                  <th>Solicitante</th>
-                  <th>Data Pedido</th>
-                  <th>Status</th>
-                  <th className="text-right">Valor Estimado</th>
-                  <th className="text-center">Ação</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentes.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="text-center text-muted" style={{ padding: '1.5rem' }}>
-                      Nenhuma solicitação registrada até o momento.
-                    </td>
-                  </tr>
-                ) : (
-                  recentes.map(p => {
-                    const uni = unidades.find(u => u.id === p.unidade_emitente_id);
-                    return (
-                      <tr key={p.id}>
-                        <td><strong>{p.numero_pbs}</strong></td>
-                        <td>{uni?.nome || 'Unidade N/D'}</td>
-                        <td>{p.responsavel_nome}</td>
-                        <td>{formatarData(p.data_pedido)}</td>
-                        <td>{renderBadgeStatus(p.status)}</td>
-                        <td className="text-right"><strong>{formatarMoeda(p.valor_total_estimado || 0)}</strong></td>
-                        <td className="text-center">
-                          <button className="btn btn-primary btn-sm" onClick={() => onAbrirFicha(p)}>
-                            <i className="fa-solid fa-file-invoice"></i> Ver Ficha
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>N° PBS</TableHead>
+                <TableHead>Unidade Emitente</TableHead>
+                <TableHead>Solicitante</TableHead>
+                <TableHead>Data Pedido</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Valor Estimado</TableHead>
+                <TableHead className="text-center">Ação</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {recentes.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center text-slate-500 py-6">
+                    Nenhuma solicitação registrada até o momento.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                recentes.map((p) => {
+                  const uni = unidades.find((u) => u.id === p.unidade_emitente_id);
+                  return (
+                    <TableRow key={p.id}>
+                      <TableCell className="font-mono text-xs font-bold text-slate-800 dark:text-slate-200">
+                        {p.numero_pbs}
+                      </TableCell>
+                      <TableCell className="font-medium text-xs">{uni?.nome || 'Unidade N/D'}</TableCell>
+                      <TableCell className="text-xs text-slate-500">{p.responsavel_nome}</TableCell>
+                      <TableCell className="text-xs text-slate-500">{formatarData(p.data_pedido)}</TableCell>
+                      <TableCell>{renderBadgeStatus(p.status)}</TableCell>
+                      <TableCell className="text-right font-mono text-xs font-semibold">
+                        {formatarMoeda(p.valor_total_estimado || 0)}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => onAbrirFicha(p)}
+                          className="h-7 text-xs text-teal-700 dark:text-teal-300 border-teal-200 dark:border-teal-800/80 hover:bg-teal-50 dark:hover:bg-teal-950/50"
+                        >
+                          <FileText className="h-3.5 w-3.5 mr-1" /> Ver Ficha
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
 
     </div>
   );

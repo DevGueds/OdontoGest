@@ -291,9 +291,9 @@ T13 → T14 → T15 → T16
 - Skill: NONE
 
 **Done when**:
-- [ ] Metric cards modernized with subtle borders and Lucide icons
-- [ ] Financial KPIs and alerts styled with Modern Clinical palette
-- [ ] Gate check passes: `npx tsc --noEmit`
+- [x] Metric cards modernized with subtle borders and Lucide icons
+- [x] Financial KPIs and alerts styled with Modern Clinical palette
+- [x] Gate check passes: `npx tsc --noEmit`
 
 **Tests**: none
 **Gate**: Quick
