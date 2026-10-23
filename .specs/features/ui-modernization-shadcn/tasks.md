@@ -128,9 +128,9 @@ T13 → T14 → T15 → T16
 - Skill: NONE
 
 **Done when**:
-- [ ] cn function exported and properly typed
-- [ ] Merges Tailwind classes without conflicts
-- [ ] Gate check passes: `npx tsc --noEmit`
+- [x] cn function exported and properly typed
+- [x] Merges Tailwind classes without conflicts
+- [x] Gate check passes: `npx tsc --noEmit`
 
 **Tests**: none
 **Gate**: Quick
