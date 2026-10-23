@@ -1,5 +1,31 @@
 import React, { useState } from 'react';
 import { PedidoPBS, UnidadeSaude, PerfilUsuario, StatusPedido } from '../../types';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui/card';
+import { Badge } from '../ui/badge';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { 
+  Table, 
+  TableHeader, 
+  TableBody, 
+  TableHead, 
+  TableRow, 
+  TableCell 
+} from '../ui/table';
+import {
+  Boxes,
+  Search,
+  FileText,
+  Clock,
+  PackageCheck,
+  Check,
+  Truck,
+  Ban,
+  Calendar,
+  ClipboardCheck,
+  Edit,
+  Hourglass
+} from 'lucide-react';
 
 interface Props {
   pedidos: PedidoPBS[];
@@ -32,13 +58,20 @@ export const TriagemTab: React.FC<Props> = ({
 
   const renderBadgeStatus = (status: StatusPedido) => {
     switch (status) {
-      case 'SOLICITADO': return <span className="badge badge-amber"><i className="fa-solid fa-clock"></i> SOLICITADO</span>;
-      case 'RECEBIDO': return <span className="badge badge-cyan"><i className="fa-solid fa-box-archive"></i> RECEBIDO</span>;
-      case 'ATENDIDO_PARCIAL': return <span className="badge badge-purple"><i className="fa-solid fa-boxes-stacked"></i> ATENDIDO PARCIAL</span>;
-      case 'ATENDIDO_TOTAL': return <span className="badge badge-emerald"><i className="fa-solid fa-check"></i> ATENDIDO TOTAL</span>;
-      case 'ENVIADO': return <span className="badge badge-blue"><i className="fa-solid fa-truck"></i> ENVIADO</span>;
-      case 'CANCELADO': return <span className="badge badge-rose"><i className="fa-solid fa-ban"></i> CANCELADO</span>;
-      default: return <span className="badge badge-blue">{status}</span>;
+      case 'SOLICITADO':
+        return <Badge variant="warning"><Clock className="h-3 w-3" /> SOLICITADO</Badge>;
+      case 'RECEBIDO':
+        return <Badge variant="info"><PackageCheck className="h-3 w-3" /> RECEBIDO</Badge>;
+      case 'ATENDIDO_PARCIAL':
+        return <Badge variant="purple"><Boxes className="h-3 w-3" /> PARCIAL</Badge>;
+      case 'ATENDIDO_TOTAL':
+        return <Badge variant="success"><Check className="h-3 w-3" /> ATENDIDO</Badge>;
+      case 'ENVIADO':
+        return <Badge variant="default"><Truck className="h-3 w-3" /> ENVIADO</Badge>;
+      case 'CANCELADO':
+        return <Badge variant="destructive"><Ban className="h-3 w-3" /> CANCELADO</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
     }
   };
 
@@ -57,30 +90,30 @@ export const TriagemTab: React.FC<Props> = ({
   });
 
   return (
-    <div className="card">
-      <div className="card-header flex-between">
+    <Card>
+      <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2>
-            <i className="fa-solid fa-boxes-packing"></i>{' '}
+          <CardTitle className="text-xl font-bold">
+            <Boxes className="h-5 w-5 text-teal-600 dark:text-teal-400" />
             {isPrivilegiado ? 'Central de Atendimento & Triagem de Pedidos' : 'Meus Pedidos & Acompanhamento'}
-          </h2>
-          <p>
+          </CardTitle>
+          <CardDescription>
             {isAdmin 
               ? 'Receba solicitações das USFs, faça a conferência de itens e confirme o envio.' 
               : isGestor
               ? 'Acompanhe as solicitações das USFs e visualize o status de atendimento.'
               : 'Acompanhe a situação dos pedidos emitidos pela sua unidade de saúde.'}
-          </p>
+          </CardDescription>
         </div>
 
-        <div className="filter-controls">
+        <div className="flex items-center gap-3 flex-wrap">
           <select 
-            className="form-control" 
+            className="flex h-9 rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs font-semibold shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
           >
             <option value="TODOS">Todos os Status</option>
-            <option value="SOLICITADO">SOLICITADO (Pendente Receber)</option>
+            <option value="SOLICITADO">SOLICITADO (Pendente)</option>
             <option value="RECEBIDO">RECEBIDO (Em Separação)</option>
             <option value="ATENDIDO_PARCIAL">ATENDIDO PARCIAL</option>
             <option value="ATENDIDO_TOTAL">ATENDIDO TOTAL</option>
@@ -88,145 +121,191 @@ export const TriagemTab: React.FC<Props> = ({
             <option value="CANCELADO">CANCELADO</option>
           </select>
 
-          <input 
-            type="text" 
-            className="form-control" 
-            placeholder="Buscar por Nº PBS, USF..." 
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+          <div className="relative w-48">
+            <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
+            <Input 
+              type="text" 
+              placeholder="Buscar Nº PBS, USF..." 
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="h-9 pl-8 text-xs"
+            />
+          </div>
         </div>
-      </div>
+      </CardHeader>
 
-      <div className="card-body">
-        <div className="table-responsive">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Nº PBS</th>
-                <th>Unidade Emitente</th>
-                <th>Data Pedido</th>
-                <th>Responsável USF</th>
-                <th>Status Atual</th>
-                <th>Recepção Almox.</th>
-                <th>Envio / Despacho</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtrados.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="text-center text-muted">
-                    Nenhuma solicitação localizada com os filtros atuais.
-                  </td>
-                </tr>
-              ) : (
-                filtrados.map(p => {
-                  const u = unidades.find(uni => uni.id === p.unidade_emitente_id);
-                  const nomeUnidade = u ? u.nome : `Unidade #${p.unidade_emitente_id}`;
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Nº PBS</TableHead>
+              <TableHead>Unidade Emitente</TableHead>
+              <TableHead>Data Pedido</TableHead>
+              <TableHead>Responsável USF</TableHead>
+              <TableHead>Status Atual</TableHead>
+              <TableHead>Recepção Almox.</TableHead>
+              <TableHead>Envio / Despacho</TableHead>
+              <TableHead className="text-center">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filtrados.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={8} className="text-center text-slate-500 py-8">
+                  Nenhuma solicitação localizada com os filtros atuais.
+                </TableCell>
+              </TableRow>
+            ) : (
+              filtrados.map(p => {
+                const u = unidades.find(uni => uni.id === p.unidade_emitente_id);
+                const nomeUnidade = u ? u.nome : `Unidade #${p.unidade_emitente_id}`;
 
-                  const recInfo = p.apontador_recebimento_nome ? (
-                    <>
-                      <strong>{p.apontador_recebimento_nome}</strong>
-                      <br />
-                      <small className="text-muted"><i className="fa-regular fa-calendar"></i> {formatarData(p.data_recebimento)}</small>
-                    </>
-                  ) : (
-                    <span className="text-muted"><i>Não recebido</i></span>
-                  );
+                const recInfo = p.apontador_recebimento_nome ? (
+                  <div className="text-xs">
+                    <strong className="text-slate-800 dark:text-slate-200">{p.apontador_recebimento_nome}</strong>
+                    <div className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
+                      <Calendar className="h-3 w-3" /> {formatarData(p.data_recebimento)}
+                    </div>
+                  </div>
+                ) : (
+                  <span className="text-xs text-slate-400 italic">Não recebido</span>
+                );
 
-                  const envInfo = p.apontador_envio_nome ? (
-                    <>
-                      <strong>{p.apontador_envio_nome}</strong>
-                      <br />
-                      <small className="text-muted"><i className="fa-regular fa-calendar"></i> {formatarData(p.data_envio)}</small>
-                    </>
-                  ) : (
-                    <span className="text-muted"><i>Não enviado</i></span>
-                  );
+                const envInfo = p.apontador_envio_nome ? (
+                  <div className="text-xs">
+                    <strong className="text-slate-800 dark:text-slate-200">{p.apontador_envio_nome}</strong>
+                    <div className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
+                      <Calendar className="h-3 w-3" /> {formatarData(p.data_envio)}
+                    </div>
+                  </div>
+                ) : (
+                  <span className="text-xs text-slate-400 italic">Não enviado</span>
+                );
 
-                  return (
-                    <tr key={p.id}>
-                      <td><strong>{p.numero_pbs}</strong></td>
-                      <td>{nomeUnidade}</td>
-                      <td>{formatarData(p.data_pedido)}</td>
-                      <td>
-                        {p.responsavel_nome}
-                        <br />
-                        <small className="text-muted">{p.responsavel_registro || ''}</small>
-                      </td>
-                      <td>{renderBadgeStatus(p.status)}</td>
-                      <td>{recInfo}</td>
-                      <td>{envInfo}</td>
-                      <td>
-                        <div className="btn-group">
-                          <button className="btn btn-outline btn-sm" onClick={() => onAbrirFicha(p)}>
-                            <i className="fa-solid fa-print"></i> Ver Ficha
-                          </button>
+                return (
+                  <TableRow key={p.id}>
+                    <TableCell className="font-mono text-xs font-bold text-slate-900 dark:text-slate-100">
+                      {p.numero_pbs}
+                    </TableCell>
+                    <TableCell className="font-medium text-xs">{nomeUnidade}</TableCell>
+                    <TableCell className="text-xs text-slate-500">{formatarData(p.data_pedido)}</TableCell>
+                    <TableCell className="text-xs">
+                      <div className="font-medium text-slate-800 dark:text-slate-200">{p.responsavel_nome}</div>
+                      {p.responsavel_registro && (
+                        <div className="text-[10px] text-slate-400">{p.responsavel_registro}</div>
+                      )}
+                    </TableCell>
+                    <TableCell>{renderBadgeStatus(p.status)}</TableCell>
+                    <TableCell>{recInfo}</TableCell>
+                    <TableCell>{envInfo}</TableCell>
+                    <TableCell className="text-center">
+                      <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => onAbrirFicha(p)}
+                          className="h-7 text-xs"
+                        >
+                          <FileText className="h-3.5 w-3.5 mr-1" /> Ficha
+                        </Button>
 
-                          {isAdmin ? (
-                            <>
-                              {(p.status === 'SOLICITADO' || p.status === 'RECEBIDO') && (
-                                <button className="btn btn-rose btn-sm" onClick={() => onCancelarPedido(p)}>
-                                  <i className="fa-solid fa-ban"></i> Cancelar
-                                </button>
-                              )}
-                              {p.status === 'SOLICITADO' && (
-                                <button className="btn btn-success btn-sm" onClick={() => onAbrirRecebimento(p)}>
-                                  <i className="fa-solid fa-clipboard-check"></i> 1. Confirmar Recebimento
-                                </button>
-                              )}
+                        {isAdmin ? (
+                          <>
+                            {(p.status === 'SOLICITADO' || p.status === 'RECEBIDO') && (
+                              <Button 
+                                variant="destructive" 
+                                size="sm" 
+                                onClick={() => onCancelarPedido(p)}
+                                className="h-7 text-xs"
+                              >
+                                <Ban className="h-3 w-3 mr-1" /> Cancelar
+                              </Button>
+                            )}
+                            {p.status === 'SOLICITADO' && (
+                              <Button 
+                                variant="emerald" 
+                                size="sm" 
+                                onClick={() => onAbrirRecebimento(p)}
+                                className="h-7 text-xs"
+                              >
+                                <ClipboardCheck className="h-3.5 w-3.5 mr-1" /> 1. Receber
+                              </Button>
+                            )}
 
-                              {p.status === 'RECEBIDO' && (
-                                <>
-                                  <button className="btn btn-primary btn-sm" onClick={() => onAbrirAtendimento(p)}>
-                                    <i className="fa-solid fa-boxes-packing"></i> 2. Conferir/Atender
-                                  </button>
-                                  <button className="btn btn-emerald btn-sm" onClick={() => onAbrirEnvio(p)}>
-                                    <i className="fa-solid fa-truck"></i> 3. Informar Envio
-                                  </button>
-                                </>
-                              )}
+                            {p.status === 'RECEBIDO' && (
+                              <>
+                                <Button 
+                                  variant="default" 
+                                  size="sm" 
+                                  onClick={() => onAbrirAtendimento(p)}
+                                  className="h-7 text-xs"
+                                >
+                                  <Boxes className="h-3.5 w-3.5 mr-1" /> 2. Atender
+                                </Button>
+                                <Button 
+                                  variant="emerald" 
+                                  size="sm" 
+                                  onClick={() => onAbrirEnvio(p)}
+                                  className="h-7 text-xs"
+                                >
+                                  <Truck className="h-3.5 w-3.5 mr-1" /> 3. Enviar
+                                </Button>
+                              </>
+                            )}
 
-                              {(p.status === 'ATENDIDO_PARCIAL' || p.status === 'ATENDIDO_TOTAL') && (
-                                <>
-                                  <button className="btn btn-primary btn-sm" onClick={() => onAbrirAtendimento(p)}>
-                                    <i className="fa-solid fa-pen"></i> Editar Qtds
-                                  </button>
-                                  <button className="btn btn-emerald btn-sm" onClick={() => onAbrirEnvio(p)}>
-                                    <i className="fa-solid fa-truck"></i> 3. Informar Envio
-                                  </button>
-                                </>
-                              )}
-                            </>
-                          ) : (
-                            <>
-                              {p.status === 'SOLICITADO' && (
-                                <button className="btn btn-rose btn-sm" onClick={() => onCancelarPedido(p)} style={{ marginRight: '8px' }}>
-                                  <i className="fa-solid fa-ban"></i> Cancelar
-                                </button>
-                              )}
-                              {p.status === 'SOLICITADO' && (
-                                <span className="badge badge-amber"><i className="fa-solid fa-hourglass-half"></i> Aguardando Almoxarifado</span>
-                              )}
-                              {(p.status === 'RECEBIDO' || p.status === 'ATENDIDO_PARCIAL' || p.status === 'ATENDIDO_TOTAL') && (
-                                <span className="badge badge-cyan"><i className="fa-solid fa-spinner fa-spin"></i> Em Separação</span>
-                              )}
-                              {p.status === 'ENVIADO' && (
-                                <span className="badge badge-emerald"><i className="fa-solid fa-circle-check"></i> Despachado</span>
-                              )}
-                            </>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+                            {(p.status === 'ATENDIDO_PARCIAL' || p.status === 'ATENDIDO_TOTAL') && (
+                              <>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  onClick={() => onAbrirAtendimento(p)}
+                                  className="h-7 text-xs"
+                                >
+                                  <Edit className="h-3 w-3 mr-1" /> Qtds
+                                </Button>
+                                <Button 
+                                  variant="emerald" 
+                                  size="sm" 
+                                  onClick={() => onAbrirEnvio(p)}
+                                  className="h-7 text-xs"
+                                >
+                                  <Truck className="h-3.5 w-3.5 mr-1" /> 3. Enviar
+                                </Button>
+                              </>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            {p.status === 'SOLICITADO' && (
+                              <Button 
+                                variant="destructive" 
+                                size="sm" 
+                                onClick={() => onCancelarPedido(p)}
+                                className="h-7 text-xs"
+                              >
+                                <Ban className="h-3 w-3 mr-1" /> Cancelar
+                              </Button>
+                            )}
+                            {p.status === 'SOLICITADO' && (
+                              <Badge variant="warning"><Hourglass className="h-3 w-3" /> Aguardando</Badge>
+                            )}
+                            {(p.status === 'RECEBIDO' || p.status === 'ATENDIDO_PARCIAL' || p.status === 'ATENDIDO_TOTAL') && (
+                              <Badge variant="info"><Boxes className="h-3 w-3" /> Em Separação</Badge>
+                            )}
+                            {p.status === 'ENVIADO' && (
+                              <Badge variant="success"><Check className="h-3 w-3" /> Despachado</Badge>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
   );
 };

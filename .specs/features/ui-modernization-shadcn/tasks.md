@@ -313,10 +313,10 @@ T13 → T14 → T15 → T16
 - Skill: NONE
 
 **Done when**:
-- [ ] Form sections use modern clinical card layout with clear visual hierarchy
-- [ ] Status badges semantic in TriagemTab
-- [ ] Item addition and stock validation limits preserved intact
-- [ ] Gate check passes: `npx tsc --noEmit`
+- [x] Form sections use modern clinical card layout with clear visual hierarchy
+- [x] Status badges semantic in TriagemTab
+- [x] Item addition and stock validation limits preserved intact
+- [x] Gate check passes: `npx tsc --noEmit`
 
 **Tests**: none
 **Gate**: Quick
