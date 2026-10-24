@@ -51,8 +51,8 @@ export default {
         },
         // Genesis Design Tokens
         genesis: {
-          primary: '#6366F1',
-          primaryHover: '#4F46E5',
+          primary: '#2563EB',
+          primaryHover: '#1D4ED8',
           secondary: '#20970B',
           neutral: '#9C9C9C',
           bg: '#FAFAFA',

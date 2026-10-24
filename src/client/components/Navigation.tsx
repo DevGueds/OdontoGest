@@ -131,7 +131,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                     "group relative flex w-full items-center rounded-[6px] font-medium transition-all duration-150 text-xs",
                     isCollapsed ? "h-9 justify-center px-0" : "h-9 px-3 gap-2.5",
                     isActive
-                      ? "bg-[#6366F1] text-white shadow-[0_2px_8px_rgba(99,102,241,0.25)]"
+                      ? "bg-[#2563EB] text-white shadow-[0_2px_8px_rgba(37,99,235,0.25)]"
                       : "text-[#6B6B6B] dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/70 hover:text-[#0A0A0A] dark:hover:text-zinc-100"
                   )}
                   aria-current={isActive ? 'page' : undefined}

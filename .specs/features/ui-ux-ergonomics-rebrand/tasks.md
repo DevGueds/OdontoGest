@@ -43,10 +43,10 @@
 **Tests**: none
 **Gate**: build
 **Done when**:
-- [ ] `:root` and `.dark` `--primary` variables updated to clinical blue
-- [ ] `tailwind.config.js` `genesis.primary` updated to `#2563EB` and hover `#1D4ED8`
-- [ ] Button glow and focus rings reflect clinical blue
-- [ ] Gate check passes: `npx tsc --noEmit; npx vite build`
+- [x] `:root` and `.dark` `--primary` variables updated to clinical blue
+- [x] `tailwind.config.js` `genesis.primary` updated to `#2563EB` and hover `#1D4ED8`
+- [x] Button glow and focus rings reflect clinical blue
+- [x] Gate check passes: `npx tsc --noEmit; npx vite build`
 **Commit**: `style(ui): update primary brand palette to clinical blue`
 
 ---
