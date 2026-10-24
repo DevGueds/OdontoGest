@@ -94,11 +94,11 @@ export const TriagemTab: React.FC<Props> = ({
       <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#E8E8EC] dark:border-zinc-800 pb-4">
         <div>
           <CardTitle className="text-lg font-bold">
-            <Boxes className="h-5 w-5 text-[#6366F1]" />
+            <Boxes className="h-5 w-5 text-[#2563EB]" />
             {isPrivilegiado ? 'Central de Atendimento & Triagem de Pedidos' : 'Meus Pedidos & Acompanhamento'}
           </CardTitle>
           <CardDescription>
-            {isAdmin 
+            {isPrivilegiado 
               ? 'Receba solicitações das USFs, faça a conferência de itens e confirme o envio.' 
               : isGestor
               ? 'Acompanhe as solicitações das USFs e visualize o status de atendimento.'
@@ -209,7 +209,7 @@ export const TriagemTab: React.FC<Props> = ({
                           <FileText className="h-3.5 w-3.5 mr-1" /> Ficha
                         </Button>
 
-                        {isAdmin ? (
+                        {isPrivilegiado ? (
                           <>
                             {(p.status === 'SOLICITADO' || p.status === 'RECEBIDO') && (
                               <Button 

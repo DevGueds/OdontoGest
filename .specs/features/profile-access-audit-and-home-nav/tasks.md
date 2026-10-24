@@ -44,9 +44,9 @@
 **Tests**: none
 **Gate**: quick
 **Done when**:
-- [ ] Gestor profile can view and click "1. Receber", "2. Atender", and "3. Enviar"
-- [ ] Solicitante continues to see order progress badges with status tracking
-- [ ] Gate check passes: `npx tsc --noEmit`
+- [x] Gestor profile can view and click "1. Receber", "2. Atender", and "3. Enviar"
+- [x] Solicitante continues to see order progress badges with status tracking
+- [x] Gate check passes: `npx tsc --noEmit`
 **Commit**: `fix(triagem): allow warehouse gestor to receive and dispatch orders`
 
 ---
