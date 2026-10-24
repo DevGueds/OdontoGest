@@ -160,6 +160,10 @@ export const AppContent: React.FC = () => {
 
 
   const handleExportarSQL = async () => {
+    if (perfilAtual !== 'ADMINISTRADOR') {
+      showToast('Acesso negado: apenas administradores podem exportar o dump SQL.', 'error');
+      return;
+    }
     try {
       const sqlText = await dbService.exportarSQL();
       const blob = new Blob([sqlText], { type: 'text/sql' });
@@ -458,7 +462,11 @@ export const AppContent: React.FC = () => {
       <Header 
         perfilAtual={perfilAtual}
         onExportarSQL={handleExportarSQL}
-        onAbrirModalRelatorios={() => setModalRelatoriosOpen(true)}
+        onAbrirModalRelatorios={
+          (perfilAtual === 'GESTOR' || perfilAtual === 'ADMINISTRADOR')
+            ? () => setModalRelatoriosOpen(true)
+            : undefined
+        }
       />
 
       <div className="flex flex-1 overflow-hidden">
@@ -676,7 +684,7 @@ export const AppContent: React.FC = () => {
         honorarios={honorarios}
         chamados={chamados}
         equipamentos={equipamentos}
-        isOpen={modalRelatoriosOpen}
+        isOpen={modalRelatoriosOpen && (perfilAtual === 'GESTOR' || perfilAtual === 'ADMINISTRADOR')}
         onClose={() => setModalRelatoriosOpen(false)}
         formatarData={formatarData}
         formatarMoeda={formatarMoeda}
