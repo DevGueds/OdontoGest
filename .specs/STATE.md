@@ -26,13 +26,21 @@
 - **Date**: 2026-10-23
 - **Status**: active
 
+### AD-004
+- **Decision**: Reestruturar a experiência do usuário (UX) do Dashboard Gerencial com KPIs executivos destacados, três gráficos vetoriais nativos em SVG (Donut de Custeio, Barras de Consumo por Unidade e Funil de Ciclo de Vida de Pedidos) e abas ergonômicas Radix Tabs para alternância de visualizações detalhadas.
+- **Reason**: Reduzir a fadiga visual causada por rolagem vertical de tabelas monolíticas, proporcionar inteligência de dados instantânea para gestores e manter zero dependências extras no bundle de produção.
+- **Trade-off**: Tabelas de insumos críticos, consolidação orçamentária e histórico recente passam a ser acessadas via abas segmentadas em vez de ocuparem a página simultaneamente.
+- **Scope**: `src/client/components/tabs/DashboardTab.tsx`, `src/client/components/dashboard/*`, `src/client/components/ui/tabs.tsx`.
+- **Date**: 2026-10-23
+- **Status**: active
+
 ## Handoff
 
-- **Feature**: .specs/features/ui-ux-ergonomics-rebrand
-- **Phase / Task**: Execute / T1-T8
-- **Completed**: Specification and task breakdown completed
-- **In-progress** (file:line): Phase 1: T1 (src/client/components/icons/ToothIcon.tsx)
-- **Next step**: Execute T1 through T8 sequentially with atomic commits and gate checks
+- **Feature**: .specs/features/dashboard-ux-enhancement
+- **Phase / Task**: Execute / Validation Complete
+- **Completed**: DASH-01 through DASH-05 (Radix Tabs primitive implemented; SVG charts for Custeio, Unidades and Pedidos created; DashboardTab redesigned; validation passed)
+- **In-progress** (file:line): none
+- **Next step**: User acceptance testing or deployment.
 - **Blockers**: none
 - **Uncommitted files**: none
 - **Branch**: main
