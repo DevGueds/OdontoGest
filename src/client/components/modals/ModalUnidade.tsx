@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
-import { Building2, Plus } from 'lucide-react';
+import { Building2, Plus, X } from 'lucide-react';
 
 interface Props {
   isOpen: boolean;
@@ -49,10 +49,23 @@ export const ModalUnidade: React.FC<Props> = ({ isOpen, onClose, onConfirm }) =>
           </div>
 
           <div className="flex justify-end gap-2 pt-3 border-t border-border">
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={onClose}
+              className="gap-1.5 text-muted-foreground hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 dark:hover:bg-rose-950/30 dark:hover:text-rose-400 dark:hover:border-rose-800 transition-colors"
+              title="Cancelar e fechar formulário"
+              aria-label="Cancelar"
+            >
+              <X className="w-4 h-4" />
               Cancelar
             </Button>
-            <Button type="submit" className="gap-2">
+            <Button 
+              type="submit" 
+              className="gap-2 hover:shadow-md transition-all"
+              title="Confirmar cadastro do estabelecimento de saúde"
+              aria-label="Cadastrar Estabelecimento"
+            >
               <Plus className="w-4 h-4" />
               Cadastrar Estabelecimento
             </Button>

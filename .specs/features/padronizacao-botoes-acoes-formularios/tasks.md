@@ -67,9 +67,9 @@ T1 → T2 → T3 → T4 → T5 → T6
 - Skill: NONE
 
 **Done when**:
-- [ ] Todos os 5 modais possuem botão Cancelar com ícone `<X />`, hover semântico e tooltip
-- [ ] Todos os botões de confirmação/salvamento possuem ícones correspondentes (`Plus`, `Save`, `Check`), cores apropriadas e tooltips
-- [ ] `npx tsc --noEmit` passa sem erros
+- [x] Todos os 5 modais possuem botão Cancelar com ícone `<X />`, hover semântico e tooltip
+- [x] Todos os botões de confirmação/salvamento possuem ícones correspondentes (`Plus`, `Save`, `Check`), cores apropriadas e tooltips
+- [x] `npx tsc --noEmit` passa sem erros
 
 **Tests**: static
 **Gate**: quick
