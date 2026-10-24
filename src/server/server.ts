@@ -560,9 +560,13 @@ async function bootstrap() {
       return reply.status(400).send({ error: err.message });
     }
   });
-  // Gerenciamento de Usuários (Exclusivo Administrador)
-  fastify.get('/api/usuarios', { preHandler: [requireRoles(['ADMINISTRADOR'])] }, async () => {
-    return await getAllUsers();
+  // Gerenciamento de Usuários (Administrador e Gestor para consulta de profissionais)
+  fastify.get('/api/usuarios', { preHandler: [requireRoles(['ADMINISTRADOR', 'GESTOR'])] }, async () => {
+    const users = await getAllUsers();
+    return users.map(u => {
+      const { senha, ...rest } = u;
+      return rest;
+    });
   });
 
   fastify.post('/api/usuarios', { preHandler: [requireRoles(['ADMINISTRADOR'])] }, async (req, reply) => {
