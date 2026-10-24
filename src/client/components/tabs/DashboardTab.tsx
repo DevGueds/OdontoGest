@@ -1,12 +1,12 @@
 import React, { useMemo, useState } from 'react';
-import { 
-  PedidoPBS, 
-  UnidadeSaude, 
-  Material, 
-  StatusPedido, 
-  HonorarioOdontologo, 
-  ChamadoManutencao, 
-  EntradaRecurso 
+import {
+  PedidoPBS,
+  UnidadeSaude,
+  Material,
+  StatusPedido,
+  HonorarioOdontologo,
+  ChamadoManutencao,
+  EntradaRecurso
 } from '../../types';
 import { dbService } from '../../services/db';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui/card';
@@ -18,21 +18,21 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
 import { CusteioDonutChart } from '../dashboard/CusteioDonutChart';
 import { UnidadesBarChart } from '../dashboard/UnidadesBarChart';
 import { PedidoPipelineChart } from '../dashboard/PedidoPipelineChart';
-import { 
-  Clock, 
-  PackageCheck, 
-  Truck, 
-  Check, 
-  Ban, 
-  Boxes, 
-  Search, 
-  ArrowRight, 
-  PlusCircle, 
-  Edit2, 
-  FileSpreadsheet, 
-  FileText, 
-  Wallet, 
-  Building2, 
+import {
+  Clock,
+  PackageCheck,
+  Truck,
+  Check,
+  Ban,
+  Boxes,
+  Search,
+  ArrowRight,
+  PlusCircle,
+  Edit2,
+  FileSpreadsheet,
+  FileText,
+  Wallet,
+  Building2,
   AlertCircle,
   Activity,
   BarChart3,
@@ -78,17 +78,17 @@ export const DashboardTab: React.FC<Props> = ({
   const [detalhesTab, setDetalhesTab] = useState<'insumos' | 'unidades' | 'recentes'>('insumos');
 
   // 1. Cálculos de Estatísticas e Saldos Segregados
-  const pendentesCount = useMemo(() => 
+  const pendentesCount = useMemo(() =>
     pedidos.filter(p => p.status === 'SOLICITADO' || p.status === 'RECEBIDO').length
-  , [pedidos]);
+    , [pedidos]);
 
-  const saldosNatureza = useMemo(() => 
+  const saldosNatureza = useMemo(() =>
     dbService.getSaldosNaturezaRecursos(unidades, pedidos, materiais, honorarios, chamados, entradas)
-  , [unidades, pedidos, materiais, honorarios, chamados, entradas]);
+    , [unidades, pedidos, materiais, honorarios, chamados, entradas]);
 
-  const consolidacaoUnidades = useMemo(() => 
+  const consolidacaoUnidades = useMemo(() =>
     dbService.getConsolidacaoFinanceiraLocal(unidades, pedidos, honorarios, chamados)
-  , [unidades, pedidos, honorarios, chamados]);
+    , [unidades, pedidos, honorarios, chamados]);
 
   // 2. Filtragem de Insumos Críticos
   const materiaisCriticos = useMemo(() => {
@@ -97,13 +97,13 @@ export const DashboardTab: React.FC<Props> = ({
       .sort((a, b) => (a.qtd_estoque ?? 0) - (b.qtd_estoque ?? 0));
   }, [materiais]);
 
-  const esgotadosCount = useMemo(() => 
+  const esgotadosCount = useMemo(() =>
     materiaisCriticos.filter(m => (m.qtd_estoque ?? 0) <= 0).length
-  , [materiaisCriticos]);
+    , [materiaisCriticos]);
 
-  const baixoCount = useMemo(() => 
+  const baixoCount = useMemo(() =>
     materiaisCriticos.filter(m => (m.qtd_estoque ?? 0) > 0).length
-  , [materiaisCriticos]);
+    , [materiaisCriticos]);
 
   const materiaisExibidos = useMemo(() => {
     return materiaisCriticos.filter(m => {
@@ -141,7 +141,7 @@ export const DashboardTab: React.FC<Props> = ({
 
   return (
     <div className="space-y-6">
-      
+
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-3 border-b border-border/60">
         <div>
@@ -161,33 +161,11 @@ export const DashboardTab: React.FC<Props> = ({
             Monitoramento em tempo real de saldos orçamentários, abastecimento e fluxo de pedidos.
           </p>
         </div>
-
-        <div className="flex items-center gap-2 self-start sm:self-auto">
-          {onAbrirModalRelatorios && (
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={onAbrirModalRelatorios} 
-              className="gap-2 h-9 text-xs font-medium"
-            >
-              <FileSpreadsheet className="h-3.5 w-3.5 text-muted-foreground" />
-              Exportar Relatórios
-            </Button>
-          )}
-          <Button
-            size="sm"
-            onClick={() => onSwitchTab('triagem')}
-            className="gap-1.5 h-9 text-xs"
-          >
-            <ClipboardList className="h-3.5 w-3.5" />
-            Central de Triagem
-          </Button>
-        </div>
       </div>
 
       {/* Top Executive KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        
+
         {/* KPI 1: Saldo Custeio */}
         <Card className="hover:border-border transition-all">
           <CardContent className="p-5">
@@ -199,14 +177,14 @@ export const DashboardTab: React.FC<Props> = ({
                 <Wallet className="h-4 w-4" />
               </div>
             </div>
-            
+
             <div className="text-2xl font-bold tracking-tight text-foreground font-mono mt-2">
               {formatarMoeda(saldosNatureza.saldoCusteioDisponivel)}
             </div>
 
             <div className="mt-3 space-y-1.5">
               <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
-                <div 
+                <div
                   className="h-full bg-emerald-600 dark:bg-emerald-500 transition-all duration-500 rounded-full"
                   style={{ width: `${Math.min(100, saldosNatureza.percentualCusteioComprometido)}%` }}
                 />
@@ -237,7 +215,7 @@ export const DashboardTab: React.FC<Props> = ({
 
             <div className="mt-3 space-y-1.5">
               <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
-                <div 
+                <div
                   className="h-full bg-blue-600 dark:bg-blue-500 transition-all duration-500 rounded-full"
                   style={{ width: `${Math.min(100, saldosNatureza.percentualInvestimentoComprometido)}%` }}
                 />
@@ -251,7 +229,7 @@ export const DashboardTab: React.FC<Props> = ({
         </Card>
 
         {/* KPI 3: Pedidos Pendentes em Triagem */}
-        <Card 
+        <Card
           onClick={() => onSwitchTab('triagem')}
           className="hover:border-border cursor-pointer transition-all hover:bg-muted/10"
         >
@@ -289,7 +267,7 @@ export const DashboardTab: React.FC<Props> = ({
         </Card>
 
         {/* KPI 4: Insumos em Alerta */}
-        <Card 
+        <Card
           onClick={() => setDetalhesTab('insumos')}
           className="hover:border-border cursor-pointer transition-all hover:bg-muted/10"
         >
@@ -326,7 +304,7 @@ export const DashboardTab: React.FC<Props> = ({
 
       {/* Interactive Visual Analytics Section */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
+
         {/* Gráfico 1: Donut Chart de Composição de Custeio (5 cols) */}
         <Card className="lg:col-span-5 flex flex-col justify-between">
           <CardHeader className="pb-2 border-b border-border/40">
@@ -476,33 +454,30 @@ export const DashboardTab: React.FC<Props> = ({
                   <button
                     type="button"
                     onClick={() => setFiltroAlerta('todos')}
-                    className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
-                      filtroAlerta === 'todos'
-                        ? 'bg-background text-foreground shadow-xs font-semibold'
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
+                    className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${filtroAlerta === 'todos'
+                      ? 'bg-background text-foreground shadow-xs font-semibold'
+                      : 'text-muted-foreground hover:text-foreground'
+                      }`}
                   >
                     Todos ({materiaisCriticos.length})
                   </button>
                   <button
                     type="button"
                     onClick={() => setFiltroAlerta('esgotados')}
-                    className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
-                      filtroAlerta === 'esgotados'
-                        ? 'bg-rose-500/10 text-rose-700 dark:text-rose-400 font-semibold shadow-xs'
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
+                    className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${filtroAlerta === 'esgotados'
+                      ? 'bg-rose-500/10 text-rose-700 dark:text-rose-400 font-semibold shadow-xs'
+                      : 'text-muted-foreground hover:text-foreground'
+                      }`}
                   >
                     Zerados ({esgotadosCount})
                   </button>
                   <button
                     type="button"
                     onClick={() => setFiltroAlerta('baixo')}
-                    className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
-                      filtroAlerta === 'baixo'
-                        ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 font-semibold shadow-xs'
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
+                    className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${filtroAlerta === 'baixo'
+                      ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 font-semibold shadow-xs'
+                      : 'text-muted-foreground hover:text-foreground'
+                      }`}
                   >
                     Baixos ({baixoCount})
                   </button>
@@ -667,9 +642,9 @@ export const DashboardTab: React.FC<Props> = ({
                   Últimos pedidos emitidos pelas Unidades de Saúde da Família
                 </CardDescription>
               </div>
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => onSwitchTab('triagem')}
                 className="text-xs gap-1"
               >
@@ -713,9 +688,9 @@ export const DashboardTab: React.FC<Props> = ({
                             {formatarMoeda(p.valor_total_estimado || 0)}
                           </TableCell>
                           <TableCell className="text-center">
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
+                            <Button
+                              variant="outline"
+                              size="sm"
                               onClick={() => onAbrirFicha(p)}
                               className="h-7 text-xs gap-1"
                             >
