@@ -13,6 +13,13 @@ import {
   TableCell 
 } from '../ui/table';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select';
+import {
   Boxes,
   Search,
   FileText,
@@ -107,19 +114,22 @@ export const TriagemTab: React.FC<Props> = ({
         </div>
 
         <div className="flex items-center gap-3 flex-wrap">
-          <select 
-            className="flex h-[38px] rounded-[6px] border border-[#E8E8EC] bg-white px-3 py-1 text-xs font-medium text-[#0A0A0A] transition-all duration-150 focus-visible:outline-none focus-visible:border-[#6366F1] focus-visible:ring-2 focus-visible:ring-[#6366F1]/20 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-          >
-            <option value="TODOS">Todos os Status</option>
-            <option value="SOLICITADO">Solicitado (Pendente)</option>
-            <option value="RECEBIDO">Recebido (Em Separação)</option>
-            <option value="ATENDIDO_PARCIAL">Atendido Parcial</option>
-            <option value="ATENDIDO_TOTAL">Atendido Total</option>
-            <option value="ENVIADO">Enviado (Despachado)</option>
-            <option value="CANCELADO">Cancelado</option>
-          </select>
+          <div className="w-52">
+            <Select value={filterStatus} onValueChange={(val) => setFilterStatus(val)}>
+              <SelectTrigger className="h-[38px] text-xs font-medium">
+                <SelectValue placeholder="Filtrar por Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="TODOS">Todos os Status</SelectItem>
+                <SelectItem value="SOLICITADO">Solicitado (Pendente)</SelectItem>
+                <SelectItem value="RECEBIDO">Recebido (Em Separação)</SelectItem>
+                <SelectItem value="ATENDIDO_PARCIAL">Atendido Parcial</SelectItem>
+                <SelectItem value="ATENDIDO_TOTAL">Atendido Total</SelectItem>
+                <SelectItem value="ENVIADO">Enviado (Despachado)</SelectItem>
+                <SelectItem value="CANCELADO">Cancelado</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
           <div className="relative w-52">
             <Search className="absolute left-3 top-3 h-3.5 w-3.5 text-[#9C9C9C]" />

@@ -17,6 +17,7 @@ import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { ConfirmDeleteDialog } from '../ui/confirm-dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { 
   Landmark, 
   Wallet, 
@@ -242,49 +243,47 @@ export const OrcamentoTab: React.FC<Props> = ({
                   <label htmlFor="ent_natureza" className="text-xs font-semibold text-foreground uppercase tracking-wider">
                     Natureza da Despesa *
                   </label>
-                  <select 
-                    id="ent_natureza" 
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    value={natureza}
-                    onChange={(e) => setNatureza(e.target.value as NaturezaDespesa)}
-                    required
-                  >
-                    <option value="CUSTEIO">Custeio (Insumos, RH e Manutenção)</option>
-                    <option value="INVESTIMENTO">Investimento (Bens Permanentes e Equipamentos)</option>
-                  </select>
+                  <Select value={natureza} onValueChange={(val) => setNatureza(val as NaturezaDespesa)}>
+                    <SelectTrigger id="ent_natureza" className="h-10">
+                      <SelectValue placeholder="Selecione a natureza" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="CUSTEIO">Custeio (Insumos, RH e Manutenção)</SelectItem>
+                      <SelectItem value="INVESTIMENTO">Investimento (Bens Permanentes e Equipamentos)</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-1.5">
                   <label htmlFor="ent_recorrencia" className="text-xs font-semibold text-foreground uppercase tracking-wider">
                     Tipo de Entrada *
                   </label>
-                  <select 
-                    id="ent_recorrencia" 
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    value={tipoRecorrencia}
-                    onChange={(e) => setTipoRecorrencia(e.target.value as TipoRecorrencia)}
-                    required
-                  >
-                    <option value="RECORRENTE">Recorrente (Mensal Ordinário)</option>
-                    <option value="PARCELA_UNICA">Parcela Única (Extraordinário)</option>
-                  </select>
+                  <Select value={tipoRecorrencia} onValueChange={(val) => setTipoRecorrencia(val as TipoRecorrencia)}>
+                    <SelectTrigger id="ent_recorrencia" className="h-10">
+                      <SelectValue placeholder="Selecione a recorrência" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="RECORRENTE">Recorrente (Mensal Ordinário)</SelectItem>
+                      <SelectItem value="PARCELA_UNICA">Parcela Única (Extraordinário)</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-1.5">
                   <label htmlFor="ent_unidade" className="text-xs font-semibold text-foreground uppercase tracking-wider">
                     Destino / Unidade Beneficiada
                   </label>
-                  <select 
-                    id="ent_unidade" 
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    value={unidadeId}
-                    onChange={(e) => setUnidadeId(e.target.value)}
-                  >
-                    <option value="">Fundo Municipal de Saúde (Global)</option>
-                    {unidades.map(u => (
-                      <option key={u.id} value={u.id}>{u.nome} ({u.tipo})</option>
-                    ))}
-                  </select>
+                  <Select value={unidadeId || 'GLOBAL'} onValueChange={(val) => setUnidadeId(val === 'GLOBAL' ? '' : val)}>
+                    <SelectTrigger id="ent_unidade" className="h-10">
+                      <SelectValue placeholder="Fundo Municipal de Saúde (Global)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="GLOBAL">Fundo Municipal de Saúde (Global)</SelectItem>
+                      {unidades.map(u => (
+                        <SelectItem key={u.id} value={String(u.id)}>{u.nome} ({u.tipo})</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-1.5">
@@ -354,15 +353,18 @@ export const OrcamentoTab: React.FC<Props> = ({
           <div className="flex items-center gap-2 self-start sm:self-auto">
             <Filter className="w-3.5 h-3.5 text-muted-foreground" />
             <span className="text-xs font-medium text-muted-foreground">Natureza:</span>
-            <select 
-              className="h-8 rounded-md border border-input bg-background px-2 py-1 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              value={filtroNatureza}
-              onChange={(e) => setFiltroNatureza(e.target.value as any)}
-            >
-              <option value="TODOS">Todas as Naturezas</option>
-              <option value="CUSTEIO">Apenas Custeio</option>
-              <option value="INVESTIMENTO">Apenas Investimento</option>
-            </select>
+            <div className="w-44">
+              <Select value={filtroNatureza} onValueChange={(val) => setFiltroNatureza(val as any)}>
+                <SelectTrigger className="h-8 text-xs">
+                  <SelectValue placeholder="Todas as Naturezas" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="TODOS">Todas as Naturezas</SelectItem>
+                  <SelectItem value="CUSTEIO">Apenas Custeio</SelectItem>
+                  <SelectItem value="INVESTIMENTO">Apenas Investimento</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardHeader>
 

@@ -8,6 +8,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
 import { ConfirmDeleteDialog } from '../ui/confirm-dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { 
   Users, 
   UserPlus, 
@@ -414,37 +415,35 @@ export const UsuariosTab: React.FC<Props> = ({
               <label htmlFor="usr_perfil" className="text-xs font-semibold text-foreground uppercase tracking-wider">
                 Perfil de Acesso (RBAC) *
               </label>
-              <select
-                id="usr_perfil"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                value={perfil}
-                onChange={e => setPerfil(e.target.value as PerfilUsuario)}
-                required
-              >
-                <option value="SOLICITANTE">Solicitante (Pedidos e Reparos)</option>
-                <option value="GESTOR">Gestor Executivo (Somente Leitura)</option>
-                <option value="ADMINISTRADOR">Administrador (Acesso Total)</option>
-                <option value="TECNICO">Técnico de Manutenção</option>
-              </select>
+              <Select value={perfil} onValueChange={(val) => setPerfil(val as PerfilUsuario)}>
+                <SelectTrigger id="usr_perfil" className="h-10">
+                  <SelectValue placeholder="Selecione o perfil" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="SOLICITANTE">Solicitante (Pedidos e Reparos)</SelectItem>
+                  <SelectItem value="GESTOR">Gestor Executivo (Somente Leitura)</SelectItem>
+                  <SelectItem value="ADMINISTRADOR">Administrador (Acesso Total)</SelectItem>
+                  <SelectItem value="TECNICO">Técnico de Manutenção</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-1.5">
               <label htmlFor="usr_unidade" className="text-xs font-semibold text-foreground uppercase tracking-wider">
                 Unidade de Saúde Alocada *
               </label>
-              <select
-                id="usr_unidade"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                value={unidadeId}
-                onChange={e => setUnidadeId(Number(e.target.value))}
-                required
-              >
-                {unidades.map(u => (
-                  <option key={u.id} value={u.id}>
-                    #{u.id} — {u.nome}
-                  </option>
-                ))}
-              </select>
+              <Select value={String(unidadeId)} onValueChange={(val) => setUnidadeId(Number(val))}>
+                <SelectTrigger id="usr_unidade" className="h-10">
+                  <SelectValue placeholder="Selecione a unidade" />
+                </SelectTrigger>
+                <SelectContent>
+                  {unidades.map(u => (
+                    <SelectItem key={u.id} value={String(u.id)}>
+                      #{u.id} — {u.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="flex justify-end gap-2 pt-3 border-t border-border">
