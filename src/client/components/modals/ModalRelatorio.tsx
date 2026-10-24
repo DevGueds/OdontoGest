@@ -11,7 +11,7 @@ import {
 import { dbService } from '../../services/db';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
 import { Button } from '../ui/button';
-import { FileDown, FileSpreadsheet, FileText, Layers, Calendar, Building2 } from 'lucide-react';
+import { FileDown, FileSpreadsheet, FileText, Layers, Calendar, Building2, X } from 'lucide-react';
 
 export type TipoRelatorio = 'FINANCEIRO' | 'INSUMOS' | 'MANUTENCAO' | 'COMPLETO';
 
@@ -503,7 +503,11 @@ export const ModalRelatorio: React.FC<Props> = ({
               type="button" 
               variant="outline" 
               onClick={onClose}
+              className="gap-1.5 text-muted-foreground hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 dark:hover:bg-rose-950/30 dark:hover:text-rose-400 dark:hover:border-rose-800 transition-colors"
+              title="Cancelar e fechar modal de relatórios"
+              aria-label="Cancelar"
             >
+              <X className="w-4 h-4" />
               Cancelar
             </Button>
 
@@ -511,8 +515,9 @@ export const ModalRelatorio: React.FC<Props> = ({
               type="button" 
               variant="emerald" 
               onClick={handleExportarExcel}
-              className="gap-2"
+              className="gap-2 shadow-sm hover:shadow-md transition-all"
               title="Download de Planilha Excel (.CSV)"
+              aria-label="Exportar Excel"
             >
               <FileSpreadsheet className="w-4 h-4" />
               Excel (.CSV)
@@ -521,8 +526,9 @@ export const ModalRelatorio: React.FC<Props> = ({
             <Button 
               type="button" 
               onClick={handleGerarPDF}
-              className="gap-2"
+              className="gap-2 hover:shadow-md transition-all"
               title="Gerar Visualização e Salvar em PDF"
+              aria-label="Gerar Relatório PDF"
             >
               <FileText className="w-4 h-4" />
               Relatório PDF

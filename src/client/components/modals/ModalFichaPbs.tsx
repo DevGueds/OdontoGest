@@ -218,10 +218,25 @@ export const ModalFichaPbs: React.FC<Props> = ({
           </div>
 
           <div className="flex items-center gap-2">
-            <Button variant="default" size="sm" onClick={handlePrint} className="text-xs">
-              <Printer className="h-3.5 w-3.5 mr-1" /> Imprimir / Gerar PDF
+            <Button 
+              variant="default" 
+              size="sm" 
+              onClick={handlePrint} 
+              className="gap-1.5 text-xs hover:shadow-md transition-all"
+              title="Imprimir documento oficial ou salvar em PDF"
+              aria-label="Imprimir Ficha PBS"
+            >
+              <Printer className="h-3.5 w-3.5" />
+              Imprimir / Gerar PDF
             </Button>
-            <Button variant="ghost" size="iconSm" onClick={onClose}>
+            <Button 
+              variant="ghost" 
+              size="iconSm" 
+              onClick={onClose}
+              className="text-muted-foreground hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+              title="Fechar visualização da ficha"
+              aria-label="Fechar"
+            >
               <X className="h-4 w-4" />
             </Button>
           </div>

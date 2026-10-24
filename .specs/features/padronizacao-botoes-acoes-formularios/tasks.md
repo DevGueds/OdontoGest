@@ -87,10 +87,10 @@ T1 → T2 → T3 → T4 → T5 → T6
 - Skill: NONE
 
 **Done when**:
-- [ ] Botões Cancelar e Fechar recebem ícone `<X />` e hover sutil
-- [ ] Botões de despacho, recebimento e atendimento recebem tooltips e estilização padrão
-- [ ] Botões de exportação em `ModalRelatorio` (Excel e PDF) e impressão em `ModalFichaPbs` recebem ícones e tooltips
-- [ ] `npx tsc --noEmit` passa sem erros
+- [x] Botões Cancelar e Fechar recebem ícone `<X />` e hover sutil
+- [x] Botões de despacho, recebimento e atendimento recebem tooltips e estilização padrão
+- [x] Botões de exportação em `ModalRelatorio` (Excel e PDF) e impressão em `ModalFichaPbs` recebem ícones e tooltips
+- [x] `npx tsc --noEmit` passa sem erros
 
 **Tests**: static
 **Gate**: quick

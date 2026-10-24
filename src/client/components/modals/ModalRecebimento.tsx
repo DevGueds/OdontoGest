@@ -83,11 +83,28 @@ export const ModalRecebimento: React.FC<Props> = ({ pedido, isOpen, onClose, onC
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#E8E8EC] dark:border-zinc-800">
-            <Button type="button" variant="outline" onClick={onClose} size="sm">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={onClose} 
+              size="sm"
+              className="gap-1.5 text-muted-foreground hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 dark:hover:bg-rose-950/30 dark:hover:text-rose-400 dark:hover:border-rose-800 transition-colors"
+              title="Cancelar e fechar modal"
+              aria-label="Cancelar"
+            >
+              <X className="h-3.5 w-3.5" />
               Cancelar
             </Button>
-            <Button type="submit" variant="default" size="sm" className="text-xs">
-              <ClipboardCheck className="h-3.5 w-3.5 mr-1" /> Confirmar Recebimento
+            <Button 
+              type="submit" 
+              variant="default" 
+              size="sm" 
+              className="gap-1.5 text-xs hover:shadow-md transition-all"
+              title="Confirmar recebimento físico dos materiais na unidade"
+              aria-label="Confirmar Recebimento"
+            >
+              <ClipboardCheck className="h-3.5 w-3.5" />
+              Confirmar Recebimento
             </Button>
           </div>
         </form>
