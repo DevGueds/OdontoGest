@@ -541,278 +541,280 @@ export const EquipamentosTab: React.FC<Props> = ({
 
       {/* Modal Novo Equipamento */}
       {modalEquipamentoOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in-0 duration-150">
-          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900 relative">
-            <button onClick={() => setModalEquipamentoOpen(false)} className="absolute right-4 top-4 rounded-lg p-1 text-slate-400 hover:text-slate-600">
-              <X className="h-4 w-4" />
-            </button>
-            <h3 className="text-base font-bold font-display text-slate-900 dark:text-white flex items-center gap-2 pb-3 border-b border-[#E8E8EC] dark:border-zinc-800">
-              <Plus className="h-4 w-4 text-[#6366F1]" /> Cadastrar Novo Equipamento
-            </h3>
-            <form onSubmit={handleSubmitEquipamento} className="mt-4 space-y-3 text-xs">
-              <div className="space-y-1">
-                <label className="font-semibold">Unidade de Saúde Alocada *</label>
-                <select 
-                  className="flex h-9 w-full rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs dark:border-slate-800 dark:bg-slate-900"
-                  value={eqUnidadeId}
-                  onChange={e => setEqUnidadeId(Number(e.target.value))}
-                  required
-                >
-                  {unidades.map(u => (
-                    <option key={u.id} value={u.id}>{u.nome} ({u.tipo})</option>
-                  ))}
-                </select>
-              </div>
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-zinc-950/60 backdrop-blur-sm p-4 animate-in fade-in-0 duration-150">
+          <div className="min-h-full flex items-center justify-center py-6">
+            <div className="w-full max-w-lg my-auto rounded-[12px] border border-[#E8E8EC] bg-white p-6 shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:border-zinc-800 dark:bg-[#121215] relative">
+              <button onClick={() => setModalEquipamentoOpen(false)} className="absolute right-4 top-4 rounded-[6px] p-1 text-[#9C9C9C] hover:text-[#0A0A0A] dark:hover:text-zinc-200 transition-colors">
+                <X className="h-4 w-4" />
+              </button>
+              <h3 className="text-base font-bold font-display text-[#0A0A0A] dark:text-zinc-100 flex items-center gap-2 pb-3 border-b border-[#E8E8EC] dark:border-zinc-800">
+                <Plus className="h-4 w-4 text-[#6366F1]" /> Cadastrar Novo Equipamento
+              </h3>
+              <form onSubmit={handleSubmitEquipamento} className="mt-4 space-y-3.5 text-xs">
+                <div className="space-y-1">
+                  <label className="font-medium text-[#0A0A0A] dark:text-zinc-300">Unidade de Saúde Alocada *</label>
+                  <select 
+                    className="flex h-[38px] w-full rounded-[6px] border border-[#E8E8EC] bg-white px-3 py-1 text-xs text-[#0A0A0A] transition-all duration-150 focus-visible:outline-none focus-visible:border-[#6366F1] focus-visible:ring-2 focus-visible:ring-[#6366F1]/20 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
+                    value={eqUnidadeId}
+                    onChange={e => setEqUnidadeId(Number(e.target.value))}
+                    required
+                  >
+                    {unidades.map(u => (
+                      <option key={u.id} value={u.id}>{u.nome} ({u.tipo})</option>
+                    ))}
+                  </select>
+                </div>
 
-              <div className="space-y-1">
-                <label className="font-semibold">Nome / Modelo do Equipamento *</label>
-                <Input 
-                  type="text" 
-                  placeholder="Ex: Cadeira Odontológica Kavo Unik"
-                  value={eqNome}
-                  onChange={e => setEqNome(e.target.value)}
-                  required
-                  className="h-9 text-xs"
-                />
-              </div>
+                <div className="space-y-1">
+                  <label className="font-medium text-[#0A0A0A] dark:text-zinc-300">Nome / Modelo do Equipamento *</label>
+                  <Input 
+                    type="text" 
+                    placeholder="Ex: Cadeira Odontológica Kavo Unik"
+                    value={eqNome}
+                    onChange={e => setEqNome(e.target.value)}
+                    required
+                  />
+                </div>
 
-              <div className="space-y-1">
-                <label className="font-semibold">Número de Patrimônio</label>
-                <Input 
-                  type="text" 
-                  placeholder="Ex: PAT-2024-001 (Opcional)"
-                  value={eqNumeroSerie}
-                  onChange={e => setEqNumeroSerie(e.target.value)}
-                  className="h-9 text-xs"
-                />
-              </div>
+                <div className="space-y-1">
+                  <label className="font-medium text-[#0A0A0A] dark:text-zinc-300">Número de Patrimônio</label>
+                  <Input 
+                    type="text" 
+                    placeholder="Ex: PAT-2024-001 (Opcional)"
+                    value={eqNumeroSerie}
+                    onChange={e => setEqNumeroSerie(e.target.value)}
+                  />
+                </div>
 
-              <div className="space-y-1">
-                <label className="font-semibold">Data da Última Preventiva</label>
-                <Input 
-                  type="date" 
-                  value={eqDataPreventiva}
-                  onChange={e => setEqDataPreventiva(e.target.value)}
-                  className="h-9 text-xs"
-                />
-              </div>
+                <div className="space-y-1">
+                  <label className="font-medium text-[#0A0A0A] dark:text-zinc-300">Data da Última Preventiva</label>
+                  <Input 
+                    type="date" 
+                    value={eqDataPreventiva}
+                    onChange={e => setEqDataPreventiva(e.target.value)}
+                  />
+                </div>
 
-              <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 dark:border-slate-800">
-                <Button type="button" variant="outline" size="sm" onClick={() => setModalEquipamentoOpen(false)}>Cancelar</Button>
-                <Button type="submit" size="sm">Cadastrar Equipamento</Button>
-              </div>
-            </form>
+                <div className="flex justify-end gap-2 pt-4 border-t border-[#E8E8EC] dark:border-zinc-800">
+                  <Button type="button" variant="outline" size="sm" onClick={() => setModalEquipamentoOpen(false)}>Cancelar</Button>
+                  <Button type="submit" size="sm">Cadastrar Equipamento</Button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}
 
       {/* Modal Editar Equipamento */}
       {modalEditEquipamentoOpen && equipamentoEdicao && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in-0 duration-150">
-          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900 relative">
-            <button onClick={() => setModalEditEquipamentoOpen(false)} className="absolute right-4 top-4 rounded-lg p-1 text-slate-400 hover:text-slate-600">
-              <X className="h-4 w-4" />
-            </button>
-            <h3 className="text-base font-bold font-display text-slate-900 dark:text-white flex items-center gap-2 pb-3 border-b border-[#E8E8EC] dark:border-zinc-800">
-              <Edit2 className="h-4 w-4 text-[#6366F1]" /> Editar Equipamento #{equipamentoEdicao.id}
-            </h3>
-            <form onSubmit={handleConfirmarEdicaoEquipamento} className="mt-4 space-y-3 text-xs">
-              <div className="space-y-1">
-                <label className="font-semibold">Unidade de Saúde Alocada *</label>
-                <select 
-                  className="flex h-9 w-full rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs dark:border-slate-800 dark:bg-slate-900"
-                  value={editUnidadeId}
-                  onChange={e => setEditUnidadeId(Number(e.target.value))}
-                  required
-                >
-                  {unidades.map(u => (
-                    <option key={u.id} value={u.id}>{u.nome} ({u.tipo})</option>
-                  ))}
-                </select>
-              </div>
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-zinc-950/60 backdrop-blur-sm p-4 animate-in fade-in-0 duration-150">
+          <div className="min-h-full flex items-center justify-center py-6">
+            <div className="w-full max-w-lg my-auto rounded-[12px] border border-[#E8E8EC] bg-white p-6 shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:border-zinc-800 dark:bg-[#121215] relative">
+              <button onClick={() => setModalEditEquipamentoOpen(false)} className="absolute right-4 top-4 rounded-[6px] p-1 text-[#9C9C9C] hover:text-[#0A0A0A] dark:hover:text-zinc-200 transition-colors">
+                <X className="h-4 w-4" />
+              </button>
+              <h3 className="text-base font-bold font-display text-[#0A0A0A] dark:text-zinc-100 flex items-center gap-2 pb-3 border-b border-[#E8E8EC] dark:border-zinc-800">
+                <Edit2 className="h-4 w-4 text-[#6366F1]" /> Editar Equipamento #{equipamentoEdicao.id}
+              </h3>
+              <form onSubmit={handleConfirmarEdicaoEquipamento} className="mt-4 space-y-3.5 text-xs">
+                <div className="space-y-1">
+                  <label className="font-medium text-[#0A0A0A] dark:text-zinc-300">Unidade de Saúde Alocada *</label>
+                  <select 
+                    className="flex h-[38px] w-full rounded-[6px] border border-[#E8E8EC] bg-white px-3 py-1 text-xs text-[#0A0A0A] transition-all duration-150 focus-visible:outline-none focus-visible:border-[#6366F1] focus-visible:ring-2 focus-visible:ring-[#6366F1]/20 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
+                    value={editUnidadeId}
+                    onChange={e => setEditUnidadeId(Number(e.target.value))}
+                    required
+                  >
+                    {unidades.map(u => (
+                      <option key={u.id} value={u.id}>{u.nome} ({u.tipo})</option>
+                    ))}
+                  </select>
+                </div>
 
-              <div className="space-y-1">
-                <label className="font-semibold">Nome / Modelo *</label>
-                <Input 
-                  type="text" 
-                  value={editNome}
-                  onChange={e => setEditNome(e.target.value)}
-                  required
-                  className="h-9 text-xs"
-                />
-              </div>
+                <div className="space-y-1">
+                  <label className="font-medium text-[#0A0A0A] dark:text-zinc-300">Nome / Modelo *</label>
+                  <Input 
+                    type="text" 
+                    value={editNome}
+                    onChange={e => setEditNome(e.target.value)}
+                    required
+                  />
+                </div>
 
-              <div className="space-y-1">
-                <label className="font-semibold">Número de Patrimônio</label>
-                <Input 
-                  type="text" 
-                  value={editNumeroSerie}
-                  onChange={e => setEditNumeroSerie(e.target.value)}
-                  className="h-9 text-xs"
-                />
-              </div>
+                <div className="space-y-1">
+                  <label className="font-medium text-[#0A0A0A] dark:text-zinc-300">Número de Patrimônio</label>
+                  <Input 
+                    type="text" 
+                    value={editNumeroSerie}
+                    onChange={e => setEditNumeroSerie(e.target.value)}
+                  />
+                </div>
 
-              <div className="space-y-1">
-                <label className="font-semibold">Data da Última Preventiva</label>
-                <Input 
-                  type="date" 
-                  value={editDataPreventiva}
-                  onChange={e => setEditDataPreventiva(e.target.value)}
-                  className="h-9 text-xs"
-                />
-              </div>
+                <div className="space-y-1">
+                  <label className="font-medium text-[#0A0A0A] dark:text-zinc-300">Data da Última Preventiva</label>
+                  <Input 
+                    type="date" 
+                    value={editDataPreventiva}
+                    onChange={e => setEditDataPreventiva(e.target.value)}
+                  />
+                </div>
 
-              <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 dark:border-slate-800">
-                <Button type="button" variant="outline" size="sm" onClick={() => setModalEditEquipamentoOpen(false)}>Cancelar</Button>
-                <Button type="submit" size="sm">Salvar Alterações</Button>
-              </div>
-            </form>
+                <div className="flex justify-end gap-2 pt-4 border-t border-[#E8E8EC] dark:border-zinc-800">
+                  <Button type="button" variant="outline" size="sm" onClick={() => setModalEditEquipamentoOpen(false)}>Cancelar</Button>
+                  <Button type="submit" size="sm">Salvar Alterações</Button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}
 
       {/* Modal Abrir Chamado */}
       {(modalChamadoOpen || modalPreventivaOpen) && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in-0 duration-150">
-          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900 relative">
-            <button onClick={() => { setModalChamadoOpen(false); setModalPreventivaOpen(false); }} className="absolute right-4 top-4 rounded-lg p-1 text-slate-400 hover:text-slate-600">
-              <X className="h-4 w-4" />
-            </button>
-            <h3 className="text-base font-bold font-display text-slate-900 dark:text-white flex items-center gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
-              {chTipo === 'PREVENTIVA' ? (
-                <><CalendarCheck className="h-4 w-4 text-cyan-600" /> Agendar Manutenção Preventiva</>
-              ) : (
-                <><AlertTriangle className="h-4 w-4 text-rose-600" /> Abrir Chamado de Reparo (Corretiva)</>
-              )}
-            </h3>
-            <form onSubmit={handleSubmitChamado} className="mt-4 space-y-3 text-xs">
-              <div className="space-y-1">
-                <label className="font-semibold">Equipamento Alvo *</label>
-                <select 
-                  className="flex h-9 w-full rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs dark:border-slate-800 dark:bg-slate-900"
-                  value={chEquipamentoId}
-                  onChange={e => setChEquipamentoId(Number(e.target.value))}
-                  required
-                >
-                  {equipamentos
-                    .filter(eq => !isSolicitante || !user?.unidade_id || eq.unidade_id === user.unidade_id)
-                    .map(eq => {
-                      const uni = unidades.find(u => u.id === eq.unidade_id);
-                      return (
-                        <option key={eq.id} value={eq.id}>
-                          {!isSolicitante && uni?.nome ? `[${uni.nome}] ` : ''}{eq.nome}{eq.numero_serie ? ` (Patr: ${eq.numero_serie})` : ''}
-                        </option>
-                      );
-                    })}
-                </select>
-              </div>
-
-              <div className="space-y-1">
-                <label className="font-semibold">Tipo de Chamado *</label>
-                <select 
-                  className="flex h-9 w-full rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs dark:border-slate-800 dark:bg-slate-900"
-                  value={chTipo}
-                  onChange={e => setChTipo(e.target.value as TipoChamado)}
-                  required
-                >
-                  <option value="CORRETIVA">Corretiva (Conserto de Defeito / Avaria)</option>
-                  <option value="PREVENTIVA">Preventiva (Calibração, Revisão Periódica)</option>
-                </select>
-              </div>
-
-              <div className="space-y-1">
-                <label className="font-semibold">Descrição do Defeito ou Serviço *</label>
-                <textarea 
-                  rows={3}
-                  placeholder="Descreva o problema ou solicitação técnica..."
-                  value={chDescricaoDefeito}
-                  onChange={e => setChDescricaoDefeito(e.target.value)}
-                  required
-                  className="w-full rounded-[6px] border border-[#E8E8EC] bg-white p-2.5 text-xs text-[#0A0A0A] transition-all duration-150 focus-visible:outline-none focus-visible:border-[#6366F1] focus-visible:ring-2 focus-visible:ring-[#6366F1]/20 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-zinc-950/60 backdrop-blur-sm p-4 animate-in fade-in-0 duration-150">
+          <div className="min-h-full flex items-center justify-center py-6">
+            <div className="w-full max-w-lg my-auto rounded-[12px] border border-[#E8E8EC] bg-white p-6 shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:border-zinc-800 dark:bg-[#121215] relative">
+              <button 
+                onClick={() => { setModalChamadoOpen(false); setModalPreventivaOpen(false); }} 
+                className="absolute right-4 top-4 rounded-[6px] p-1 text-[#9C9C9C] hover:text-[#0A0A0A] dark:hover:text-zinc-200 transition-colors"
+              >
+                <X className="h-4 w-4" />
+              </button>
+              <h3 className="text-base font-bold font-display text-[#0A0A0A] dark:text-zinc-100 flex items-center gap-2 pb-3 border-b border-[#E8E8EC] dark:border-zinc-800">
+                {chTipo === 'PREVENTIVA' ? (
+                  <><CalendarCheck className="h-4 w-4 text-[#6366F1]" /> Agendar Manutenção Preventiva</>
+                ) : (
+                  <><AlertTriangle className="h-4 w-4 text-[#EF4444]" /> Abrir Chamado de Reparo (Corretiva)</>
+                )}
+              </h3>
+              <form onSubmit={handleSubmitChamado} className="mt-4 space-y-3.5 text-xs">
                 <div className="space-y-1">
-                  <label className="font-semibold">Data Abertura *</label>
-                  <Input 
-                    type="date" 
-                    value={chDataAbertura} 
-                    onChange={e => setChDataAbertura(e.target.value)}
+                  <label className="font-medium text-[#0A0A0A] dark:text-zinc-300">Equipamento Alvo *</label>
+                  <select 
+                    className="flex h-[38px] w-full rounded-[6px] border border-[#E8E8EC] bg-white px-3 py-1 text-xs text-[#0A0A0A] transition-all duration-150 focus-visible:outline-none focus-visible:border-[#6366F1] focus-visible:ring-2 focus-visible:ring-[#6366F1]/20 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
+                    value={chEquipamentoId}
+                    onChange={e => setChEquipamentoId(Number(e.target.value))}
                     required
-                    className="h-9 text-xs"
+                  >
+                    {equipamentos
+                      .filter(eq => !isSolicitante || !user?.unidade_id || eq.unidade_id === user.unidade_id)
+                      .map(eq => {
+                        const uni = unidades.find(u => u.id === eq.unidade_id);
+                        return (
+                          <option key={eq.id} value={eq.id}>
+                            {!isSolicitante && uni?.nome ? `[${uni.nome}] ` : ''}{eq.nome}{eq.numero_serie ? ` (Patr: ${eq.numero_serie})` : ''}
+                          </option>
+                        );
+                      })}
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-medium text-[#0A0A0A] dark:text-zinc-300">Tipo de Chamado *</label>
+                  <select 
+                    className="flex h-[38px] w-full rounded-[6px] border border-[#E8E8EC] bg-white px-3 py-1 text-xs text-[#0A0A0A] transition-all duration-150 focus-visible:outline-none focus-visible:border-[#6366F1] focus-visible:ring-2 focus-visible:ring-[#6366F1]/20 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
+                    value={chTipo}
+                    onChange={e => setChTipo(e.target.value as TipoChamado)}
+                    required
+                  >
+                    <option value="CORRETIVA">Corretiva (Conserto de Defeito / Avaria)</option>
+                    <option value="PREVENTIVA">Preventiva (Calibração, Revisão Periódica)</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-medium text-[#0A0A0A] dark:text-zinc-300">Descrição do Defeito ou Serviço *</label>
+                  <textarea 
+                    rows={3}
+                    placeholder="Descreva o problema ou solicitação técnica..."
+                    value={chDescricaoDefeito}
+                    onChange={e => setChDescricaoDefeito(e.target.value)}
+                    required
+                    className="w-full rounded-[6px] border border-[#E8E8EC] bg-white p-2.5 text-xs text-[#0A0A0A] transition-all duration-150 focus-visible:outline-none focus-visible:border-[#6366F1] focus-visible:ring-2 focus-visible:ring-[#6366F1]/20 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
                   />
                 </div>
-                {!isSolicitante && (
+
+                <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="font-semibold">Custo Estimado (R$)</label>
+                    <label className="font-medium text-[#0A0A0A] dark:text-zinc-300">Data Abertura *</label>
                     <Input 
-                      type="number" 
-                      step="0.01" 
-                      placeholder="0.00" 
-                      value={chCustoReparo} 
-                      onChange={e => setChCustoReparo(e.target.value)}
-                      className="h-9 text-xs"
+                      type="date" 
+                      value={chDataAbertura} 
+                      onChange={e => setChDataAbertura(e.target.value)}
+                      required
                     />
                   </div>
-                )}
-              </div>
+                  {!isSolicitante && (
+                    <div className="space-y-1">
+                      <label className="font-medium text-[#0A0A0A] dark:text-zinc-300">Custo Estimado (R$)</label>
+                      <Input 
+                        type="number" 
+                        step="0.01" 
+                        placeholder="0.00" 
+                        value={chCustoReparo} 
+                        onChange={e => setChCustoReparo(e.target.value)}
+                      />
+                    </div>
+                  )}
+                </div>
 
-              <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 dark:border-slate-800">
-                <Button type="button" variant="outline" size="sm" onClick={() => { setModalChamadoOpen(false); setModalPreventivaOpen(false); }}>Cancelar</Button>
-                <Button type="submit" size="sm">Registrar Chamado</Button>
-              </div>
-            </form>
+                <div className="flex justify-end gap-2 pt-4 border-t border-[#E8E8EC] dark:border-zinc-800">
+                  <Button type="button" variant="outline" size="sm" onClick={() => { setModalChamadoOpen(false); setModalPreventivaOpen(false); }}>Cancelar</Button>
+                  <Button type="submit" size="sm">Registrar Chamado</Button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}
 
       {/* Modal Atualizar Status */}
       {chamadoEmEdicao && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in-0 duration-150">
-          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900 relative">
-            <button onClick={() => setChamadoEmEdicao(null)} className="absolute right-4 top-4 rounded-lg p-1 text-slate-400 hover:text-slate-600">
-              <X className="h-4 w-4" />
-            </button>
-            <h3 className="text-base font-bold font-display text-slate-900 dark:text-white flex items-center gap-2 pb-3 border-b border-[#E8E8EC] dark:border-zinc-800">
-              <Wrench className="h-4 w-4 text-[#6366F1]" /> Atualizar Chamado #{chamadoEmEdicao.id}
-            </h3>
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              onUpdateStatusChamado(chamadoEmEdicao.id, novoStatus, parseFloat(novoCusto) || 0);
-              setChamadoEmEdicao(null);
-            }} className="mt-4 space-y-3 text-xs">
-              <div className="space-y-1">
-                <label className="font-semibold">Novo Status *</label>
-                <select 
-                  className="flex h-9 w-full rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs dark:border-slate-800 dark:bg-slate-900"
-                  value={novoStatus}
-                  onChange={e => setNovoStatus(e.target.value as StatusChamado)}
-                  required
-                >
-                  <option value="ABERTO">Aberto (Aguardando Atendimento)</option>
-                  <option value="EM_ANDAMENTO">Em Andamento (Com Técnico)</option>
-                  <option value="CONCLUIDO">Concluído (Reparo Finalizado)</option>
-                </select>
-              </div>
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-zinc-950/60 backdrop-blur-sm p-4 animate-in fade-in-0 duration-150">
+          <div className="min-h-full flex items-center justify-center py-6">
+            <div className="w-full max-w-md my-auto rounded-[12px] border border-[#E8E8EC] bg-white p-6 shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:border-zinc-800 dark:bg-[#121215] relative">
+              <button onClick={() => setChamadoEmEdicao(null)} className="absolute right-4 top-4 rounded-[6px] p-1 text-[#9C9C9C] hover:text-[#0A0A0A] dark:hover:text-zinc-200 transition-colors">
+                <X className="h-4 w-4" />
+              </button>
+              <h3 className="text-base font-bold font-display text-[#0A0A0A] dark:text-zinc-100 flex items-center gap-2 pb-3 border-b border-[#E8E8EC] dark:border-zinc-800">
+                <Wrench className="h-4 w-4 text-[#6366F1]" /> Atualizar Chamado #{chamadoEmEdicao.id}
+              </h3>
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                onUpdateStatusChamado(chamadoEmEdicao.id, novoStatus, parseFloat(novoCusto) || 0);
+                setChamadoEmEdicao(null);
+              }} className="mt-4 space-y-3.5 text-xs">
+                <div className="space-y-1">
+                  <label className="font-medium text-[#0A0A0A] dark:text-zinc-300">Novo Status *</label>
+                  <select 
+                    className="flex h-[38px] w-full rounded-[6px] border border-[#E8E8EC] bg-white px-3 py-1 text-xs text-[#0A0A0A] transition-all duration-150 focus-visible:outline-none focus-visible:border-[#6366F1] focus-visible:ring-2 focus-visible:ring-[#6366F1]/20 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
+                    value={novoStatus}
+                    onChange={e => setNovoStatus(e.target.value as StatusChamado)}
+                    required
+                  >
+                    <option value="ABERTO">Aberto (Aguardando Atendimento)</option>
+                    <option value="EM_ANDAMENTO">Em Andamento (Com Técnico)</option>
+                    <option value="CONCLUIDO">Concluído (Reparo Finalizado)</option>
+                  </select>
+                </div>
 
-              <div className="space-y-1">
-                <label className="font-semibold">Custo Final do Reparo (R$)</label>
-                <Input 
-                  type="number" 
-                  step="0.01" 
-                  placeholder="0.00" 
-                  value={novoCusto} 
-                  onChange={e => setNovoCusto(e.target.value)}
-                  className="h-9 text-xs"
-                />
-              </div>
+                <div className="space-y-1">
+                  <label className="font-medium text-[#0A0A0A] dark:text-zinc-300">Custo Final do Reparo (R$)</label>
+                  <Input 
+                    type="number" 
+                    step="0.01" 
+                    placeholder="0.00" 
+                    value={novoCusto} 
+                    onChange={e => setNovoCusto(e.target.value)}
+                  />
+                </div>
 
-              <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 dark:border-slate-800">
-                <Button type="button" variant="outline" size="sm" onClick={() => setChamadoEmEdicao(null)}>Cancelar</Button>
-                <Button type="submit" size="sm">Salvar Status</Button>
-              </div>
-            </form>
+                <div className="flex justify-end gap-2 pt-4 border-t border-[#E8E8EC] dark:border-zinc-800">
+                  <Button type="button" variant="outline" size="sm" onClick={() => setChamadoEmEdicao(null)}>Cancelar</Button>
+                  <Button type="submit" size="sm">Salvar Status</Button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}

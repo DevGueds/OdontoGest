@@ -71,10 +71,10 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 
 | Requirement ID | Story | Phase | Status |
 | --- | --- | --- | --- |
-| AUTH-01 | P1: Restringir Acesso a Relatórios e Dump SQL para Solicitante | Execute | Pending |
-| AUTH-02 | P1: Restringir Acesso a Relatórios e Dump SQL para Solicitante | Execute | Pending |
-| AUTH-03 | P1: Restringir Acesso a Relatórios e Dump SQL para Solicitante | Execute | Pending |
-| AUTH-04 | P1: Restringir Acesso a Relatórios e Dump SQL para Solicitante | Execute | Pending |
+| AUTH-01 | P1: Restringir Acesso a Relatórios e Dump SQL para Solicitante | Execute | Verified |
+| AUTH-02 | P1: Restringir Acesso a Relatórios e Dump SQL para Solicitante | Execute | Verified |
+| AUTH-03 | P1: Restringir Acesso a Relatórios e Dump SQL para Solicitante | Execute | Verified |
+| AUTH-04 | P1: Restringir Acesso a Relatórios e Dump SQL para Solicitante | Execute | Verified |
 
 **ID format:** `AUTH-NN`
 
@@ -86,9 +86,9 @@ Every ambiguity is resolved or recorded here - nothing is left silently unclear.
 
 ## Success Criteria
 
-- [ ] Usuário logado com perfil SOLICITANTE não vê o botão "Relatórios" no Header.
-- [ ] Usuário logado com perfil SOLICITANTE não vê o botão "SQL Dump" no Header.
-- [ ] O componente `ModalRelatorio` nunca é aberto ou alimentado para perfil SOLICITANTE.
-- [ ] A rota backend `GET /api/export/sql` retorna HTTP 401 para requisições não autenticadas e HTTP 403 para o perfil SOLICITANTE.
-- [ ] Usuários com perfil GESTOR ou ADMINISTRADOR continuam acessando Relatórios normalmente.
-- [ ] Usuários com perfil ADMINISTRADOR continuam acessando SQL Dump normalmente.
+- [x] Usuário logado com perfil SOLICITANTE não vê o botão "Relatórios" no Header.
+- [x] Usuário logado com perfil SOLICITANTE não vê o botão "SQL Dump" no Header.
+- [x] O componente `ModalRelatorio` nunca é aberto ou alimentado para perfil SOLICITANTE.
+- [x] A rota backend `GET /api/export/sql` retorna HTTP 401 para requisições não autenticadas e HTTP 403 para o perfil SOLICITANTE.
+- [x] Usuários com perfil GESTOR ou ADMINISTRADOR continuam acessando Relatórios normalmente.
+- [x] Usuários com perfil ADMINISTRADOR continuam acessando SQL Dump normalmente.
