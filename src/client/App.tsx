@@ -458,7 +458,7 @@ export const AppContent: React.FC = () => {
   const pendentesCount = pedidos.filter(p => p.status === 'SOLICITADO' || p.status === 'RECEBIDO').length;
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50/70 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200">
+    <div className="h-screen flex flex-col overflow-hidden bg-slate-50/70 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200">
       <Header 
         perfilAtual={perfilAtual}
         onExportarSQL={handleExportarSQL}
@@ -469,7 +469,7 @@ export const AppContent: React.FC = () => {
         }
       />
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 min-h-0 overflow-hidden relative">
         <Navigation 
           activeTab={activeTab}
           perfilAtual={perfilAtual}
@@ -479,7 +479,7 @@ export const AppContent: React.FC = () => {
           onToggleCollapse={handleToggleSidebar}
         />
 
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 space-y-6">
+        <main className="flex-1 min-h-0 overflow-y-auto p-4 md:p-6 lg:p-8 space-y-6">
         {activeTab === 'novo-pedido' && (
           <div className="tab-content active">
             <NovoPedidoTab 

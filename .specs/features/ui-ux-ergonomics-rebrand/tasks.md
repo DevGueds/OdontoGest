@@ -126,10 +126,10 @@
 **Tests**: none
 **Gate**: quick
 **Done when**:
-- [ ] App root is `h-screen flex flex-col overflow-hidden`
-- [ ] Main content area scrolls independently with `flex-1 overflow-y-auto`
-- [ ] Sidebar toggle footer remains pinned at bottom of viewport
-- [ ] Gate check passes: `npx tsc --noEmit`
+- [x] App root is `h-screen flex flex-col overflow-hidden`
+- [x] Main content area scrolls independently with `flex-1 overflow-y-auto`
+- [x] Sidebar toggle footer remains pinned at bottom of viewport
+- [x] Gate check passes: `npx tsc --noEmit`
 **Commit**: `fix(layout): constrain app shell to viewport height to pin sidebar toggle`
 
 ---
@@ -142,10 +142,10 @@
 **Tests**: none
 **Gate**: build
 **Done when**:
-- [ ] Moving mouse over collapsed sidebar expands it smoothly
-- [ ] Moving mouse away returns sidebar to icon rail
-- [ ] Toggle button still pins/unpins collapsed state cleanly
-- [ ] Gate check passes: `npx tsc --noEmit; npx vite build`
+- [x] Moving mouse over collapsed sidebar expands it smoothly
+- [x] Moving mouse away returns sidebar to icon rail
+- [x] Toggle button still pins/unpins collapsed state cleanly
+- [x] Gate check passes: `npx tsc --noEmit; npx vite build`
 **Commit**: `feat(navigation): add hover expand capability to collapsed sidebar rail`
 
 ---

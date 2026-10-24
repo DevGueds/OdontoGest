@@ -34,6 +34,15 @@ export const Navigation: React.FC<NavigationProps> = ({
   isCollapsed = false,
   onToggleCollapse,
 }) => {
+  const [isHovered, setIsHovered] = React.useState(false);
+  const isExpanded = !isCollapsed || isHovered;
+
+  React.useEffect(() => {
+    if (!isCollapsed) {
+      setIsHovered(false);
+    }
+  }, [isCollapsed]);
+
   const isTecnico = perfilAtual === 'TECNICO';
   const isGestor = perfilAtual === 'GESTOR';
   const isAdmin = perfilAtual === 'ADMINISTRADOR';
@@ -102,16 +111,30 @@ export const Navigation: React.FC<NavigationProps> = ({
 
   return (
     <TooltipProvider delayDuration={150}>
+      {isCollapsed && (
+        <div className="w-16 h-full shrink-0 pointer-events-none" aria-hidden="true" />
+      )}
       <aside
+        onMouseEnter={() => {
+          if (isCollapsed) setIsHovered(true);
+        }}
+        onMouseLeave={() => {
+          if (isCollapsed) setIsHovered(false);
+        }}
         className={cn(
-          "relative flex flex-col border-r border-[#E8E8EC] bg-white dark:border-zinc-800 dark:bg-[#121215] transition-all duration-200 select-none z-30 shrink-0",
-          isCollapsed ? "w-16" : "w-64"
+          "h-full flex flex-col border-r border-[#E8E8EC] bg-white dark:border-zinc-800 dark:bg-[#121215] transition-[width,box-shadow] duration-200 ease-out select-none",
+          isCollapsed
+            ? cn(
+                "absolute top-0 bottom-0 left-0 z-40",
+                isHovered ? "w-64 shadow-2xl" : "w-16 shadow-none"
+              )
+            : "relative w-64 shrink-0 z-30"
         )}
         aria-label="Navegação Lateral"
       >
         {/* Navigation list */}
         <nav className="flex-1 space-y-1 p-3 overflow-y-auto">
-          {!isCollapsed && (
+          {isExpanded && (
             <div className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-[#9C9C9C] dark:text-zinc-500">
               Menu Principal
             </div>
@@ -126,10 +149,13 @@ export const Navigation: React.FC<NavigationProps> = ({
               const buttonContent = (
                 <button
                   key={item.id}
-                  onClick={() => onSelectTab(item.id)}
+                  onClick={() => {
+                    onSelectTab(item.id);
+                    if (isCollapsed) setIsHovered(false);
+                  }}
                   className={cn(
                     "group relative flex w-full items-center rounded-[6px] font-medium transition-all duration-150 text-xs",
-                    isCollapsed ? "h-9 justify-center px-0" : "h-9 px-3 gap-2.5",
+                    !isExpanded ? "h-9 justify-center px-0" : "h-9 px-3 gap-2.5",
                     isActive
                       ? "bg-[#2563EB] text-white shadow-[0_2px_8px_rgba(37,99,235,0.25)]"
                       : "text-[#6B6B6B] dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/70 hover:text-[#0A0A0A] dark:hover:text-zinc-100"
@@ -145,7 +171,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                     )}
                   />
 
-                  {!isCollapsed && (
+                  {isExpanded && (
                     <span className="truncate flex-1 text-left">
                       {item.label}
                     </span>
@@ -159,7 +185,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                         isActive
                           ? "bg-white/20 text-white"
                           : "bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30",
-                        isCollapsed ? "absolute -top-1 -right-1" : "ml-auto"
+                        !isExpanded ? "absolute -top-1 -right-1" : "ml-auto"
                       )}
                     >
                       {item.badgeCount}
@@ -168,7 +194,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                 </button>
               );
 
-              if (isCollapsed) {
+              if (!isExpanded) {
                 return (
                   <Tooltip key={item.id}>
                     <TooltipTrigger asChild>{buttonContent}</TooltipTrigger>
@@ -190,21 +216,27 @@ export const Navigation: React.FC<NavigationProps> = ({
 
         {/* Collapse / Expand Toggle Button Footer */}
         {onToggleCollapse && (
-          <div className="p-3 border-t border-[#E8E8EC] dark:border-zinc-800">
+          <div className="p-3 border-t border-[#E8E8EC] dark:border-zinc-800 mt-auto shrink-0 bg-inherit">
             <button
-              onClick={onToggleCollapse}
+              onClick={() => {
+                setIsHovered(false);
+                onToggleCollapse();
+              }}
               className={cn(
                 "flex w-full items-center rounded-[6px] p-2 text-xs font-medium text-[#6B6B6B] hover:bg-zinc-100 hover:text-[#0A0A0A] dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200 transition-colors",
-                isCollapsed ? "justify-center" : "gap-2.5"
+                !isExpanded ? "justify-center" : "gap-2.5"
               )}
-              title={isCollapsed ? "Expandir barra lateral" : "Recolher barra lateral"}
+              title={isCollapsed ? (isHovered ? "Fixar menu aberto" : "Expandir barra lateral") : "Recolher barra lateral"}
             >
               {isCollapsed ? (
-                <ChevronRight className="h-4 w-4" />
+                <>
+                  <ChevronRight className="h-4 w-4 shrink-0" />
+                  {isHovered && <span className="truncate">Fixar Menu</span>}
+                </>
               ) : (
                 <>
-                  <ChevronLeft className="h-4 w-4" />
-                  <span>Recolher Menu</span>
+                  <ChevronLeft className="h-4 w-4 shrink-0" />
+                  <span className="truncate">Recolher Menu</span>
                 </>
               )}
             </button>
