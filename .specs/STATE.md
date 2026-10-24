@@ -36,11 +36,18 @@
 
 ## Handoff
 
-- **Feature**: .specs/features/dashboard-ux-enhancement
-- **Phase / Task**: Execute / Validation Complete
-- **Completed**: DASH-01 through DASH-05 (Radix Tabs primitive implemented; SVG charts for Custeio, Unidades and Pedidos created; DashboardTab redesigned; validation passed)
+- **Feature**: .specs/features/ui-ux-ergonomics-rebrand
+- **Phase / Task**: Execute / Verification Complete
+- **Completed**:
+  - REBRAND-01: Primary palette updated to clinical blue (`#2563EB` / HSL `221 83% 53%` with `#1D4ED8` hover).
+  - REBRAND-02: Dedicated dental `ToothIcon` created and integrated in Header and Login.
+  - DASH-01: Balanced semantic icon colors across Dashboard KPI cards (emerald, blue, amber, rose).
+  - PEDIDO-01: Role-adapted Novo Pedido header (compact summary card for Solicitante; editable grid for Admin/Gestor).
+  - PEDIDO-02: "Adicionar Insumo" button relocated directly below the last row of the materials table.
+  - NAV-01: Shell constrained to `h-screen flex flex-col overflow-hidden` with pinned sidebar toggle.
+  - NAV-02: Collapsed sidebar rail expanded smoothly on hover (`isHovered`) without layout reflow.
 - **In-progress** (file:line): none
-- **Next step**: User acceptance testing or deployment.
+- **Next step**: User feedback / acceptance review.
 - **Blockers**: none
 - **Uncommitted files**: none
 - **Branch**: main
