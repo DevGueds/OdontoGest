@@ -48,21 +48,27 @@
 - **Trade-off**: Ações destrutivas agora gerenciam estado de abertura de modal localmente.
 - **Scope**: `src/client/components/ui/confirm-dialog.tsx`, `src/client/components/ui/select.tsx`, tabs e modais com confirmação de exclusão e cores roxas.
 - **Date**: 2026-10-24
+### AD-007
+- **Decision**: Permitir que Gestores e Administradores consultem usuários no endpoint GET `/api/usuarios` com remoção segura de hashes de senha, alimentar `HonorariosTab` com os profissionais cadastrados e prover seleção automática por unidade de saúde alocada no modal de registro de honorários com autopreenchimento de Nome e CRO e fallback para digitação manual.
+- **Reason**: Reduzir retrabalho de digitação manual, eliminar riscos de inconsistência cadastral entre honorários e o quadro profissional das unidades de saúde e manter conformidade com OWASP A01 (sanitizando credenciais de senha no payload HTTP).
+- **Trade-off**: A aba de honorários passa a receber a lista de usuários do estado global.
+- **Scope**: `src/server/server.ts`, `src/client/App.tsx`, `src/client/components/tabs/HonorariosTab.tsx`, `tests/honorarios-profissionais-unidade.test.ts`.
+- **Date**: 2026-10-24
 - **Status**: active
 
 ## Handoff
 
-- **Feature**: .specs/features/ui-modals-selects-rebrand-cleanup
+- **Feature**: .specs/features/honorarios-selecao-profissionais-unidade
 - **Phase / Task**: Verified / Complete
 - **Completed**:
-  - `ConfirmDeleteDialog` implemented (`src/client/components/ui/confirm-dialog.tsx`)
-  - All 5 native `confirm()` calls replaced with `ConfirmDeleteDialog` (`UsuariosTab.tsx`, `OrcamentoTab.tsx`, `CatalogoTab.tsx`, `App.tsx`)
-  - Official shadcn/ui `Select` component suite created wrapping `@radix-ui/react-select` (`src/client/components/ui/select.tsx`)
-  - Shadcn `Select` integrated into `TriagemTab.tsx`, `UsuariosTab.tsx`, and `OrcamentoTab.tsx`
-  - All residual `#6366F1` legacy purple occurrences purged across `EquipamentosTab.tsx`, `ModalRecebimento.tsx`, `ModalEnvio.tsx`, `ModalAtendimento.tsx`, and `ModalFichaPbs.tsx`
-  - Passed verification gates: `npx tsc --noEmit` (exit 0) and `npx vite build` (exit 0)
+  - `GET /api/usuarios` no backend atualizado para permitir papéis `ADMINISTRADOR` e `GESTOR`, com sanitização do campo `senha` (`src/server/server.ts`)
+  - Componente `HonorariosTab` atualizado para receber `usuarios` e filtrar profissionais pela unidade de saúde alocada no modal (`src/client/components/tabs/HonorariosTab.tsx`)
+  - Select de profissional implementado no modal com exibição formatada `Nome - Registro/CRO`, autopreenchimento reativo dos campos de texto e opção fallback de digitação manual
+  - `App.tsx` atualizado repassando `usuarios={usuarios}` para `<HonorariosTab />` (`src/client/App.tsx`)
+  - Teste de integração automatizado cobrindo RBAC, sanitização e associação de honorários criado e validado com sucesso (`tests/honorarios-profissionais-unidade.test.ts`)
+  - Todos os gates determinísticos aprovados: `npx tsc --noEmit` (exit 0), `npx vite build` (exit 0), `validate_spec.py` (exit 0), `validate_tasks.py` (exit 0) e `validate_state.py` (exit 0)
 - **In-progress**: None
-- **Next step**: User acceptance testing
+- **Next step**: Validação do usuário em ambiente de desenvolvimento
 - **Blockers**: None
 - **Uncommitted files**: none
 - **Branch**: main
