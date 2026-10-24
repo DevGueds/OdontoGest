@@ -105,8 +105,10 @@ export const LoginModal: React.FC = () => {
           <div className="pt-2">
             <Button
               type="submit"
-              className="w-full"
+              className="w-full gap-2 hover:shadow-md transition-all"
               disabled={loading}
+              title="Entrar com as credenciais informadas"
+              aria-label="Entrar no Sistema"
             >
               {loading ? (
                 <>

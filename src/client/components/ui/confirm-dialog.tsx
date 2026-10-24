@@ -8,7 +8,7 @@ import {
   DialogFooter,
 } from './dialog';
 import { Button } from './button';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, X, Trash2 } from 'lucide-react';
 
 export interface ConfirmDeleteDialogProps {
   open: boolean;
@@ -62,14 +62,18 @@ export const ConfirmDeleteDialog: React.FC<ConfirmDeleteDialogProps> = ({
           </div>
         </DialogHeader>
 
-        <DialogFooter className="mt-2">
+        <DialogFooter className="mt-2 gap-2">
           <Button
             type="button"
             variant="outline"
             size="sm"
             onClick={() => onOpenChange(false)}
             disabled={submitting || isLoading}
+            className="gap-1.5 text-muted-foreground hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 dark:hover:bg-rose-950/30 dark:hover:text-rose-400 dark:hover:border-rose-800 transition-colors"
+            title="Cancelar e manter o registro intacto"
+            aria-label="Cancelar"
           >
+            <X className="h-4 w-4" />
             {cancelLabel}
           </Button>
           <Button
@@ -78,7 +82,11 @@ export const ConfirmDeleteDialog: React.FC<ConfirmDeleteDialogProps> = ({
             size="sm"
             onClick={handleConfirm}
             disabled={submitting || isLoading}
+            className="gap-1.5 bg-rose-600 hover:bg-rose-700 text-white shadow-sm transition-all"
+            title="Confirmar exclusão definitiva do registro"
+            aria-label="Confirmar exclusão"
           >
+            <Trash2 className="h-4 w-4" />
             {submitting || isLoading ? "Processando..." : confirmLabel}
           </Button>
         </DialogFooter>
