@@ -185,7 +185,9 @@ export const DashboardTab: React.FC<Props> = ({
               <span className="text-xs font-medium uppercase tracking-wider">
                 Saldo Custeio Disponível
               </span>
-              <Wallet className="h-4 w-4 text-muted-foreground/70" />
+              <div className="flex h-7 w-7 items-center justify-center rounded-[6px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                <Wallet className="h-4 w-4" />
+              </div>
             </div>
             
             <div className="text-2xl font-bold tracking-tight text-foreground font-mono mt-2">
@@ -195,7 +197,7 @@ export const DashboardTab: React.FC<Props> = ({
             <div className="mt-3 space-y-1.5">
               <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
                 <div 
-                  className="h-full bg-foreground/80 dark:bg-foreground/70 transition-all duration-500 rounded-full"
+                  className="h-full bg-emerald-600 dark:bg-emerald-500 transition-all duration-500 rounded-full"
                   style={{ width: `${Math.min(100, saldosNatureza.percentualCusteioComprometido)}%` }}
                 />
               </div>
@@ -214,7 +216,9 @@ export const DashboardTab: React.FC<Props> = ({
               <span className="text-xs font-medium uppercase tracking-wider">
                 Saldo Investimento
               </span>
-              <Building2 className="h-4 w-4 text-muted-foreground/70" />
+              <div className="flex h-7 w-7 items-center justify-center rounded-[6px] bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                <Building2 className="h-4 w-4" />
+              </div>
             </div>
 
             <div className="text-2xl font-bold tracking-tight text-foreground font-mono mt-2">
@@ -224,7 +228,7 @@ export const DashboardTab: React.FC<Props> = ({
             <div className="mt-3 space-y-1.5">
               <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
                 <div 
-                  className="h-full bg-foreground/80 dark:bg-foreground/70 transition-all duration-500 rounded-full"
+                  className="h-full bg-blue-600 dark:bg-blue-500 transition-all duration-500 rounded-full"
                   style={{ width: `${Math.min(100, saldosNatureza.percentualInvestimentoComprometido)}%` }}
                 />
               </div>
@@ -243,7 +247,9 @@ export const DashboardTab: React.FC<Props> = ({
               <span className="text-xs font-medium uppercase tracking-wider">
                 Pedidos em Triagem
               </span>
-              <Clock className="h-4 w-4 text-muted-foreground/70" />
+              <div className="flex h-7 w-7 items-center justify-center rounded-[6px] bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                <Clock className="h-4 w-4" />
+              </div>
             </div>
 
             <div className="text-2xl font-bold tracking-tight text-foreground font-mono mt-2">
@@ -273,7 +279,9 @@ export const DashboardTab: React.FC<Props> = ({
               <span className="text-xs font-medium uppercase tracking-wider">
                 Insumos em Alerta
               </span>
-              <AlertCircle className="h-4 w-4 text-muted-foreground/70" />
+              <div className="flex h-7 w-7 items-center justify-center rounded-[6px] bg-rose-500/10 text-rose-600 dark:text-rose-400">
+                <AlertCircle className="h-4 w-4" />
+              </div>
             </div>
 
             <div className="text-2xl font-bold tracking-tight text-foreground font-mono mt-2">
@@ -301,7 +309,8 @@ export const DashboardTab: React.FC<Props> = ({
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <div>
-              <CardTitle className="text-sm font-semibold">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <Wallet className="h-4 w-4 text-emerald-500" />
                 Composição das Saídas de Custeio
               </CardTitle>
               <CardDescription>
@@ -316,16 +325,16 @@ export const DashboardTab: React.FC<Props> = ({
           <CardContent className="space-y-4 pt-2">
             {/* Multi-Segmented Progress Bar */}
             <div className="flex h-2.5 w-full rounded-full overflow-hidden bg-muted">
-              <div style={{ width: `${pctInsumos}%` }} className="bg-zinc-800 dark:bg-zinc-200 transition-all duration-300" title={`Insumos: ${pctInsumos}%`} />
-              <div style={{ width: `${pctRh}%` }} className="bg-zinc-500 dark:bg-zinc-400 transition-all duration-300" title={`RH: ${pctRh}%`} />
-              <div style={{ width: `${pctManutencao}%` }} className="bg-zinc-300 dark:bg-zinc-600 transition-all duration-300" title={`Manutenção: ${pctManutencao}%`} />
+              <div style={{ width: `${pctInsumos}%` }} className="bg-emerald-600 dark:bg-emerald-500 transition-all duration-300" title={`Insumos: ${pctInsumos}%`} />
+              <div style={{ width: `${pctRh}%` }} className="bg-blue-600 dark:bg-blue-500 transition-all duration-300" title={`RH: ${pctRh}%`} />
+              <div style={{ width: `${pctManutencao}%` }} className="bg-amber-600 dark:bg-amber-500 transition-all duration-300" title={`Manutenção: ${pctManutencao}%`} />
             </div>
 
-            {/* Clean Neutral Legends */}
+            {/* Clean Neutral Legends with Semantic Dot Accents */}
             <div className="grid grid-cols-3 gap-3 pt-2">
               <div className="rounded-lg border border-border/60 bg-muted/20 p-3">
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
-                  <span className="h-2 w-2 rounded-full bg-zinc-800 dark:bg-zinc-200" />
+                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
                   Insumos (PBS)
                 </div>
                 <div className="text-sm font-semibold text-foreground font-mono mt-1">
@@ -336,7 +345,7 @@ export const DashboardTab: React.FC<Props> = ({
 
               <div className="rounded-lg border border-border/60 bg-muted/20 p-3">
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
-                  <span className="h-2 w-2 rounded-full bg-zinc-500 dark:bg-zinc-400" />
+                  <span className="h-2 w-2 rounded-full bg-blue-500" />
                   Folha & RH
                 </div>
                 <div className="text-sm font-semibold text-foreground font-mono mt-1">
@@ -347,7 +356,7 @@ export const DashboardTab: React.FC<Props> = ({
 
               <div className="rounded-lg border border-border/60 bg-muted/20 p-3">
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
-                  <span className="h-2 w-2 rounded-full bg-zinc-300 dark:bg-zinc-600" />
+                  <span className="h-2 w-2 rounded-full bg-amber-500" />
                   Manutenção
                 </div>
                 <div className="text-sm font-semibold text-foreground font-mono mt-1">
@@ -363,7 +372,8 @@ export const DashboardTab: React.FC<Props> = ({
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <div>
-              <CardTitle className="text-sm font-semibold">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <BarChart2 className="h-4 w-4 text-blue-500" />
                 Consumo por Unidade de Saúde
               </CardTitle>
               <CardDescription>
@@ -409,7 +419,7 @@ export const DashboardTab: React.FC<Props> = ({
         <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/60 pb-4">
           <div>
             <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <Boxes className="h-4 w-4 text-muted-foreground" />
+              <Boxes className="h-4 w-4 text-amber-500" />
               Gestão de Insumos em Alerta de Estoque
             </CardTitle>
             <CardDescription>
@@ -546,7 +556,8 @@ export const DashboardTab: React.FC<Props> = ({
       <Card>
         <CardHeader className="flex flex-row items-center justify-between border-b border-border/60 pb-4">
           <div>
-            <CardTitle className="text-sm font-semibold">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-blue-500" />
               Consolidação Orçamentária por Unidade de Saúde
             </CardTitle>
             <CardDescription>
@@ -609,7 +620,8 @@ export const DashboardTab: React.FC<Props> = ({
       <Card>
         <CardHeader className="flex flex-row items-center justify-between border-b border-border/60 pb-4">
           <div>
-            <CardTitle className="text-sm font-semibold">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <Clock className="h-4 w-4 text-blue-500" />
               Solicitações Recentes de Insumos (PBS)
             </CardTitle>
             <CardDescription>

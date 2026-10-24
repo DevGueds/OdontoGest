@@ -76,9 +76,9 @@
 **Tests**: none
 **Gate**: quick
 **Done when**:
-- [ ] KPI cards display colored semantic icon badges with soft background tints
-- [ ] Zero rainbow borders or tacky gradients introduced
-- [ ] Gate check passes: `npx tsc --noEmit`
+- [x] KPI cards display colored semantic icon badges with soft background tints
+- [x] Zero rainbow borders or tacky gradients introduced
+- [x] Gate check passes: `npx tsc --noEmit`
 **Commit**: `style(dashboard): balance kpi cards with controlled semantic icon colors`
 
 ---
