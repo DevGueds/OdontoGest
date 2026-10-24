@@ -68,9 +68,9 @@ T1 → T2 → T3 → T4 → T5 → T6
 - Skill: NONE
 
 **Done when**:
-- [ ] Botões de Editar e Excluir usam classes de hover semânticas padronizadas
-- [ ] Cabeçalho da coluna Ações tem largura proporcional `w-24`
-- [ ] `npx tsc --noEmit` passa sem erros
+- [x] Botões de Editar e Excluir usam classes de hover semânticas padronizadas
+- [x] Cabeçalho da coluna Ações tem largura proporcional `w-24`
+- [x] `npx tsc --noEmit` passa sem erros
 
 **Tests**: integration
 **Gate**: quick

@@ -203,7 +203,7 @@ export const UsuariosTab: React.FC<Props> = ({
                   <TableHead onClick={() => requestSort('unidade_id')} className="cursor-pointer select-none">
                     <span className="flex items-center gap-1">Unidade Alocada {getSortIndicator('unidade_id')}</span>
                   </TableHead>
-                  <TableHead className="text-center w-28">Ações</TableHead>
+                  <TableHead className="text-center w-24">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -261,7 +261,8 @@ export const UsuariosTab: React.FC<Props> = ({
                               size="sm"
                               onClick={() => handleAbrirEditar(u)}
                               title="Editar Usuário"
-                              className="h-8 w-8 p-0 text-primary hover:text-primary hover:bg-primary/10"
+                              aria-label="Editar Usuário"
+                              className="h-8 w-8 p-0 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
                             >
                               <Pencil className="w-3.5 h-3.5" />
                             </Button>
@@ -270,7 +271,8 @@ export const UsuariosTab: React.FC<Props> = ({
                               size="sm"
                               onClick={() => setUserToDelete(u)}
                               title="Apagar Usuário"
-                              className="h-8 w-8 p-0 text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                              aria-label="Apagar Usuário"
+                              className="h-8 w-8 p-0 text-muted-foreground hover:text-rose-600 hover:bg-rose-500/10 dark:hover:bg-rose-950/30 transition-colors"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </Button>
