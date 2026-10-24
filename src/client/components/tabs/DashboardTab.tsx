@@ -303,10 +303,10 @@ export const DashboardTab: React.FC<Props> = ({
       </div>
 
       {/* Interactive Visual Analytics Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-        {/* Gráfico 1: Donut Chart de Composição de Custeio (5 cols) */}
-        <Card className="lg:col-span-5 flex flex-col justify-between">
+        {/* Gráfico 1: Donut Chart de Composição de Custeio */}
+        <Card className="flex flex-col justify-between">
           <CardHeader className="pb-2 border-b border-border/40">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -333,8 +333,8 @@ export const DashboardTab: React.FC<Props> = ({
           </CardContent>
         </Card>
 
-        {/* Gráfico 2: Ranking de Consumo por Unidade de Saúde (7 cols) */}
-        <Card className="lg:col-span-7 flex flex-col justify-between">
+        {/* Gráfico 2: Ranking de Consumo por Unidade de Saúde */}
+        <Card className="flex flex-col justify-between">
           <CardHeader className="pb-2 border-b border-border/40">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
