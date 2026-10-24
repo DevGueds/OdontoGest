@@ -89,8 +89,8 @@ T1 → T2 → T3 → T4 → T5 → T6
 - Skill: NONE
 
 **Done when**:
-- [ ] Botão de Remover Entrada usa `h-8 w-8 p-0` e hover rose semântico
-- [ ] `npx tsc --noEmit` passa sem erros
+- [x] Botão de Remover Entrada usa `h-8 w-8 p-0` e hover rose semântico
+- [x] `npx tsc --noEmit` passa sem erros
 
 **Tests**: integration
 **Gate**: quick
