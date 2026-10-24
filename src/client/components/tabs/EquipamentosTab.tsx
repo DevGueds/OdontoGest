@@ -298,7 +298,7 @@ export const EquipamentosTab: React.FC<Props> = ({
         <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#E8E8EC] dark:border-zinc-800 pb-5">
           <div>
             <CardTitle className="text-lg font-bold">
-              <Wrench className="h-5 w-5 text-[#6366F1]" />
+              <Wrench className="h-5 w-5 text-[#2563EB]" />
               Gestão de Equipamentos & Chamados de Manutenção
             </CardTitle>
             <CardDescription>
@@ -329,7 +329,7 @@ export const EquipamentosTab: React.FC<Props> = ({
             <div className="min-w-[220px] space-y-1">
               <label className="text-xs font-medium text-[#0A0A0A] dark:text-zinc-300">Filtrar por Unidade:</label>
               <select 
-                className="flex h-[38px] w-full rounded-[6px] border border-[#E8E8EC] bg-white px-3 py-1 text-xs text-[#0A0A0A] transition-all duration-150 focus-visible:outline-none focus-visible:border-[#6366F1] focus-visible:ring-2 focus-visible:ring-[#6366F1]/20 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
+                className="flex h-[38px] w-full rounded-[6px] border border-[#E8E8EC] bg-white px-3 py-1 text-xs text-[#0A0A0A] transition-all duration-150 focus-visible:outline-none focus-visible:border-[#2563EB] focus-visible:ring-2 focus-visible:ring-[#2563EB]/20 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
                 value={isSolicitante && user?.unidade_id ? user.unidade_id : unidadeFiltro}
                 onChange={e => {
                   setUnidadeFiltro(e.target.value === 'TODAS' ? 'TODAS' : Number(e.target.value));
@@ -349,7 +349,7 @@ export const EquipamentosTab: React.FC<Props> = ({
             <div className="min-w-[240px] space-y-1">
               <label className="text-xs font-medium text-[#0A0A0A] dark:text-zinc-300">Filtrar por Equipamento:</label>
               <select 
-                className="flex h-[38px] w-full rounded-[6px] border border-[#E8E8EC] bg-white px-3 py-1 text-xs text-[#0A0A0A] transition-all duration-150 focus-visible:outline-none focus-visible:border-[#6366F1] focus-visible:ring-2 focus-visible:ring-[#6366F1]/20 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
+                className="flex h-[38px] w-full rounded-[6px] border border-[#E8E8EC] bg-white px-3 py-1 text-xs text-[#0A0A0A] transition-all duration-150 focus-visible:outline-none focus-visible:border-[#2563EB] focus-visible:ring-2 focus-visible:ring-[#2563EB]/20 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
                 value={equipamentoSelecionadoId}
                 onChange={e => setEquipamentoSelecionadoId(e.target.value === 'TODOS' ? 'TODOS' : Number(e.target.value))}
               >
@@ -364,7 +364,7 @@ export const EquipamentosTab: React.FC<Props> = ({
           {/* Chamados de Reparo Table */}
           <div className="space-y-3">
             <h4 className="text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] dark:text-zinc-400 flex items-center gap-2">
-              <ClipboardList className="h-4 w-4 text-[#6366F1]" />
+              <ClipboardList className="h-4 w-4 text-[#2563EB]" />
               Histórico de Chamados de Manutenção
             </h4>
             <Table>
@@ -467,7 +467,7 @@ export const EquipamentosTab: React.FC<Props> = ({
           {/* Equipamentos Instalados Table */}
           <div className="space-y-3 pt-4 border-t border-[#E8E8EC] dark:border-zinc-800">
             <h4 className="text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] dark:text-zinc-400 flex items-center gap-2">
-              <Boxes className="h-4 w-4 text-[#6366F1]" />
+              <Boxes className="h-4 w-4 text-[#2563EB]" />
               Equipamentos Instalados nas Unidades
             </h4>
             <Table>
@@ -549,13 +549,13 @@ export const EquipamentosTab: React.FC<Props> = ({
                 <X className="h-4 w-4" />
               </button>
               <h3 className="text-base font-bold font-display text-[#0A0A0A] dark:text-zinc-100 flex items-center gap-2 pb-3 border-b border-[#E8E8EC] dark:border-zinc-800">
-                <Plus className="h-4 w-4 text-[#6366F1]" /> Cadastrar Novo Equipamento
+                <Plus className="h-4 w-4 text-[#2563EB]" /> Cadastrar Novo Equipamento
               </h3>
               <form onSubmit={handleSubmitEquipamento} className="mt-4 space-y-3.5 text-xs">
                 <div className="space-y-1">
                   <label className="font-medium text-[#0A0A0A] dark:text-zinc-300">Unidade de Saúde Alocada *</label>
                   <select 
-                    className="flex h-[38px] w-full rounded-[6px] border border-[#E8E8EC] bg-white px-3 py-1 text-xs text-[#0A0A0A] transition-all duration-150 focus-visible:outline-none focus-visible:border-[#6366F1] focus-visible:ring-2 focus-visible:ring-[#6366F1]/20 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
+                    className="flex h-[38px] w-full rounded-[6px] border border-[#E8E8EC] bg-white px-3 py-1 text-xs text-[#0A0A0A] transition-all duration-150 focus-visible:outline-none focus-visible:border-[#2563EB] focus-visible:ring-2 focus-visible:ring-[#2563EB]/20 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
                     value={eqUnidadeId}
                     onChange={e => setEqUnidadeId(Number(e.target.value))}
                     required
@@ -616,13 +616,13 @@ export const EquipamentosTab: React.FC<Props> = ({
                 <X className="h-4 w-4" />
               </button>
               <h3 className="text-base font-bold font-display text-[#0A0A0A] dark:text-zinc-100 flex items-center gap-2 pb-3 border-b border-[#E8E8EC] dark:border-zinc-800">
-                <Edit2 className="h-4 w-4 text-[#6366F1]" /> Editar Equipamento #{equipamentoEdicao.id}
+                <Edit2 className="h-4 w-4 text-[#2563EB]" /> Editar Equipamento #{equipamentoEdicao.id}
               </h3>
               <form onSubmit={handleConfirmarEdicaoEquipamento} className="mt-4 space-y-3.5 text-xs">
                 <div className="space-y-1">
                   <label className="font-medium text-[#0A0A0A] dark:text-zinc-300">Unidade de Saúde Alocada *</label>
                   <select 
-                    className="flex h-[38px] w-full rounded-[6px] border border-[#E8E8EC] bg-white px-3 py-1 text-xs text-[#0A0A0A] transition-all duration-150 focus-visible:outline-none focus-visible:border-[#6366F1] focus-visible:ring-2 focus-visible:ring-[#6366F1]/20 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
+                    className="flex h-[38px] w-full rounded-[6px] border border-[#E8E8EC] bg-white px-3 py-1 text-xs text-[#0A0A0A] transition-all duration-150 focus-visible:outline-none focus-visible:border-[#2563EB] focus-visible:ring-2 focus-visible:ring-[#2563EB]/20 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
                     value={editUnidadeId}
                     onChange={e => setEditUnidadeId(Number(e.target.value))}
                     required
@@ -685,7 +685,7 @@ export const EquipamentosTab: React.FC<Props> = ({
               </button>
               <h3 className="text-base font-bold font-display text-[#0A0A0A] dark:text-zinc-100 flex items-center gap-2 pb-3 border-b border-[#E8E8EC] dark:border-zinc-800">
                 {chTipo === 'PREVENTIVA' ? (
-                  <><CalendarCheck className="h-4 w-4 text-[#6366F1]" /> Agendar Manutenção Preventiva</>
+                  <><CalendarCheck className="h-4 w-4 text-[#2563EB]" /> Agendar Manutenção Preventiva</>
                 ) : (
                   <><AlertTriangle className="h-4 w-4 text-[#EF4444]" /> Abrir Chamado de Reparo (Corretiva)</>
                 )}
@@ -694,7 +694,7 @@ export const EquipamentosTab: React.FC<Props> = ({
                 <div className="space-y-1">
                   <label className="font-medium text-[#0A0A0A] dark:text-zinc-300">Equipamento Alvo *</label>
                   <select 
-                    className="flex h-[38px] w-full rounded-[6px] border border-[#E8E8EC] bg-white px-3 py-1 text-xs text-[#0A0A0A] transition-all duration-150 focus-visible:outline-none focus-visible:border-[#6366F1] focus-visible:ring-2 focus-visible:ring-[#6366F1]/20 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
+                    className="flex h-[38px] w-full rounded-[6px] border border-[#E8E8EC] bg-white px-3 py-1 text-xs text-[#0A0A0A] transition-all duration-150 focus-visible:outline-none focus-visible:border-[#2563EB] focus-visible:ring-2 focus-visible:ring-[#2563EB]/20 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
                     value={chEquipamentoId}
                     onChange={e => setChEquipamentoId(Number(e.target.value))}
                     required
@@ -715,7 +715,7 @@ export const EquipamentosTab: React.FC<Props> = ({
                 <div className="space-y-1">
                   <label className="font-medium text-[#0A0A0A] dark:text-zinc-300">Tipo de Chamado *</label>
                   <select 
-                    className="flex h-[38px] w-full rounded-[6px] border border-[#E8E8EC] bg-white px-3 py-1 text-xs text-[#0A0A0A] transition-all duration-150 focus-visible:outline-none focus-visible:border-[#6366F1] focus-visible:ring-2 focus-visible:ring-[#6366F1]/20 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
+                    className="flex h-[38px] w-full rounded-[6px] border border-[#E8E8EC] bg-white px-3 py-1 text-xs text-[#0A0A0A] transition-all duration-150 focus-visible:outline-none focus-visible:border-[#2563EB] focus-visible:ring-2 focus-visible:ring-[#2563EB]/20 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
                     value={chTipo}
                     onChange={e => setChTipo(e.target.value as TipoChamado)}
                     required
@@ -733,7 +733,7 @@ export const EquipamentosTab: React.FC<Props> = ({
                     value={chDescricaoDefeito}
                     onChange={e => setChDescricaoDefeito(e.target.value)}
                     required
-                    className="w-full rounded-[6px] border border-[#E8E8EC] bg-white p-2.5 text-xs text-[#0A0A0A] transition-all duration-150 focus-visible:outline-none focus-visible:border-[#6366F1] focus-visible:ring-2 focus-visible:ring-[#6366F1]/20 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
+                    className="w-full rounded-[6px] border border-[#E8E8EC] bg-white p-2.5 text-xs text-[#0A0A0A] transition-all duration-150 focus-visible:outline-none focus-visible:border-[#2563EB] focus-visible:ring-2 focus-visible:ring-[#2563EB]/20 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
                   />
                 </div>
 
@@ -781,7 +781,7 @@ export const EquipamentosTab: React.FC<Props> = ({
                 <X className="h-4 w-4" />
               </button>
               <h3 className="text-base font-bold font-display text-[#0A0A0A] dark:text-zinc-100 flex items-center gap-2 pb-3 border-b border-[#E8E8EC] dark:border-zinc-800">
-                <Wrench className="h-4 w-4 text-[#6366F1]" /> Atualizar Chamado #{chamadoEmEdicao.id}
+                <Wrench className="h-4 w-4 text-[#2563EB]" /> Atualizar Chamado #{chamadoEmEdicao.id}
               </h3>
               <form onSubmit={(e) => {
                 e.preventDefault();
@@ -791,7 +791,7 @@ export const EquipamentosTab: React.FC<Props> = ({
                 <div className="space-y-1">
                   <label className="font-medium text-[#0A0A0A] dark:text-zinc-300">Novo Status *</label>
                   <select 
-                    className="flex h-[38px] w-full rounded-[6px] border border-[#E8E8EC] bg-white px-3 py-1 text-xs text-[#0A0A0A] transition-all duration-150 focus-visible:outline-none focus-visible:border-[#6366F1] focus-visible:ring-2 focus-visible:ring-[#6366F1]/20 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
+                    className="flex h-[38px] w-full rounded-[6px] border border-[#E8E8EC] bg-white px-3 py-1 text-xs text-[#0A0A0A] transition-all duration-150 focus-visible:outline-none focus-visible:border-[#2563EB] focus-visible:ring-2 focus-visible:ring-[#2563EB]/20 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
                     value={novoStatus}
                     onChange={e => setNovoStatus(e.target.value as StatusChamado)}
                     required

@@ -204,7 +204,7 @@ export const ModalFichaPbs: React.FC<Props> = ({
         <div className="w-full max-w-4xl my-auto rounded-[12px] border border-[#E8E8EC] bg-white shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:border-zinc-800 dark:bg-[#121215] max-h-[92vh] flex flex-col overflow-hidden relative">
         <div className="flex items-center justify-between p-4 px-6 border-b border-[#E8E8EC] dark:border-zinc-800 shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-[6px] bg-[#6366F1]/10 text-[#6366F1]">
+            <div className="flex h-9 w-9 items-center justify-center rounded-[6px] bg-[#2563EB]/10 text-[#2563EB]">
               <FileText className="h-5 w-5" />
             </div>
             <div>
@@ -283,9 +283,9 @@ export const ModalFichaPbs: React.FC<Props> = ({
                           <td className="p-2 font-medium">{mat ? mat.descricao : `Material #${it.material_id}`}</td>
                           <td className="p-2 text-center text-[#6B6B6B]">{mat ? mat.unidade_medida : 'un'}</td>
                           <td className="p-2 text-center font-semibold">{it.qtd_pedida}</td>
-                          <td className="p-2 text-center font-semibold text-[#6366F1]">{it.qtd_atendida || 0}</td>
+                          <td className="p-2 text-center font-semibold text-[#2563EB]">{it.qtd_atendida || 0}</td>
                           {isGestor && <td className="p-2 text-right font-mono">{formatarMoeda(it.valor_unitario)}</td>}
-                          {isGestor && <td className="p-2 text-right font-mono font-semibold text-[#6366F1]">{formatarMoeda(valAtendido)}</td>}
+                          {isGestor && <td className="p-2 text-right font-mono font-semibold text-[#2563EB]">{formatarMoeda(valAtendido)}</td>}
                         </tr>
                       );
                     })}
@@ -294,7 +294,7 @@ export const ModalFichaPbs: React.FC<Props> = ({
                     <tfoot className="bg-zinc-50 dark:bg-zinc-800/70 font-semibold border-t border-[#E8E8EC] dark:border-zinc-800">
                       <tr>
                         <td colSpan={5} className="p-2 text-right text-xs uppercase tracking-wider text-[#6B6B6B]">TOTAL ATENDIDO:</td>
-                        <td colSpan={2} className="p-2 text-right text-[#6366F1] font-mono text-sm">
+                        <td colSpan={2} className="p-2 text-right text-[#2563EB] font-mono text-sm">
                           {formatarMoeda(valorTotalAtendido)}
                         </td>
                       </tr>

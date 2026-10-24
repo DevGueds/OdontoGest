@@ -86,7 +86,7 @@ export const ModalAtendimento: React.FC<Props> = ({
         </button>
 
         <div className="flex items-center gap-2.5 pb-4 border-b border-[#E8E8EC] dark:border-zinc-800 shrink-0">
-          <div className="flex h-9 w-9 items-center justify-center rounded-[6px] bg-[#6366F1]/10 text-[#6366F1]">
+          <div className="flex h-9 w-9 items-center justify-center rounded-[6px] bg-[#2563EB]/10 text-[#2563EB]">
             <Boxes className="h-5 w-5" />
           </div>
           <div>
