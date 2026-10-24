@@ -25,7 +25,10 @@ import {
   Lock,
   ShieldCheck,
   AlertCircle,
-  Boxes
+  Boxes,
+  Edit3,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 
 interface FormItem {
@@ -69,6 +72,8 @@ export const NovoPedidoTab: React.FC<Props> = ({
   const { user } = useAuth();
   const isGestor = perfilAtual === 'GESTOR';
   const isAdmin = perfilAtual === 'ADMINISTRADOR';
+  const isSolicitante = perfilAtual === 'SOLICITANTE' || (!isAdmin && !isGestor);
+  const [showEdicaoSolicitante, setShowEdicaoSolicitante] = useState(false);
 
   const [unidadeId, setUnidadeId] = useState<number | ''>(unidades[0]?.id || '');
   const [dataPedido, setDataPedido] = useState(new Date().toISOString().substring(0, 10));
