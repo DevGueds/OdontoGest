@@ -66,10 +66,10 @@ Como os profissionais já estão cadastrados no sistema vinculados às suas resp
 
 | Requirement ID | Story | Phase | Status |
 | --- | --- | --- | --- |
-| HONOR-01 | P1: Passagem de Usuários para HonorariosTab | Execute | Pending |
-| HONOR-02 | P1: Select de Profissionais por Unidade com Nome e CRO | Execute | Pending |
-| HONOR-03 | P1: Auto-preenchimento de Nome e CRO ao Selecionar | Execute | Pending |
-| HONOR-04 | P1: Suporte a Preenchimento Manual e Fallback para Unidade sem Profissionais | Execute | Pending |
+| HONOR-01 | P1: Passagem de Usuários para HonorariosTab | Execute | Verified |
+| HONOR-02 | P1: Select de Profissionais por Unidade com Nome e CRO | Execute | Verified |
+| HONOR-03 | P1: Auto-preenchimento de Nome e CRO ao Selecionar | Execute | Verified |
+| HONOR-04 | P1: Suporte a Preenchimento Manual e Fallback para Unidade sem Profissionais | Execute | Verified |
 
 **Coverage:** 4 total, 4 mapped to tasks, 0 unmapped.
 

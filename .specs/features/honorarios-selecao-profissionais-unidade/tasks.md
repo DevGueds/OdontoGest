@@ -111,8 +111,8 @@ T1 → T2 → T3 → T4
 - Skill: NONE
 
 **Done when**:
-- [ ] Teste executa com sucesso via `npx tsx tests/honorarios-profissionais-unidade.test.ts`
-- [ ] Build completo `npm run build` passa sem erros
+- [x] Teste executa com sucesso via `npx tsx tests/honorarios-profissionais-unidade.test.ts`
+- [x] Build completo `npm run build` passa sem erros
 
 **Tests**: integration
 **Gate**: full
