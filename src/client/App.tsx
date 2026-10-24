@@ -126,20 +126,28 @@ export const AppContent: React.FC = () => {
     }
   }, [authenticated, reloadData]);
 
+  const getHomeTabForProfile = useCallback((perfil: PerfilUsuario): string => {
+    switch (perfil) {
+      case 'ADMINISTRADOR':
+      case 'GESTOR':
+        return 'dashboard';
+      case 'SOLICITANTE':
+        return 'triagem';
+      case 'TECNICO':
+        return 'equipamentos';
+      default:
+        return 'triagem';
+    }
+  }, []);
+
   useEffect(() => {
     if (authenticated && user) {
       if (user.id !== prevUserIdRef.current) {
         prevUserIdRef.current = user.id;
-        if (user.perfil === 'GESTOR' || user.perfil === 'ADMINISTRADOR') {
-          setActiveTab('dashboard');
-        } else if (user.perfil === 'SOLICITANTE') {
-          setActiveTab('novo-pedido');
-        } else if (user.perfil === 'TECNICO') {
-          setActiveTab('equipamentos');
-        }
+        setActiveTab(getHomeTabForProfile(user.perfil));
       }
     }
-  }, [authenticated, user]);
+  }, [authenticated, user, getHomeTabForProfile]);
 
   useEffect(() => {
     if (perfilAtual === 'TECNICO' && activeTab !== 'equipamentos') {
@@ -467,6 +475,7 @@ export const AppContent: React.FC = () => {
             ? () => setModalRelatoriosOpen(true)
             : undefined
         }
+        onNavigateHome={() => handleSelectTab(getHomeTabForProfile(perfilAtual))}
       />
 
       <div className="flex flex-1 min-h-0 overflow-hidden relative">

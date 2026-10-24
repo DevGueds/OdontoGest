@@ -20,29 +20,41 @@ interface HeaderProps {
   perfilAtual: PerfilUsuario;
   onExportarSQL: () => void;
   onAbrirModalRelatorios?: () => void;
+  onNavigateHome?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ perfilAtual, onExportarSQL, onAbrirModalRelatorios }) => {
+export const Header: React.FC<HeaderProps> = ({ 
+  perfilAtual, 
+  onExportarSQL, 
+  onAbrirModalRelatorios,
+  onNavigateHome 
+}) => {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/95 backdrop-blur-md transition-colors select-none">
       <div className="flex h-14 items-center justify-between px-4 md:px-6">
-        {/* Brand identity */}
-        <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#2563EB] text-white shadow-xs">
+        {/* Brand identity - Clickable to Home */}
+        <button
+          type="button"
+          onClick={onNavigateHome}
+          className="flex items-center gap-3 rounded-lg p-1.5 -ml-1.5 text-left transition-all duration-150 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/40 group cursor-pointer"
+          title="Ir para o menu inicial"
+          aria-label="Ir para o menu inicial"
+        >
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#2563EB] text-white shadow-xs group-hover:scale-105 transition-transform">
             <ToothIcon className="h-4 w-4" />
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold tracking-tight text-foreground">
+            <span className="text-sm font-semibold tracking-tight text-foreground group-hover:text-[#2563EB] transition-colors">
               Odonto<span className="text-muted-foreground font-normal">Gest</span>
             </span>
             <span className="rounded border border-border/80 bg-muted/40 px-1.5 py-0.2 font-mono text-[10px] text-muted-foreground">
               v2.0
             </span>
           </div>
-        </div>
+        </button>
 
         {/* Right side controls */}
         <div className="flex items-center gap-2 sm:gap-3">
