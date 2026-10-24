@@ -59,9 +59,9 @@
 **Tests**: none
 **Gate**: quick
 **Done when**:
-- [ ] Header brand avatar renders `ToothIcon`
-- [ ] LoginModal brand avatar renders `ToothIcon`
-- [ ] Gate check passes: `npx tsc --noEmit`
+- [x] Header brand avatar renders `ToothIcon`
+- [x] LoginModal brand avatar renders `ToothIcon`
+- [x] Gate check passes: `npx tsc --noEmit`
 **Commit**: `refactor(ui): update header and login modals with dental tooth branding`
 
 ---

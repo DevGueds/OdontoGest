@@ -9,9 +9,9 @@ import {
   EyeOff, 
   LogIn, 
   Loader2, 
-  AlertCircle,
-  Activity
+  AlertCircle
 } from 'lucide-react';
+import { ToothIcon } from './icons/ToothIcon';
 
 export const LoginModal: React.FC = () => {
   const { login, loading } = useAuth();
@@ -42,8 +42,8 @@ export const LoginModal: React.FC = () => {
         <div className="w-full max-w-sm my-auto rounded-[12px] border border-[#E8E8EC] bg-white p-7 shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:border-zinc-800 dark:bg-[#121215]">
         {/* Header */}
         <div className="text-left mb-6">
-          <div className="flex h-10 w-10 items-center justify-center rounded-[6px] bg-[#6366F1]/10 text-[#6366F1] mb-3">
-            <Activity className="h-5 w-5" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-[6px] bg-[#2563EB]/10 text-[#2563EB] mb-3">
+            <ToothIcon className="h-5 w-5" />
           </div>
           <h2 className="text-lg font-bold tracking-tight text-[#0A0A0A] dark:text-zinc-100">
             OdontoGest

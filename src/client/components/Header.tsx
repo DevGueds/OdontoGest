@@ -12,9 +12,9 @@ import {
   Database, 
   LogOut, 
   Sun, 
-  Moon,
-  Activity
+  Moon
 } from 'lucide-react';
+import { ToothIcon } from './icons/ToothIcon';
 
 interface HeaderProps {
   perfilAtual: PerfilUsuario;
@@ -31,8 +31,8 @@ export const Header: React.FC<HeaderProps> = ({ perfilAtual, onExportarSQL, onAb
       <div className="flex h-14 items-center justify-between px-4 md:px-6">
         {/* Brand identity */}
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900 text-zinc-50 dark:bg-zinc-100 dark:text-zinc-900 shadow-xs">
-            <Activity className="h-4 w-4" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#2563EB] text-white shadow-xs">
+            <ToothIcon className="h-4 w-4" />
           </div>
           <div className="flex items-center gap-2">
             <span className="text-sm font-semibold tracking-tight text-foreground">
