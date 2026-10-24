@@ -16,7 +16,8 @@ import {
   Search, 
   Building2,
   Stethoscope,
-  Save
+  Save,
+  X
 } from 'lucide-react';
 
 interface Props {
@@ -502,10 +503,23 @@ export const HonorariosTab: React.FC<Props> = ({
             </div>
 
             <div className="flex justify-end gap-2 pt-2 border-t border-border">
-              <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setModalOpen(false)}
+                className="gap-1.5 text-muted-foreground hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 dark:hover:bg-rose-950/30 dark:hover:text-rose-400 dark:hover:border-rose-800 transition-colors"
+                title="Cancelar e fechar formulário"
+                aria-label="Cancelar"
+              >
+                <X className="w-4 h-4" />
                 Cancelar
               </Button>
-              <Button type="submit" className="gap-2">
+              <Button 
+                type="submit" 
+                className="gap-2 hover:shadow-md transition-all"
+                title="Confirmar lançamento do honorário odontológico"
+                aria-label="Salvar Honorário"
+              >
                 <Save className="w-4 h-4" />
                 Salvar Honorário
               </Button>

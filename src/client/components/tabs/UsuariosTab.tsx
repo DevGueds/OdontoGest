@@ -25,7 +25,8 @@ import {
   Mail, 
   Briefcase, 
   FileText,
-  Save
+  Save,
+  X
 } from 'lucide-react';
 
 interface Props {
@@ -449,10 +450,23 @@ export const UsuariosTab: React.FC<Props> = ({
             </div>
 
             <div className="flex justify-end gap-2 pt-3 border-t border-border">
-              <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setModalOpen(false)}
+                className="gap-1.5 text-muted-foreground hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 dark:hover:bg-rose-950/30 dark:hover:text-rose-400 dark:hover:border-rose-800 transition-colors"
+                title="Cancelar e fechar formulário"
+                aria-label="Cancelar"
+              >
+                <X className="w-4 h-4" />
                 Cancelar
               </Button>
-              <Button type="submit" className="gap-2">
+              <Button 
+                type="submit" 
+                className="gap-2 hover:shadow-md transition-all"
+                title={usuarioEdicao ? "Salvar alterações no usuário" : "Confirmar cadastro do novo usuário"}
+                aria-label="Salvar Usuário"
+              >
                 <Save className="w-4 h-4" />
                 Salvar Usuário
               </Button>

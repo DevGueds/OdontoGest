@@ -108,9 +108,9 @@ T1 → T2 → T3 → T4 → T5 → T6
 - Skill: NONE
 
 **Done when**:
-- [ ] Formulário de usuário possui Cancelar com `<X />` e hover suave, e Salvar com `<Save />` e tooltip
-- [ ] Formulário de honorário possui Cancelar com `<X />` e hover suave, e Salvar com `<Save />` e tooltip
-- [ ] `npx tsc --noEmit` passa sem erros
+- [x] Formulário de usuário possui Cancelar com `<X />` e hover suave, e Salvar com `<Save />` e tooltip
+- [x] Formulário de honorário possui Cancelar com `<X />` e hover suave, e Salvar com `<Save />` e tooltip
+- [x] `npx tsc --noEmit` passa sem erros
 
 **Tests**: static
 **Gate**: quick
