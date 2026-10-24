@@ -273,11 +273,11 @@ export const NovoPedidoTab: React.FC<Props> = ({
   }, [materiais, isGestor]);
 
   return (
-    <Card className="max-w-5xl mx-auto shadow-md">
-      <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
+    <Card className="max-w-5xl mx-auto">
+      <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#E8E8EC] dark:border-zinc-800 pb-5">
         <div>
-          <CardTitle className="text-xl font-bold">
-            <FilePlus2 className="h-5 w-5 text-teal-600 dark:text-teal-400" />
+          <CardTitle className="text-lg font-bold">
+            <FilePlus2 className="h-5 w-5 text-[#6366F1]" />
             Formular Novo Pedido de Bens e Serviços (PBS)
           </CardTitle>
           <CardDescription>
@@ -295,19 +295,19 @@ export const NovoPedidoTab: React.FC<Props> = ({
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* 1. Identificação */}
           <div className="space-y-4">
-            <h4 className="text-sm font-bold uppercase tracking-wider text-teal-700 dark:text-teal-300 flex items-center gap-2">
-              <Building2 className="h-4 w-4" />
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] dark:text-zinc-400 flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-[#6366F1]" />
               1. Identificação do Estabelecimento de Saúde e Responsável
             </h4>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="space-y-1.5 md:col-span-2 lg:col-span-1">
-                <label htmlFor="unidade_emitente_id" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                <label htmlFor="unidade_emitente_id" className="text-xs font-medium text-[#0A0A0A] dark:text-zinc-300">
                   Unidade Emitente / Posto de Saúde *
                 </label>
                 <select 
                   id="unidade_emitente_id" 
-                  className="flex h-9 w-full rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
+                  className="flex h-[38px] w-full rounded-[6px] border border-[#E8E8EC] bg-white px-3 py-1 text-xs text-[#0A0A0A] transition-all duration-150 focus-visible:outline-none focus-visible:border-[#6366F1] focus-visible:ring-2 focus-visible:ring-[#6366F1]/20 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
                   value={unidadeId}
                   onChange={(e) => setUnidadeId(Number(e.target.value))}
                   disabled={!isAdmin && Boolean(user?.unidade_id)}
@@ -318,12 +318,12 @@ export const NovoPedidoTab: React.FC<Props> = ({
                   ))}
                 </select>
                 {!isAdmin && Boolean(user?.unidade_id) ? (
-                  <p className="text-[11px] text-slate-400 flex items-center gap-1">
+                  <p className="text-[11px] text-[#9C9C9C] flex items-center gap-1">
                     <Lock className="h-3 w-3" /> Unidade fixada conforme seu cadastro.
                   </p>
                 ) : isAdmin ? (
-                  <p className="text-[11px] text-slate-400 flex items-center gap-1">
-                    <ShieldCheck className="h-3 w-3 text-teal-600" /> Admin: alteração livre.
+                  <p className="text-[11px] text-[#9C9C9C] flex items-center gap-1">
+                    <ShieldCheck className="h-3 w-3 text-[#6366F1]" /> Admin: alteração livre.
                   </p>
                 ) : null}
               </div>
@@ -390,8 +390,8 @@ export const NovoPedidoTab: React.FC<Props> = ({
           {/* 2. Insumos Solicitados */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h4 className="text-sm font-bold uppercase tracking-wider text-teal-700 dark:text-teal-300 flex items-center gap-2">
-                <Boxes className="h-4 w-4" />
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] dark:text-zinc-400 flex items-center gap-2">
+                <Boxes className="h-4 w-4 text-[#6366F1]" />
                 2. Materiais / Insumos Solicitados
               </h4>
               <Button type="button" variant="outline" size="sm" onClick={handleAddLinha} className="text-xs">
@@ -418,10 +418,10 @@ export const NovoPedidoTab: React.FC<Props> = ({
 
                   return (
                     <TableRow key={item.id}>
-                      <TableCell className="font-mono text-xs font-bold text-slate-500">{index + 1}</TableCell>
+                      <TableCell className="font-mono text-xs font-bold text-[#6B6B6B]">{index + 1}</TableCell>
                       <TableCell>
                         <select 
-                          className="flex h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
+                          className="flex h-[38px] w-full rounded-[6px] border border-[#E8E8EC] bg-white px-2.5 py-1 text-xs text-[#0A0A0A] transition-all duration-150 focus-visible:outline-none focus-visible:border-[#6366F1] focus-visible:ring-2 focus-visible:ring-[#6366F1]/20 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
                           value={item.material_id}
                           onChange={(e) => handleMaterialChange(item.id, e.target.value)}
                           required
@@ -435,7 +435,7 @@ export const NovoPedidoTab: React.FC<Props> = ({
                         </select>
                       </TableCell>
                       <TableCell>
-                        <Input type="text" readOnly value={item.unidade_medida} placeholder="-" className="h-8 text-xs bg-slate-50 dark:bg-slate-800 text-center" />
+                        <Input type="text" readOnly value={item.unidade_medida} placeholder="-" className="h-8 text-xs bg-zinc-50 dark:bg-zinc-800/50 text-center" />
                       </TableCell>
                       <TableCell>
                         <Input 
@@ -474,7 +474,7 @@ export const NovoPedidoTab: React.FC<Props> = ({
                           type="button" 
                           variant="ghost" 
                           size="iconSm" 
-                          className="text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/60"
+                          className="text-[#EF4444] hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/40"
                           onClick={() => handleRemoveLinha(item.id)}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -486,9 +486,9 @@ export const NovoPedidoTab: React.FC<Props> = ({
               </TableBody>
               {isGestor && (
                 <TableFooter>
-                  <TableRow className="bg-slate-50 dark:bg-slate-800/60 font-bold">
-                    <TableCell colSpan={5} className="text-right">VALOR TOTAL ESTIMADO:</TableCell>
-                    <TableCell className="font-mono text-sm text-teal-600 dark:text-teal-400">
+                  <TableRow className="bg-zinc-50 dark:bg-zinc-800/40 font-bold">
+                    <TableCell colSpan={5} className="text-right text-xs uppercase tracking-wider text-[#6B6B6B]">VALOR TOTAL ESTIMADO:</TableCell>
+                    <TableCell className="font-mono text-sm font-semibold text-[#6366F1]">
                       {formatarMoeda(totalEstimado)}
                     </TableCell>
                     <TableCell></TableCell>
@@ -498,11 +498,11 @@ export const NovoPedidoTab: React.FC<Props> = ({
             </Table>
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#E8E8EC] dark:border-zinc-800">
             <Button type="button" variant="outline" onClick={onCancel}>
               Cancelar
             </Button>
-            <Button type="submit" size="lg" className="font-semibold text-sm">
+            <Button type="submit" size="default" className="font-medium text-sm">
               <Send className="h-4 w-4 mr-1.5" /> Emitir Solicitação de PBS
             </Button>
           </div>

@@ -75,24 +75,24 @@ export const ModalAtendimento: React.FC<Props> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in-0 duration-150">
-      <div className="w-full max-w-3xl rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900 relative max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-sm animate-in fade-in-0 duration-150">
+      <div className="w-full max-w-3xl rounded-[12px] border border-[#E8E8EC] bg-white p-6 shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:border-zinc-800 dark:bg-[#121215] relative max-h-[90vh] flex flex-col">
         <button 
           onClick={onClose} 
-          className="absolute right-4 top-4 rounded-lg p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+          className="absolute right-4 top-4 rounded-[6px] p-1 text-[#9C9C9C] hover:text-[#0A0A0A] dark:hover:text-zinc-200 transition-colors"
         >
           <X className="h-4 w-4" />
         </button>
 
-        <div className="flex items-center gap-2.5 pb-4 border-b border-slate-100 dark:border-slate-800 shrink-0">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-teal-700 dark:bg-teal-950/80 dark:text-teal-300">
+        <div className="flex items-center gap-2.5 pb-4 border-b border-[#E8E8EC] dark:border-zinc-800 shrink-0">
+          <div className="flex h-9 w-9 items-center justify-center rounded-[6px] bg-[#6366F1]/10 text-[#6366F1]">
             <Boxes className="h-5 w-5" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 font-display">
+            <h3 className="text-base font-bold text-[#0A0A0A] dark:text-zinc-100 font-display">
               Conferência e Atendimento de Itens - {pedido.numero_pbs}
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs text-[#6B6B6B] dark:text-zinc-400">
               Informe a quantidade efetivamente atendida e liberada para o pedido
             </p>
           </div>
@@ -129,8 +129,8 @@ export const ModalAtendimento: React.FC<Props> = ({
 
                   return (
                     <TableRow key={it.id}>
-                      <TableCell className="font-mono text-xs font-bold text-slate-500">{idx + 1}</TableCell>
-                      <TableCell className="font-semibold text-xs text-slate-900 dark:text-slate-100">{desc}</TableCell>
+                      <TableCell className="font-mono text-xs font-bold text-[#6B6B6B]">{idx + 1}</TableCell>
+                      <TableCell className="font-semibold text-xs text-[#0A0A0A] dark:text-zinc-100">{desc}</TableCell>
                       <TableCell><Badge variant="outline">{un}</Badge></TableCell>
                       <TableCell className="text-center font-bold text-xs">{it.qtd_pedida}</TableCell>
                       <TableCell>{badgeEstoque}</TableCell>
@@ -151,11 +151,11 @@ export const ModalAtendimento: React.FC<Props> = ({
             </Table>
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800 shrink-0 mt-4">
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#E8E8EC] dark:border-zinc-800 shrink-0 mt-4">
             <Button type="button" variant="outline" onClick={onClose} size="sm">
               Cancelar
             </Button>
-            <Button type="submit" size="sm" className="font-semibold text-xs">
+            <Button type="submit" size="sm" className="text-xs">
               <Save className="h-3.5 w-3.5 mr-1" /> Salvar Quantidades Atendidas
             </Button>
           </div>

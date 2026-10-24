@@ -230,7 +230,7 @@ export const ModalRelatorio: React.FC<Props> = ({
       <body>
         <div class="no-print" style="margin-bottom: 15px; text-align: right;">
           <button onclick="window.print()" style="background: #0284c7; color: #fff; border: none; padding: 8px 16px; font-weight: bold; border-radius: 4px; cursor: pointer;">
-            🖨️ Imprimir ou Salvar PDF
+            Imprimir ou Salvar PDF
           </button>
         </div>
 
@@ -452,10 +452,10 @@ export const ModalRelatorio: React.FC<Props> = ({
               value={tipoRelatorio}
               onChange={e => setTipoRelatorio(e.target.value as TipoRelatorio)}
             >
-              <option value="FINANCEIRO">💰 Fluxo Financeiro & Consolidação Multiclínica</option>
-              <option value="INSUMOS">📦 Gestão de Insumos & Estoque de Materiais</option>
-              <option value="MANUTENCAO">🛠️ Manutenção de Equipamentos & Chamados</option>
-              <option value="COMPLETO">📊 Relatório Geral Consolidado (Todas as Áreas)</option>
+              <option value="FINANCEIRO">Fluxo Financeiro e Consolidação Multiclínica</option>
+              <option value="INSUMOS">Gestão de Insumos e Estoque de Materiais</option>
+              <option value="MANUTENCAO">Manutenção de Equipamentos e Chamados</option>
+              <option value="COMPLETO">Relatório Geral Consolidado (Todas as Áreas)</option>
             </select>
           </div>
 
@@ -463,7 +463,7 @@ export const ModalRelatorio: React.FC<Props> = ({
             {/* Filtro Mensal */}
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5 text-amber-500" />
+                <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
                 Período / Mês *
               </label>
               <select 
@@ -471,9 +471,9 @@ export const ModalRelatorio: React.FC<Props> = ({
                 value={mesFiltro}
                 onChange={e => setMesFiltro(e.target.value)}
               >
-                <option value="TODOS">📅 Todos os Meses</option>
+                <option value="TODOS">Todos os Meses</option>
                 {mesesDisponiveis.map(m => (
-                  <option key={m} value={m}>📆 {m}</option>
+                  <option key={m} value={m}>{m}</option>
                 ))}
               </select>
             </div>
@@ -481,7 +481,7 @@ export const ModalRelatorio: React.FC<Props> = ({
             {/* Filtro por Unidade */}
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
-                <Building2 className="w-3.5 h-3.5 text-emerald-500" />
+                <Building2 className="w-3.5 h-3.5 text-muted-foreground" />
                 Unidade de Saúde *
               </label>
               <select 
@@ -489,7 +489,7 @@ export const ModalRelatorio: React.FC<Props> = ({
                 value={unidadeFiltro}
                 onChange={e => setUnidadeFiltro(e.target.value === 'TODAS' ? 'TODAS' : Number(e.target.value))}
               >
-                <option value="TODAS">🏥 Todas as Unidades de Saúde</option>
+                <option value="TODAS">Todas as Unidades de Saúde</option>
                 {unidades.map(u => (
                   <option key={u.id} value={u.id}>{u.nome} ({u.tipo})</option>
                 ))}

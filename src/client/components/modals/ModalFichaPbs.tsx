@@ -199,25 +199,25 @@ export const ModalFichaPbs: React.FC<Props> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in-0 duration-150">
-      <div className="w-full max-w-4xl rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900 max-h-[92vh] flex flex-col overflow-hidden relative">
-        <div className="flex items-center justify-between p-4 px-6 border-b border-slate-100 dark:border-slate-800 shrink-0">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-sm animate-in fade-in-0 duration-150">
+      <div className="w-full max-w-4xl rounded-[12px] border border-[#E8E8EC] bg-white shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:border-zinc-800 dark:bg-[#121215] max-h-[92vh] flex flex-col overflow-hidden relative">
+        <div className="flex items-center justify-between p-4 px-6 border-b border-[#E8E8EC] dark:border-zinc-800 shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-teal-700 dark:bg-teal-950/80 dark:text-teal-300">
+            <div className="flex h-9 w-9 items-center justify-center rounded-[6px] bg-[#6366F1]/10 text-[#6366F1]">
               <FileText className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 font-display">
+              <h3 className="text-base font-bold text-[#0A0A0A] dark:text-zinc-100 font-display">
                 Ficha PBS - Nº {pedido.numero_pbs}
               </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs text-[#6B6B6B] dark:text-zinc-400">
                 Visualização do documento oficial e impressão / exportação PDF
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <Button variant="emerald" size="sm" onClick={handlePrint} className="text-xs">
+            <Button variant="default" size="sm" onClick={handlePrint} className="text-xs">
               <Printer className="h-3.5 w-3.5 mr-1" /> Imprimir / Gerar PDF
             </Button>
             <Button variant="ghost" size="iconSm" onClick={onClose}>
@@ -226,42 +226,42 @@ export const ModalFichaPbs: React.FC<Props> = ({
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-5 bg-slate-50/50 dark:bg-slate-950/40">
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-            <div className="text-center pb-4 border-b border-slate-200 dark:border-slate-800">
-              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+        <div className="flex-1 overflow-y-auto p-6 space-y-5 bg-[#FAFAFA] dark:bg-zinc-950/50">
+          <div className="bg-white dark:bg-[#121215] p-6 rounded-[12px] border border-[#E8E8EC] dark:border-zinc-800 space-y-4">
+            <div className="text-center pb-4 border-b border-[#E8E8EC] dark:border-zinc-800">
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] dark:text-zinc-400">
                 SECRETARIA MUNICIPAL DE SAÚDE
               </h2>
-              <h3 className="text-base font-black text-teal-700 dark:text-teal-300 mt-0.5">
+              <h3 className="text-base font-bold text-[#0A0A0A] dark:text-zinc-100 mt-0.5">
                 PEDIDO DE BENS E SERVIÇOS (PBS) - Nº {pedido.numero_pbs}
               </h3>
-              <div className="mt-2 flex items-center justify-center gap-2 text-xs text-slate-500">
+              <div className="mt-2 flex items-center justify-center gap-2 text-xs text-[#6B6B6B]">
                 <span>Status: <Badge variant="outline">{pedido.status}</Badge></span>
                 <span>•</span>
                 <span>Emissão: <strong>{formatarData(pedido.data_pedido)}</strong></span>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-200/80 dark:border-slate-800">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs bg-zinc-50 dark:bg-zinc-800/40 p-3.5 rounded-[6px] border border-[#E8E8EC] dark:border-zinc-800">
               <div>
-                <span className="text-slate-500">Unidade Emitente:</span>
-                <p className="font-semibold text-slate-800 dark:text-slate-200">{nomeUnidade}</p>
+                <span className="text-[#6B6B6B]">Unidade Emitente:</span>
+                <p className="font-medium text-[#0A0A0A] dark:text-zinc-200">{nomeUnidade}</p>
               </div>
               <div>
-                <span className="text-slate-500">Responsável Solicitante:</span>
-                <p className="font-semibold text-slate-800 dark:text-slate-200">
+                <span className="text-[#6B6B6B]">Responsável Solicitante:</span>
+                <p className="font-medium text-[#0A0A0A] dark:text-zinc-200">
                   {pedido.responsavel_nome} {pedido.responsavel_registro ? `(${pedido.responsavel_registro})` : ''}
                 </p>
               </div>
             </div>
 
             <div>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] dark:text-zinc-400 mb-2">
                 Itens e Insumos Solicitados / Atendidos
               </h4>
-              <div className="rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden">
+              <div className="rounded-[6px] border border-[#E8E8EC] dark:border-zinc-800 overflow-hidden">
                 <table className="w-full text-xs">
-                  <thead className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                  <thead className="bg-zinc-50 dark:bg-zinc-800/60 text-[#6B6B6B] dark:text-zinc-400">
                     <tr>
                       <th className="p-2 text-center w-10">Item</th>
                       <th className="p-2 text-left">Descrição do Material</th>
@@ -272,28 +272,28 @@ export const ModalFichaPbs: React.FC<Props> = ({
                       {isGestor && <th className="p-2 text-right w-24">Tot. Atend.</th>}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  <tbody className="divide-y divide-[#E8E8EC] dark:divide-zinc-800">
                     {(pedido.itens || []).map(it => {
                       const mat = materiais.find(m => m.id === it.material_id);
                       const valAtendido = (Number(it.qtd_atendida) || 0) * (Number(it.valor_unitario) || 0);
                       return (
-                        <tr key={it.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                        <tr key={it.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/40">
                           <td className="p-2 text-center font-mono">{it.numero_item}</td>
                           <td className="p-2 font-medium">{mat ? mat.descricao : `Material #${it.material_id}`}</td>
-                          <td className="p-2 text-center text-slate-500">{mat ? mat.unidade_medida : 'un'}</td>
-                          <td className="p-2 text-center font-bold">{it.qtd_pedida}</td>
-                          <td className="p-2 text-center font-bold text-teal-600 dark:text-teal-400">{it.qtd_atendida || 0}</td>
+                          <td className="p-2 text-center text-[#6B6B6B]">{mat ? mat.unidade_medida : 'un'}</td>
+                          <td className="p-2 text-center font-semibold">{it.qtd_pedida}</td>
+                          <td className="p-2 text-center font-semibold text-[#6366F1]">{it.qtd_atendida || 0}</td>
                           {isGestor && <td className="p-2 text-right font-mono">{formatarMoeda(it.valor_unitario)}</td>}
-                          {isGestor && <td className="p-2 text-right font-mono font-bold text-teal-600">{formatarMoeda(valAtendido)}</td>}
+                          {isGestor && <td className="p-2 text-right font-mono font-semibold text-[#6366F1]">{formatarMoeda(valAtendido)}</td>}
                         </tr>
                       );
                     })}
                   </tbody>
                   {isGestor && (
-                    <tfoot className="bg-slate-50 dark:bg-slate-800/70 font-bold border-t border-slate-200 dark:border-slate-800">
+                    <tfoot className="bg-zinc-50 dark:bg-zinc-800/70 font-semibold border-t border-[#E8E8EC] dark:border-zinc-800">
                       <tr>
-                        <td colSpan={5} className="p-2 text-right">TOTAL ATENDIDO:</td>
-                        <td colSpan={2} className="p-2 text-right text-teal-600 font-mono text-sm">
+                        <td colSpan={5} className="p-2 text-right text-xs uppercase tracking-wider text-[#6B6B6B]">TOTAL ATENDIDO:</td>
+                        <td colSpan={2} className="p-2 text-right text-[#6366F1] font-mono text-sm">
                           {formatarMoeda(valorTotalAtendido)}
                         </td>
                       </tr>

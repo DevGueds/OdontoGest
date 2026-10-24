@@ -43,8 +43,8 @@ export function useSortableData<T>(items: T[], config: SortConfig<T> = null) {
   };
 
   const getSortIndicator = (key: keyof T) => {
-    if (!sortConfig || sortConfig.key !== key) return ' ↕️';
-    return sortConfig.direction === 'asc' ? ' 🔼' : ' 🔽';
+    if (!sortConfig || sortConfig.key !== key) return '';
+    return sortConfig.direction === 'asc' ? ' ↑' : ' ↓';
   };
 
   return { items: sortedItems, requestSort, sortConfig, getSortIndicator };

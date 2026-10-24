@@ -20,16 +20,16 @@ export const Toast: React.FC<ToastProps> = ({ toasts }) => {
           <div
             key={t.id}
             className={cn(
-              "pointer-events-auto flex items-start gap-3 rounded-xl border p-4 shadow-lg backdrop-blur-md transition-all duration-200 animate-in slide-in-from-bottom-3 fade-in-0",
-              isSuccess && "border-emerald-200 bg-white/95 text-slate-800 dark:border-emerald-800/80 dark:bg-slate-900/95 dark:text-slate-100",
-              isError && "border-rose-200 bg-white/95 text-slate-800 dark:border-rose-800/80 dark:bg-slate-900/95 dark:text-slate-100",
-              !isSuccess && !isError && "border-teal-200 bg-white/95 text-slate-800 dark:border-teal-800/80 dark:bg-slate-900/95 dark:text-slate-100"
+              "pointer-events-auto flex items-start gap-3 rounded-[8px] border p-3.5 shadow-[0_8px_30px_rgba(0,0,0,0.08)] backdrop-blur-md transition-all duration-200 animate-in slide-in-from-bottom-2 fade-in-0 bg-white dark:bg-[#121215] text-[#0A0A0A] dark:text-zinc-100",
+              isSuccess && "border-emerald-500/20",
+              isError && "border-red-500/20",
+              !isSuccess && !isError && "border-[#6366F1]/20"
             )}
           >
             <div className="mt-0.5 shrink-0">
-              {isSuccess && <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />}
-              {isError && <AlertCircle className="h-5 w-5 text-rose-600 dark:text-rose-400" />}
-              {!isSuccess && !isError && <Info className="h-5 w-5 text-teal-600 dark:text-teal-400" />}
+              {isSuccess && <CheckCircle2 className="h-4 w-4 text-[#10B981]" />}
+              {isError && <AlertCircle className="h-4 w-4 text-[#EF4444]" />}
+              {!isSuccess && !isError && <Info className="h-4 w-4 text-[#6366F1]" />}
             </div>
 
             <div className="flex-1 text-xs md:text-sm font-medium leading-relaxed">

@@ -60,11 +60,11 @@ export const CatalogoTab: React.FC<Props> = ({
   return (
     <div className="space-y-8">
       {/* Unidades / Estabelecimentos de Saúde */}
-      <Card className="shadow-sm">
-        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-4">
+      <Card>
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#E8E8EC] dark:border-zinc-800 pb-4">
           <div className="space-y-1">
             <CardTitle className="text-lg flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-primary" />
+              <Building2 className="w-5 h-5 text-[#6366F1]" />
               Estabelecimentos / Postos de Saúde
             </CardTitle>
             <CardDescription>
@@ -116,7 +116,7 @@ export const CatalogoTab: React.FC<Props> = ({
                               size="sm" 
                               onClick={() => onAbrirEditarUnidade(u)}
                               title="Editar Estabelecimento"
-                              className="h-8 gap-1 text-primary hover:text-primary hover:bg-primary/10"
+                              className="h-8 gap-1 text-[#6366F1] hover:text-[#4F46E5] hover:bg-[#6366F1]/10"
                             >
                               <Pencil className="w-3.5 h-3.5" />
                               <span className="hidden sm:inline text-xs">Editar</span>
@@ -130,7 +130,7 @@ export const CatalogoTab: React.FC<Props> = ({
                                 }
                               }}
                               title="Apagar Estabelecimento"
-                              className="h-8 gap-1 text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                              className="h-8 gap-1 text-[#EF4444] hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/40"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                               <span className="hidden sm:inline text-xs">Apagar</span>
@@ -152,11 +152,11 @@ export const CatalogoTab: React.FC<Props> = ({
       </Card>
 
       {/* Catálogo de Materiais / Insumos */}
-      <Card className="shadow-sm">
-        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-4">
+      <Card>
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#E8E8EC] dark:border-zinc-800 pb-4">
           <div className="space-y-1">
             <CardTitle className="text-lg flex items-center gap-2">
-              <Boxes className="w-5 h-5 text-primary" />
+              <Boxes className="w-5 h-5 text-[#6366F1]" />
               Catálogo de Materiais & Insumos
             </CardTitle>
             <CardDescription>
@@ -268,7 +268,7 @@ export const CatalogoTab: React.FC<Props> = ({
                               size="sm" 
                               onClick={() => onAbrirEditarMaterial(m)}
                               title="Editar Insumo"
-                              className="h-8 px-2 text-primary hover:text-primary hover:bg-primary/10 text-xs gap-1"
+                              className="h-8 px-2 text-[#6366F1] hover:text-[#4F46E5] hover:bg-[#6366F1]/10 text-xs gap-1"
                             >
                               <Pencil className="w-3.5 h-3.5" />
                               <span className="hidden xl:inline">Editar</span>
@@ -292,7 +292,7 @@ export const CatalogoTab: React.FC<Props> = ({
                                 }
                               }}
                               title="Excluir Insumo"
-                              className="h-8 px-2 text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-xs"
+                              className="h-8 px-2 text-[#EF4444] hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/40 text-xs"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </Button>

@@ -4,31 +4,31 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 select-none active:scale-[0.98]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[6px] text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6366F1]/30 focus-visible:ring-offset-1 disabled:pointer-events-none disabled:opacity-50 select-none hover:-translate-y-[1px] active:translate-y-0",
   {
     variants: {
       variant: {
         default:
-          "bg-teal-600 text-white shadow-sm hover:bg-teal-700 active:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-500",
+          "bg-[#6366F1] text-white hover:bg-[#4F46E5] hover:shadow-[0_4px_12px_rgba(99,102,241,0.35)]",
         destructive:
-          "bg-rose-600 text-white shadow-sm hover:bg-rose-700 active:bg-rose-800 dark:bg-rose-700 dark:hover:bg-rose-600",
+          "border border-red-200 dark:border-red-900/50 bg-transparent text-[#EF4444] dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30",
         outline:
-          "border border-slate-200 dark:border-slate-800 bg-transparent text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/80 shadow-sm",
+          "border border-[#E8E8EC] dark:border-zinc-800 bg-transparent text-[#0A0A0A] dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800/80",
         secondary:
-          "bg-slate-100 text-slate-800 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700 shadow-sm",
+          "bg-zinc-100 text-[#0A0A0A] hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700",
         ghost:
-          "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100",
+          "text-[#6B6B6B] dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-[#0A0A0A] dark:hover:text-zinc-100",
         link:
-          "text-teal-600 dark:text-teal-400 underline-offset-4 hover:underline",
+          "text-[#6366F1] underline-offset-4 hover:underline",
         emerald:
-          "bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 active:bg-emerald-800",
+          "border border-emerald-200 dark:border-emerald-800/50 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/15",
       },
       size: {
-        default: "h-9 px-4 py-2",
-        sm: "h-8 rounded-md px-3 text-xs",
-        lg: "h-11 rounded-xl px-6 text-base font-semibold",
-        icon: "h-9 w-9 rounded-lg",
-        iconSm: "h-8 w-8 rounded-md",
+        default: "h-[38px] px-4 py-2",
+        sm: "h-8 rounded-[6px] px-3 text-xs",
+        lg: "h-11 rounded-[6px] px-6 text-base font-medium",
+        icon: "h-[38px] w-[38px] rounded-[6px]",
+        iconSm: "h-8 w-8 rounded-[6px]",
       },
     },
     defaultVariants: {

@@ -3,9 +3,7 @@ import { PerfilUsuario } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { Button } from './ui/button';
-import { Badge } from './ui/badge';
 import { 
-  Activity, 
   Crown, 
   Eye, 
   Stethoscope, 
@@ -14,7 +12,8 @@ import {
   Database, 
   LogOut, 
   Sun, 
-  Moon 
+  Moon,
+  Activity
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -28,24 +27,19 @@ export const Header: React.FC<HeaderProps> = ({ perfilAtual, onExportarSQL, onAb
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-slate-200/80 bg-white/85 backdrop-blur-md transition-colors duration-200 dark:border-slate-800 dark:bg-slate-900/85">
-      <div className="flex h-16 items-center justify-between px-4 md:px-6">
+    <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/95 backdrop-blur-md transition-colors select-none">
+      <div className="flex h-14 items-center justify-between px-4 md:px-6">
         {/* Brand identity */}
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-teal-600 to-cyan-500 text-white shadow-md shadow-teal-500/20">
-            <Activity className="h-5 w-5" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900 text-zinc-50 dark:bg-zinc-100 dark:text-zinc-900 shadow-xs">
+            <Activity className="h-4 w-4" />
           </div>
-          <div className="flex flex-col">
-            <div className="flex items-center gap-2">
-              <span className="font-display text-lg font-bold tracking-tight text-slate-900 dark:text-white">
-                ODONTO<span className="text-teal-600 dark:text-teal-400">GEST</span>
-              </span>
-              <span className="rounded-full bg-teal-50 px-2 py-0.5 text-[10px] font-semibold text-teal-700 dark:bg-teal-950/80 dark:text-teal-300 border border-teal-200/60 dark:border-teal-800/60">
-                v2.0
-              </span>
-            </div>
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium hidden sm:inline-block">
-              Gestão Odontológica, Insumos & Manutenção
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold tracking-tight text-foreground">
+              Odonto<span className="text-muted-foreground font-normal">Gest</span>
+            </span>
+            <span className="rounded border border-border/80 bg-muted/40 px-1.5 py-0.2 font-mono text-[10px] text-muted-foreground">
+              v2.0
             </span>
           </div>
         </div>
@@ -53,34 +47,34 @@ export const Header: React.FC<HeaderProps> = ({ perfilAtual, onExportarSQL, onAb
         {/* Right side controls */}
         <div className="flex items-center gap-2 sm:gap-3">
           {/* User Profile Pill */}
-          <div className="flex items-center gap-2.5 rounded-full border border-slate-200/80 bg-slate-50/80 py-1 pl-1.5 pr-3 dark:border-slate-800 dark:bg-slate-800/60 shadow-sm">
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-teal-600 text-xs font-bold text-white shadow-sm">
+          <div className="flex items-center gap-2 rounded-full border border-border/70 bg-muted/20 py-1 pl-1.5 pr-3 shadow-xs">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-200 dark:bg-zinc-800 text-[11px] font-semibold text-foreground">
               {user?.nome ? user.nome.charAt(0).toUpperCase() : 'U'}
             </div>
 
             <div className="flex flex-col text-left leading-none">
-              <span className="text-xs font-semibold text-slate-800 dark:text-slate-100 max-w-[120px] sm:max-w-[160px] truncate">
+              <span className="text-xs font-medium text-foreground max-w-[120px] sm:max-w-[160px] truncate">
                 {user?.nome || 'Usuário'}
               </span>
-              <div className="mt-0.5 flex items-center gap-1 text-[10px] text-slate-500 dark:text-slate-400">
+              <div className="mt-0.5 flex items-center gap-1 text-[10px] text-muted-foreground">
                 {perfilAtual === 'ADMINISTRADOR' && (
-                  <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-medium">
-                    <Crown className="h-3 w-3" /> Admin
+                  <span className="flex items-center gap-1">
+                    <Crown className="h-2.5 w-2.5" /> Admin
                   </span>
                 )}
                 {perfilAtual === 'GESTOR' && (
-                  <span className="flex items-center gap-1 text-cyan-600 dark:text-cyan-400 font-medium">
-                    <Eye className="h-3 w-3" /> Gestor
+                  <span className="flex items-center gap-1">
+                    <Eye className="h-2.5 w-2.5" /> Gestor
                   </span>
                 )}
                 {perfilAtual === 'SOLICITANTE' && (
-                  <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium">
-                    <Stethoscope className="h-3 w-3" /> {user?.funcao || 'USF'}
+                  <span className="flex items-center gap-1">
+                    <Stethoscope className="h-2.5 w-2.5" /> {user?.funcao || 'USF'}
                   </span>
                 )}
                 {perfilAtual === 'TECNICO' && (
-                  <span className="flex items-center gap-1 text-purple-600 dark:text-purple-400 font-medium">
-                    <Wrench className="h-3 w-3" /> Técnico
+                  <span className="flex items-center gap-1">
+                    <Wrench className="h-2.5 w-2.5" /> Técnico
                   </span>
                 )}
               </div>
@@ -93,12 +87,12 @@ export const Header: React.FC<HeaderProps> = ({ perfilAtual, onExportarSQL, onAb
             size="iconSm"
             onClick={toggleTheme}
             title={theme === 'dark' ? 'Ativar Modo Claro' : 'Ativar Modo Escuro'}
-            className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+            className="text-muted-foreground hover:text-foreground h-8 w-8"
           >
             {theme === 'dark' ? (
-              <Sun className="h-4 w-4 text-amber-400 transition-transform duration-200 rotate-0 hover:rotate-45" />
+              <Sun className="h-4 w-4 text-zinc-200" />
             ) : (
-              <Moon className="h-4 w-4 text-slate-600 transition-transform duration-200 hover:-rotate-12" />
+              <Moon className="h-4 w-4 text-zinc-700" />
             )}
           </Button>
 
@@ -109,10 +103,10 @@ export const Header: React.FC<HeaderProps> = ({ perfilAtual, onExportarSQL, onAb
               size="sm"
               onClick={onAbrirModalRelatorios}
               title="Gerar e Exportar Relatórios PDF e Excel"
-              className="hidden sm:inline-flex text-xs font-semibold border-teal-200 text-teal-700 hover:bg-teal-50 dark:border-teal-800 dark:text-teal-300 dark:hover:bg-teal-950/60"
+              className="hidden sm:inline-flex text-xs h-8 gap-1.5"
             >
-              <FileSpreadsheet className="h-3.5 w-3.5 mr-1 text-teal-600 dark:text-teal-400" />
-              Relatórios
+              <FileSpreadsheet className="h-3.5 w-3.5 text-muted-foreground" />
+              <span>Relatórios</span>
             </Button>
           )}
 
@@ -123,10 +117,10 @@ export const Header: React.FC<HeaderProps> = ({ perfilAtual, onExportarSQL, onAb
               size="sm"
               onClick={onExportarSQL}
               title="Exportar DUMP MySQL do Almoxarifado"
-              className="hidden md:inline-flex text-xs"
+              className="hidden md:inline-flex text-xs h-8 gap-1.5"
             >
-              <Database className="h-3.5 w-3.5 mr-1 text-slate-500" />
-              SQL Dump
+              <Database className="h-3.5 w-3.5 text-muted-foreground" />
+              <span>SQL Dump</span>
             </Button>
           )}
 
@@ -136,7 +130,7 @@ export const Header: React.FC<HeaderProps> = ({ perfilAtual, onExportarSQL, onAb
             size="sm"
             onClick={logout}
             title="Encerrar Sessão"
-            className="text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 px-2 sm:px-3 text-xs"
+            className="text-muted-foreground hover:text-rose-600 dark:hover:text-rose-400 h-8 px-2 text-xs"
           >
             <LogOut className="h-3.5 w-3.5 sm:mr-1" />
             <span className="hidden sm:inline">Sair</span>

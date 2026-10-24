@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { 
   PedidoPBS, 
   UnidadeSaude, 
@@ -10,40 +10,29 @@ import {
 } from '../../types';
 import { dbService } from '../../services/db';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui/card';
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell, TableFooter } from '../ui/table';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { 
-  Table, 
-  TableHeader, 
-  TableBody, 
-  TableFooter, 
-  TableHead, 
-  TableRow, 
-  TableCell 
-} from '../ui/table';
-import { 
-  TrendingUp, 
-  CheckCircle2, 
-  CreditCard, 
-  Landmark, 
   Clock, 
-  AlertTriangle, 
-  PieChart, 
-  BarChart3, 
+  PackageCheck, 
+  Truck, 
+  Check, 
+  Ban, 
   Boxes, 
-  Calculator, 
-  ClipboardList, 
-  FileSpreadsheet, 
+  Search, 
+  ArrowRight, 
   PlusCircle, 
   Edit2, 
-  ArrowRight, 
+  FileSpreadsheet, 
   FileText, 
-  Check, 
-  Truck, 
-  Ban, 
-  Search,
-  PackageCheck
+  Wallet, 
+  Building2, 
+  AlertCircle,
+  Activity,
+  Layers,
+  BarChart2
 } from 'lucide-react';
 
 interface Props {
@@ -55,8 +44,8 @@ interface Props {
   entradas?: EntradaRecurso[];
   onSwitchTab: (tabName: string) => void;
   onAbrirFicha: (pedido: PedidoPBS) => void;
-  onAbrirAjusteEstoque: (material: Material) => void;
-  onAbrirEditarMaterial: (material: Material) => void;
+  onAbrirAjusteEstoque: (m: Material) => void;
+  onAbrirEditarMaterial: (m: Material) => void;
   onAbrirModalRelatorios?: () => void;
   formatarData: (d?: string | null) => string;
   formatarMoeda: (v: number) => string;
@@ -126,17 +115,17 @@ export const DashboardTab: React.FC<Props> = ({
   const renderBadgeStatus = (status: StatusPedido) => {
     switch (status) {
       case 'SOLICITADO':
-        return <Badge variant="warning"><Clock className="h-3 w-3" /> SOLICITADO</Badge>;
+        return <Badge variant="warning"><Clock className="h-3 w-3" /> Solicitado</Badge>;
       case 'RECEBIDO':
-        return <Badge variant="info"><PackageCheck className="h-3 w-3" /> RECEBIDO</Badge>;
+        return <Badge variant="info"><PackageCheck className="h-3 w-3" /> Recebido</Badge>;
       case 'ATENDIDO_PARCIAL':
-        return <Badge variant="purple"><Boxes className="h-3 w-3" /> PARCIAL</Badge>;
+        return <Badge variant="purple"><Boxes className="h-3 w-3" /> Parcial</Badge>;
       case 'ATENDIDO_TOTAL':
-        return <Badge variant="success"><Check className="h-3 w-3" /> ATENDIDO</Badge>;
+        return <Badge variant="success"><Check className="h-3 w-3" /> Atendido</Badge>;
       case 'ENVIADO':
-        return <Badge variant="default"><Truck className="h-3 w-3" /> ENVIADO</Badge>;
+        return <Badge variant="default"><Truck className="h-3 w-3" /> Enviado</Badge>;
       case 'CANCELADO':
-        return <Badge variant="destructive"><Ban className="h-3 w-3" /> CANCELADO</Badge>;
+        return <Badge variant="destructive"><Ban className="h-3 w-3" /> Cancelado</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -154,256 +143,257 @@ export const DashboardTab: React.FC<Props> = ({
   return (
     <div className="space-y-6">
       
-      {/* HEADER DE CONTEXTO E NÍVEL ESTRATÉGICO */}
-      <Card className="border-l-4 border-l-teal-600 bg-gradient-to-r from-white via-white to-slate-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800/60">
-        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <Badge variant="info">
-                <TrendingUp className="h-3 w-3" />
-                DASHBOARD ESTRATÉGICO
-              </Badge>
-              <Badge variant="success">
-                <CheckCircle2 className="h-3 w-3" />
-                Operação Ativa
-              </Badge>
-            </div>
-            <CardTitle className="text-xl md:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-              Consolidação Financeira & Gestão de Recursos de Saúde Bucal
-            </CardTitle>
-            <CardDescription className="mt-1">
-              Visão consolidada dos aportes, saldos disponíveis por natureza, liquidez de insumos e despesas por unidade.
-            </CardDescription>
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-border/60">
+        <div>
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              Painel Estratégico
+            </span>
+            <span className="h-1 w-1 rounded-full bg-border" />
+            <span className="text-xs text-muted-foreground font-mono">
+              Consolidação Multiclínica
+            </span>
           </div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            Visão Geral de Recursos & Operações
+          </h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Monitoramento de saldos por natureza, reposição de insumos e despesas de pessoal.
+          </p>
+        </div>
 
-          {onAbrirModalRelatorios && (
-            <Button 
-              variant="emerald" 
-              onClick={onAbrirModalRelatorios} 
-              title="Gerar Relatórios em PDF e Excel"
-              className="shrink-0"
-            >
-              <FileSpreadsheet className="h-4 w-4 mr-1" />
-              Exportar Relatórios
-            </Button>
-          )}
-        </CardHeader>
-      </Card>
+        {onAbrirModalRelatorios && (
+          <Button 
+            variant="outline" 
+            onClick={onAbrirModalRelatorios} 
+            className="gap-2 h-9 text-xs font-medium self-start sm:self-auto"
+          >
+            <FileSpreadsheet className="h-3.5 w-3.5 text-muted-foreground" />
+            Exportar Relatórios
+          </Button>
+        )}
+      </div>
 
-      {/* NÍVEL 1: MACRO KPIS DE ALTO IMPACTO */}
+      {/* Modern Clean KPI Cards (Linear / Vercel style - no tacky rainbow borders) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
         {/* KPI 1: Saldo Custeio */}
-        <Card className="border-t-4 border-t-teal-600 relative overflow-hidden">
+        <Card className="hover:border-border transition-colors">
           <CardContent className="p-5">
-            <div className="flex items-start justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                Saldo Custeio (Disponível)
+            <div className="flex items-center justify-between text-muted-foreground">
+              <span className="text-xs font-medium uppercase tracking-wider">
+                Saldo Custeio Disponível
               </span>
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-50 text-teal-700 dark:bg-teal-950/80 dark:text-teal-300">
-                <CreditCard className="h-5 w-5" />
-              </div>
+              <Wallet className="h-4 w-4 text-muted-foreground/70" />
             </div>
             
-            <div className={`text-2xl font-black mt-2 font-display ${saldosNatureza.saldoCusteioDisponivel >= 0 ? 'text-teal-600 dark:text-teal-400' : 'text-rose-600 dark:text-rose-400'}`}>
+            <div className="text-2xl font-bold tracking-tight text-foreground font-mono mt-2">
               {formatarMoeda(saldosNatureza.saldoCusteioDisponivel)}
             </div>
 
             <div className="mt-3 space-y-1.5">
-              <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
-                <span>Comprometido: <strong className="text-slate-800 dark:text-slate-200">{saldosNatureza.percentualCusteioComprometido.toFixed(1)}%</strong></span>
-                <span>Total: {formatarMoeda(saldosNatureza.orcamentoCusteioTotal)}</span>
-              </div>
-              <div className="h-2 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+              <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
                 <div 
-                  className={`h-full transition-all duration-500 rounded-full ${
-                    saldosNatureza.percentualCusteioComprometido > 85 
-                      ? 'bg-rose-500' 
-                      : saldosNatureza.percentualCusteioComprometido > 60 
-                      ? 'bg-amber-500' 
-                      : 'bg-teal-500'
-                  }`}
+                  className="h-full bg-foreground/80 dark:bg-foreground/70 transition-all duration-500 rounded-full"
                   style={{ width: `${Math.min(100, saldosNatureza.percentualCusteioComprometido)}%` }}
                 />
+              </div>
+              <div className="flex justify-between text-[11px] text-muted-foreground">
+                <span>{saldosNatureza.percentualCusteioComprometido.toFixed(1)}% comprometido</span>
+                <span>Teto: {formatarMoeda(saldosNatureza.orcamentoCusteioTotal)}</span>
               </div>
             </div>
           </CardContent>
         </Card>
 
         {/* KPI 2: Saldo Investimento */}
-        <Card className="border-t-4 border-t-purple-600 relative overflow-hidden">
+        <Card className="hover:border-border transition-colors">
           <CardContent className="p-5">
-            <div className="flex items-start justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                Saldo Investimento (Disponível)
+            <div className="flex items-center justify-between text-muted-foreground">
+              <span className="text-xs font-medium uppercase tracking-wider">
+                Saldo Investimento
               </span>
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-purple-50 text-purple-700 dark:bg-purple-950/80 dark:text-purple-300">
-                <Landmark className="h-5 w-5" />
-              </div>
+              <Building2 className="h-4 w-4 text-muted-foreground/70" />
             </div>
 
-            <div className={`text-2xl font-black mt-2 font-display ${saldosNatureza.saldoInvestimentoDisponivel >= 0 ? 'text-purple-600 dark:text-purple-400' : 'text-rose-600 dark:text-rose-400'}`}>
+            <div className="text-2xl font-bold tracking-tight text-foreground font-mono mt-2">
               {formatarMoeda(saldosNatureza.saldoInvestimentoDisponivel)}
             </div>
 
             <div className="mt-3 space-y-1.5">
-              <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
-                <span>Comprometido: <strong className="text-slate-800 dark:text-slate-200">{saldosNatureza.percentualInvestimentoComprometido.toFixed(1)}%</strong></span>
-                <span>Total: {formatarMoeda(saldosNatureza.orcamentoInvestimentoTotal)}</span>
-              </div>
-              <div className="h-2 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+              <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
                 <div 
-                  className="h-full bg-purple-500 transition-all duration-500 rounded-full"
+                  className="h-full bg-foreground/80 dark:bg-foreground/70 transition-all duration-500 rounded-full"
                   style={{ width: `${Math.min(100, saldosNatureza.percentualInvestimentoComprometido)}%` }}
                 />
+              </div>
+              <div className="flex justify-between text-[11px] text-muted-foreground">
+                <span>{saldosNatureza.percentualInvestimentoComprometido.toFixed(1)}% comprometido</span>
+                <span>Teto: {formatarMoeda(saldosNatureza.orcamentoInvestimentoTotal)}</span>
               </div>
             </div>
           </CardContent>
         </Card>
 
         {/* KPI 3: Pedidos Pendentes */}
-        <Card className="border-t-4 border-t-amber-500 relative overflow-hidden">
+        <Card className="hover:border-border transition-colors">
           <CardContent className="p-5">
-            <div className="flex items-start justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                Pedidos Pendentes
+            <div className="flex items-center justify-between text-muted-foreground">
+              <span className="text-xs font-medium uppercase tracking-wider">
+                Pedidos em Triagem
               </span>
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50 text-amber-700 dark:bg-amber-950/80 dark:text-amber-300">
-                <Clock className="h-5 w-5" />
-              </div>
+              <Clock className="h-4 w-4 text-muted-foreground/70" />
             </div>
 
-            <div className="text-2xl font-black mt-2 font-display text-slate-900 dark:text-white">
+            <div className="text-2xl font-bold tracking-tight text-foreground font-mono mt-2">
               {pendentesCount}
             </div>
 
-            <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-              {pendentesCount > 0 ? '⚠️ Requer atendimento pelo Almoxarifado' : '✅ Nenhuma solicitação pendente'}
+            <p className="mt-3 text-xs text-muted-foreground flex items-center gap-1.5">
+              {pendentesCount > 0 ? (
+                <>
+                  <span className="h-2 w-2 rounded-full bg-amber-500 shrink-0" />
+                  <span>Aguardando despacho pelo Almoxarifado</span>
+                </>
+              ) : (
+                <>
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 shrink-0" />
+                  <span>Nenhuma solicitação pendente</span>
+                </>
+              )}
             </p>
           </CardContent>
         </Card>
 
         {/* KPI 4: Insumos Críticos */}
-        <Card className="border-t-4 border-t-rose-500 relative overflow-hidden">
+        <Card className="hover:border-border transition-colors">
           <CardContent className="p-5">
-            <div className="flex items-start justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                Insumos p/ Reabastecer
+            <div className="flex items-center justify-between text-muted-foreground">
+              <span className="text-xs font-medium uppercase tracking-wider">
+                Insumos em Alerta
               </span>
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-rose-50 text-rose-700 dark:bg-rose-950/80 dark:text-rose-300">
-                <AlertTriangle className="h-5 w-5" />
-              </div>
+              <AlertCircle className="h-4 w-4 text-muted-foreground/70" />
             </div>
 
-            <div className={`text-2xl font-black mt-2 font-display ${materiaisCriticos.length > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+            <div className="text-2xl font-bold tracking-tight text-foreground font-mono mt-2">
               {materiaisCriticos.length}
             </div>
 
-            <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-              {esgotadosCount > 0 ? `🚨 ${esgotadosCount} com estoque esgotado` : 'Insumos com estoque baixo (<20 un)'}
+            <p className="mt-3 text-xs text-muted-foreground flex items-center gap-1.5">
+              {esgotadosCount > 0 ? (
+                <>
+                  <span className="h-2 w-2 rounded-full bg-rose-500 shrink-0" />
+                  <span className="text-rose-600 dark:text-rose-400 font-medium">{esgotadosCount} com estoque zerado</span>
+                </>
+              ) : (
+                <span>Itens com volume baixo (menos de 20 un)</span>
+              )}
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* NÍVEL 2: VISUALIZAÇÃO DE DADOS & COMPARAÇÕES */}
+      {/* Visual Analytics */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
-        {/* GRÁFICO 1: Composição das Despesas de Custeio */}
+        {/* Composição das Despesas de Custeio */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <div>
-              <CardTitle className="text-base font-bold">
-                <PieChart className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+              <CardTitle className="text-sm font-semibold">
                 Composição das Saídas de Custeio
               </CardTitle>
               <CardDescription>
-                Distribuição percentual dos gastos operacionais realizados
+                Distribuição percentual dos gastos operacionais liquidados
               </CardDescription>
             </div>
-            <Badge variant="info">{formatarMoeda(saldosNatureza.gastoCusteioTotal)}</Badge>
+            <span className="font-mono text-xs font-semibold text-foreground">
+              {formatarMoeda(saldosNatureza.gastoCusteioTotal)}
+            </span>
           </CardHeader>
 
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 pt-2">
             {/* Multi-Segmented Progress Bar */}
-            <div className="flex h-3.5 w-full rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800">
-              <div style={{ width: `${pctInsumos}%` }} className="bg-teal-600 transition-all duration-300" title={`Insumos: ${pctInsumos}%`} />
-              <div style={{ width: `${pctRh}%` }} className="bg-purple-600 transition-all duration-300" title={`RH: ${pctRh}%`} />
-              <div style={{ width: `${pctManutencao}%` }} className="bg-amber-500 transition-all duration-300" title={`Manutenção: ${pctManutencao}%`} />
+            <div className="flex h-2.5 w-full rounded-full overflow-hidden bg-muted">
+              <div style={{ width: `${pctInsumos}%` }} className="bg-zinc-800 dark:bg-zinc-200 transition-all duration-300" title={`Insumos: ${pctInsumos}%`} />
+              <div style={{ width: `${pctRh}%` }} className="bg-zinc-500 dark:bg-zinc-400 transition-all duration-300" title={`RH: ${pctRh}%`} />
+              <div style={{ width: `${pctManutencao}%` }} className="bg-zinc-300 dark:bg-zinc-600 transition-all duration-300" title={`Manutenção: ${pctManutencao}%`} />
             </div>
 
-            {/* Visual Breakdown Legends */}
-            <div className="grid grid-cols-3 gap-3 text-center pt-2">
-              <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-3 dark:border-slate-800 dark:bg-slate-800/40">
-                <div className="flex items-center justify-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
-                  <span className="h-2 w-2 rounded-full bg-teal-600" />
+            {/* Clean Neutral Legends */}
+            <div className="grid grid-cols-3 gap-3 pt-2">
+              <div className="rounded-lg border border-border/60 bg-muted/20 p-3">
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+                  <span className="h-2 w-2 rounded-full bg-zinc-800 dark:bg-zinc-200" />
                   Insumos (PBS)
                 </div>
-                <div className="text-sm font-bold text-slate-800 dark:text-slate-100 mt-1">
+                <div className="text-sm font-semibold text-foreground font-mono mt-1">
                   {formatarMoeda(saldosNatureza.detalhamentoCusteio.insumos)}
                 </div>
-                <span className="text-[11px] text-slate-400">{pctInsumos}% do total</span>
+                <span className="text-[11px] text-muted-foreground">{pctInsumos}% do total</span>
               </div>
 
-              <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-3 dark:border-slate-800 dark:bg-slate-800/40">
-                <div className="flex items-center justify-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
-                  <span className="h-2 w-2 rounded-full bg-purple-600" />
-                  Salários (RH)
+              <div className="rounded-lg border border-border/60 bg-muted/20 p-3">
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+                  <span className="h-2 w-2 rounded-full bg-zinc-500 dark:bg-zinc-400" />
+                  Folha & RH
                 </div>
-                <div className="text-sm font-bold text-slate-800 dark:text-slate-100 mt-1">
+                <div className="text-sm font-semibold text-foreground font-mono mt-1">
                   {formatarMoeda(saldosNatureza.detalhamentoCusteio.rhHonorarios)}
                 </div>
-                <span className="text-[11px] text-slate-400">{pctRh}% do total</span>
+                <span className="text-[11px] text-muted-foreground">{pctRh}% do total</span>
               </div>
 
-              <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-3 dark:border-slate-800 dark:bg-slate-800/40">
-                <div className="flex items-center justify-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
-                  <span className="h-2 w-2 rounded-full bg-amber-500" />
-                  Manutenções
+              <div className="rounded-lg border border-border/60 bg-muted/20 p-3">
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+                  <span className="h-2 w-2 rounded-full bg-zinc-300 dark:bg-zinc-600" />
+                  Manutenção
                 </div>
-                <div className="text-sm font-bold text-slate-800 dark:text-slate-100 mt-1">
+                <div className="text-sm font-semibold text-foreground font-mono mt-1">
                   {formatarMoeda(saldosNatureza.detalhamentoCusteio.manutencao)}
                 </div>
-                <span className="text-[11px] text-slate-400">{pctManutencao}% do total</span>
+                <span className="text-[11px] text-muted-foreground">{pctManutencao}% do total</span>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* GRÁFICO 2: Comparativo de Gastos Por Unidade de Saúde */}
+        {/* Comparativo de Gastos Por Unidade de Saúde */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <div>
-              <CardTitle className="text-base font-bold">
-                <BarChart3 className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                Comparativo de Gastos por Unidade
+              <CardTitle className="text-sm font-semibold">
+                Consumo por Unidade de Saúde
               </CardTitle>
               <CardDescription>
-                Volume financeiro total consumido por cada posto/unidade
+                Consumo financeiro consolidado por estabelecimento
               </CardDescription>
             </div>
-            <Badge variant="purple">{unidades.length} Unidades</Badge>
+            <span className="text-xs text-muted-foreground font-medium">
+              {unidades.length} unidades
+            </span>
           </CardHeader>
 
-          <CardContent className="space-y-3 max-h-[260px] overflow-y-auto pr-1">
+          <CardContent className="space-y-3.5 max-h-[250px] overflow-y-auto pr-1 pt-2">
             {consolidacaoUnidades.map((u) => {
               const pct = Math.round((u.custoTotalGeral / maxGastoUnidade) * 100);
               return (
                 <div key={u.unidadeId} className="space-y-1">
                   <div className="flex justify-between text-xs">
-                    <span className="font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                    <span className="font-medium text-foreground flex items-center gap-1.5">
                       {u.nome}
-                      <span className="rounded bg-teal-50 px-1.5 py-0.2 text-[10px] font-semibold text-teal-700 dark:bg-teal-950 dark:text-teal-300">
-                        {u.tipo}
+                      <span className="text-[10px] text-muted-foreground font-mono">
+                        ({u.tipo})
                       </span>
                     </span>
-                    <span className="font-bold text-slate-900 dark:text-slate-100">
+                    <span className="font-mono font-medium text-foreground">
                       {formatarMoeda(u.custoTotalGeral)}
                     </span>
                   </div>
-                  <div className="h-2 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                  <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
                     <div 
-                      className="h-full bg-gradient-to-r from-teal-500 to-purple-600 rounded-full transition-all duration-300"
+                      className="h-full bg-foreground/60 rounded-full transition-all duration-300"
                       style={{ width: `${pct}%` }}
                     />
                   </div>
@@ -414,41 +404,40 @@ export const DashboardTab: React.FC<Props> = ({
         </Card>
       </div>
 
-      {/* NÍVEL 3: DETALHAMENTO OPERACIONAL */}
-
-      {/* Painel Alerta de Insumos Críticos */}
-      <Card className="border-l-4 border-l-rose-500">
-        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      {/* Painel de Insumos Críticos */}
+      <Card>
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/60 pb-4">
           <div>
-            <CardTitle className="text-base font-bold text-rose-700 dark:text-rose-400">
-              <Boxes className="h-4 w-4" />
-              Alertas de Reabastecimento de Insumos Críticos
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <Boxes className="h-4 w-4 text-muted-foreground" />
+              Gestão de Insumos em Alerta de Estoque
             </CardTitle>
             <CardDescription>
-              Ações rápidas para reposição de estoque e reordenamento
+              Insumos que atingiram ponto de reposição ou estoque crítico
             </CardDescription>
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
-            <div className="relative w-44">
-              <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
+            <div className="relative w-48">
+              <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
               <Input
                 type="text"
-                placeholder="Buscar insumo..."
+                placeholder="Filtrar por nome..."
                 value={buscaAlerta}
                 onChange={(e) => setBuscaAlerta(e.target.value)}
                 className="h-8 pl-8 text-xs"
               />
             </div>
 
-            <div className="flex rounded-lg border border-slate-200 dark:border-slate-800 p-0.5 bg-slate-100 dark:bg-slate-800/60">
+            {/* Segmented Filter Control */}
+            <div className="flex rounded-lg border border-border bg-muted/40 p-0.5 text-xs">
               <button
                 type="button"
                 onClick={() => setFiltroAlerta('todos')}
-                className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${
+                className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
                   filtroAlerta === 'todos'
-                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                    ? 'bg-background text-foreground shadow-xs font-semibold'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 Todos ({materiaisCriticos.length})
@@ -456,30 +445,30 @@ export const DashboardTab: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={() => setFiltroAlerta('esgotados')}
-                className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${
+                className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
                   filtroAlerta === 'esgotados'
-                    ? 'bg-rose-600 text-white shadow-sm'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                    ? 'bg-rose-500/10 text-rose-700 dark:text-rose-400 font-semibold shadow-xs'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                Esgotados ({esgotadosCount})
+                Zerados ({esgotadosCount})
               </button>
               <button
                 type="button"
                 onClick={() => setFiltroAlerta('baixo')}
-                className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${
+                className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
                   filtroAlerta === 'baixo'
-                    ? 'bg-amber-500 text-white shadow-sm'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                    ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 font-semibold shadow-xs'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                Baixo ({baixoCount})
+                Baixos ({baixoCount})
               </button>
             </div>
           </div>
         </CardHeader>
 
-        <CardContent>
+        <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
@@ -488,15 +477,15 @@ export const DashboardTab: React.FC<Props> = ({
                 <TableHead>Natureza</TableHead>
                 <TableHead>Fornecedor</TableHead>
                 <TableHead>Estoque Atual</TableHead>
-                <TableHead>Valor Est.</TableHead>
-                <TableHead className="text-center">Ações de Reposição</TableHead>
+                <TableHead className="text-right">Valor Est.</TableHead>
+                <TableHead className="text-center w-40">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {materiaisExibidos.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-slate-500 py-6">
-                    ✅ Nenhum insumo necessita de reposição para o filtro selecionado.
+                  <TableCell colSpan={7} className="text-center text-muted-foreground py-8 text-xs">
+                    Nenhum insumo necessita de reposição para o filtro selecionado.
                   </TableCell>
                 </TableRow>
               ) : (
@@ -504,17 +493,13 @@ export const DashboardTab: React.FC<Props> = ({
                   const est = m.qtd_estoque ?? 0;
                   return (
                     <TableRow key={m.id}>
-                      <TableCell className="font-mono text-xs text-slate-500">#{m.id}</TableCell>
-                      <TableCell className="font-semibold text-slate-900 dark:text-slate-100">{m.descricao}</TableCell>
+                      <TableCell className="font-mono text-xs text-muted-foreground">#{m.id}</TableCell>
+                      <TableCell className="font-medium text-foreground">{m.descricao}</TableCell>
                       <TableCell>
-                        {m.natureza === 'INVESTIMENTO' ? (
-                          <Badge variant="purple">Investimento</Badge>
-                        ) : (
-                          <Badge variant="info">Custeio</Badge>
-                        )}
+                        <Badge variant="outline">{m.natureza}</Badge>
                       </TableCell>
-                      <TableCell className="text-xs text-slate-500">
-                        {m.fornecedor || 'Não inf.'}
+                      <TableCell className="text-xs text-muted-foreground">
+                        {m.fornecedor || 'Padrão'}
                       </TableCell>
                       <TableCell>
                         {est <= 0 ? (
@@ -523,28 +508,28 @@ export const DashboardTab: React.FC<Props> = ({
                           <Badge variant="warning">{est} {m.unidade_medida} (Baixo)</Badge>
                         )}
                       </TableCell>
-                      <TableCell className="font-medium text-xs">
+                      <TableCell className="text-right font-mono text-xs">
                         {formatarMoeda(m.valor_estimado || 0)}
                       </TableCell>
                       <TableCell className="text-center">
                         <div className="flex items-center justify-center gap-1.5">
                           <Button
-                            variant="emerald"
+                            variant="outline"
                             size="sm"
                             onClick={() => onAbrirAjusteEstoque(m)}
                             title="Repor Estoque"
-                            className="h-7 text-xs"
+                            className="h-7 text-xs px-2 gap-1"
                           >
-                            <PlusCircle className="h-3.5 w-3.5 mr-1" /> Repor
+                            <PlusCircle className="h-3 w-3" /> Repor
                           </Button>
                           <Button
-                            variant="outline"
+                            variant="ghost"
                             size="sm"
                             onClick={() => onAbrirEditarMaterial(m)}
                             title="Editar Insumo"
-                            className="h-7 text-xs"
+                            className="h-7 text-xs px-2 gap-1 text-muted-foreground hover:text-foreground"
                           >
-                            <Edit2 className="h-3 w-3 mr-1" /> Editar
+                            <Edit2 className="h-3 w-3" /> Editar
                           </Button>
                         </div>
                       </TableCell>
@@ -559,20 +544,21 @@ export const DashboardTab: React.FC<Props> = ({
 
       {/* Tabela de Consolidação Financeira Multiclínica por Unidade */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-row items-center justify-between border-b border-border/60 pb-4">
           <div>
-            <CardTitle className="text-base font-bold">
-              <Calculator className="h-4 w-4 text-teal-600 dark:text-teal-400" />
-              Consolidação Financeira por Unidade de Saúde
+            <CardTitle className="text-sm font-semibold">
+              Consolidação Orçamentária por Unidade de Saúde
             </CardTitle>
             <CardDescription>
-              Detalhamento por posto de saúde unindo Insumos, Salários e Manutenções
+              Detalhamento de insumos atendidos, remuneração de profissionais e manutenções
             </CardDescription>
           </div>
-          <Badge variant="info">Tabela Executiva</Badge>
+          <span className="text-xs font-mono text-muted-foreground">
+            {consolidacaoUnidades.length} unidades registradas
+          </span>
         </CardHeader>
 
-        <CardContent>
+        <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
@@ -587,20 +573,20 @@ export const DashboardTab: React.FC<Props> = ({
             <TableBody>
               {consolidacaoUnidades.map((c) => (
                 <TableRow key={c.unidadeId}>
-                  <TableCell className="font-semibold text-slate-900 dark:text-slate-100">{c.nome}</TableCell>
+                  <TableCell className="font-medium text-foreground">{c.nome}</TableCell>
                   <TableCell><Badge variant="outline">{c.tipo}</Badge></TableCell>
                   <TableCell className="text-right font-mono text-xs">{formatarMoeda(c.custoInsumosAtendidos)}</TableCell>
                   <TableCell className="text-right font-mono text-xs">{formatarMoeda(c.custoHonorariosDentistas)}</TableCell>
                   <TableCell className="text-right font-mono text-xs">{formatarMoeda(c.custoManutencaoEquipamentos)}</TableCell>
-                  <TableCell className="text-right font-mono text-xs font-bold text-teal-700 dark:text-teal-300">
+                  <TableCell className="text-right font-mono text-xs font-semibold text-foreground">
                     {formatarMoeda(c.custoTotalGeral)}
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
             <TableFooter>
-              <TableRow className="bg-slate-100/70 dark:bg-slate-800/70 font-bold">
-                <TableCell colSpan={2}>TOTAL MUNICIPAL CONSOLIDADO:</TableCell>
+              <TableRow className="bg-muted/40 font-semibold">
+                <TableCell colSpan={2}>TOTAL MUNICIPAL CONSOLIDADO</TableCell>
                 <TableCell className="text-right font-mono">
                   {formatarMoeda(consolidacaoUnidades.reduce((a, b) => a + b.custoInsumosAtendidos, 0))}
                 </TableCell>
@@ -610,7 +596,7 @@ export const DashboardTab: React.FC<Props> = ({
                 <TableCell className="text-right font-mono">
                   {formatarMoeda(consolidacaoUnidades.reduce((a, b) => a + b.custoManutencaoEquipamentos, 0))}
                 </TableCell>
-                <TableCell className="text-right font-mono text-base text-teal-600 dark:text-teal-400">
+                <TableCell className="text-right font-mono font-bold text-foreground">
                   {formatarMoeda(consolidacaoUnidades.reduce((a, b) => a + b.custoTotalGeral, 0))}
                 </TableCell>
               </TableRow>
@@ -621,43 +607,42 @@ export const DashboardTab: React.FC<Props> = ({
 
       {/* Pedidos Recentes */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-row items-center justify-between border-b border-border/60 pb-4">
           <div>
-            <CardTitle className="text-base font-bold">
-              <ClipboardList className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+            <CardTitle className="text-sm font-semibold">
               Solicitações Recentes de Insumos (PBS)
             </CardTitle>
             <CardDescription>
-              Clique para visualizar ou imprimir a Ficha PBS
+              Últimos pedidos emitidos pelas Unidades de Saúde da Família
             </CardDescription>
           </div>
           <Button 
-            variant="outline" 
+            variant="ghost" 
             size="sm" 
             onClick={() => onSwitchTab('triagem')}
-            className="text-xs"
+            className="text-xs gap-1"
           >
-            Ver Todos <ArrowRight className="h-3.5 w-3.5 ml-1" />
+            Ver Todos <ArrowRight className="h-3.5 w-3.5" />
           </Button>
         </CardHeader>
 
-        <CardContent>
+        <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>N° PBS</TableHead>
+                <TableHead className="w-24">N° PBS</TableHead>
                 <TableHead>Unidade Emitente</TableHead>
                 <TableHead>Solicitante</TableHead>
                 <TableHead>Data Pedido</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Valor Estimado</TableHead>
-                <TableHead className="text-center">Ação</TableHead>
+                <TableHead className="text-center w-28">Ação</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {recentes.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-slate-500 py-6">
+                  <TableCell colSpan={7} className="text-center text-muted-foreground py-8 text-xs">
                     Nenhuma solicitação registrada até o momento.
                   </TableCell>
                 </TableRow>
@@ -666,12 +651,12 @@ export const DashboardTab: React.FC<Props> = ({
                   const uni = unidades.find((u) => u.id === p.unidade_emitente_id);
                   return (
                     <TableRow key={p.id}>
-                      <TableCell className="font-mono text-xs font-bold text-slate-800 dark:text-slate-200">
+                      <TableCell className="font-mono text-xs font-semibold text-foreground">
                         {p.numero_pbs}
                       </TableCell>
                       <TableCell className="font-medium text-xs">{uni?.nome || 'Unidade N/D'}</TableCell>
-                      <TableCell className="text-xs text-slate-500">{p.responsavel_nome}</TableCell>
-                      <TableCell className="text-xs text-slate-500">{formatarData(p.data_pedido)}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{p.responsavel_nome}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{formatarData(p.data_pedido)}</TableCell>
                       <TableCell>{renderBadgeStatus(p.status)}</TableCell>
                       <TableCell className="text-right font-mono text-xs font-semibold">
                         {formatarMoeda(p.valor_total_estimado || 0)}
@@ -681,9 +666,9 @@ export const DashboardTab: React.FC<Props> = ({
                           variant="outline" 
                           size="sm" 
                           onClick={() => onAbrirFicha(p)}
-                          className="h-7 text-xs text-teal-700 dark:text-teal-300 border-teal-200 dark:border-teal-800/80 hover:bg-teal-50 dark:hover:bg-teal-950/50"
+                          className="h-7 text-xs gap-1"
                         >
-                          <FileText className="h-3.5 w-3.5 mr-1" /> Ver Ficha
+                          <FileText className="h-3 w-3" /> Ficha
                         </Button>
                       </TableCell>
                     </TableRow>

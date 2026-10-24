@@ -423,10 +423,10 @@ export const UsuariosTab: React.FC<Props> = ({
                 onChange={e => setPerfil(e.target.value as PerfilUsuario)}
                 required
               >
-                <option value="SOLICITANTE">🩺 Solicitante (Fazer Pedidos e Reparos)</option>
-                <option value="GESTOR">👁️ Gestor Executivo (Somente Leitura)</option>
-                <option value="ADMINISTRADOR">👑 Administrador (Acesso Total / Gestão)</option>
-                <option value="TECNICO">🔧 Técnico de Manutenção (Manutenções Aprovadas)</option>
+                <option value="SOLICITANTE">Solicitante (Pedidos e Reparos)</option>
+                <option value="GESTOR">Gestor Executivo (Somente Leitura)</option>
+                <option value="ADMINISTRADOR">Administrador (Acesso Total)</option>
+                <option value="TECNICO">Técnico de Manutenção</option>
               </select>
             </div>
 
@@ -443,7 +443,7 @@ export const UsuariosTab: React.FC<Props> = ({
               >
                 {unidades.map(u => (
                   <option key={u.id} value={u.id}>
-                    🏥 #{u.id} — {u.nome}
+                    #{u.id} — {u.nome}
                   </option>
                 ))}
               </select>

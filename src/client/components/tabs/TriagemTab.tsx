@@ -59,17 +59,17 @@ export const TriagemTab: React.FC<Props> = ({
   const renderBadgeStatus = (status: StatusPedido) => {
     switch (status) {
       case 'SOLICITADO':
-        return <Badge variant="warning"><Clock className="h-3 w-3" /> SOLICITADO</Badge>;
+        return <Badge variant="warning"><Clock className="h-3 w-3" /> Solicitado</Badge>;
       case 'RECEBIDO':
-        return <Badge variant="info"><PackageCheck className="h-3 w-3" /> RECEBIDO</Badge>;
+        return <Badge variant="info"><PackageCheck className="h-3 w-3" /> Recebido</Badge>;
       case 'ATENDIDO_PARCIAL':
-        return <Badge variant="purple"><Boxes className="h-3 w-3" /> PARCIAL</Badge>;
+        return <Badge variant="purple"><Boxes className="h-3 w-3" /> Parcial</Badge>;
       case 'ATENDIDO_TOTAL':
-        return <Badge variant="success"><Check className="h-3 w-3" /> ATENDIDO</Badge>;
+        return <Badge variant="success"><Check className="h-3 w-3" /> Atendido</Badge>;
       case 'ENVIADO':
-        return <Badge variant="default"><Truck className="h-3 w-3" /> ENVIADO</Badge>;
+        return <Badge variant="default"><Truck className="h-3 w-3" /> Enviado</Badge>;
       case 'CANCELADO':
-        return <Badge variant="destructive"><Ban className="h-3 w-3" /> CANCELADO</Badge>;
+        return <Badge variant="destructive"><Ban className="h-3 w-3" /> Cancelado</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -91,10 +91,10 @@ export const TriagemTab: React.FC<Props> = ({
 
   return (
     <Card>
-      <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#E8E8EC] dark:border-zinc-800 pb-4">
         <div>
-          <CardTitle className="text-xl font-bold">
-            <Boxes className="h-5 w-5 text-teal-600 dark:text-teal-400" />
+          <CardTitle className="text-lg font-bold">
+            <Boxes className="h-5 w-5 text-[#6366F1]" />
             {isPrivilegiado ? 'Central de Atendimento & Triagem de Pedidos' : 'Meus Pedidos & Acompanhamento'}
           </CardTitle>
           <CardDescription>
@@ -108,27 +108,27 @@ export const TriagemTab: React.FC<Props> = ({
 
         <div className="flex items-center gap-3 flex-wrap">
           <select 
-            className="flex h-9 rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs font-semibold shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
+            className="flex h-[38px] rounded-[6px] border border-[#E8E8EC] bg-white px-3 py-1 text-xs font-medium text-[#0A0A0A] transition-all duration-150 focus-visible:outline-none focus-visible:border-[#6366F1] focus-visible:ring-2 focus-visible:ring-[#6366F1]/20 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
           >
             <option value="TODOS">Todos os Status</option>
-            <option value="SOLICITADO">SOLICITADO (Pendente)</option>
-            <option value="RECEBIDO">RECEBIDO (Em Separação)</option>
-            <option value="ATENDIDO_PARCIAL">ATENDIDO PARCIAL</option>
-            <option value="ATENDIDO_TOTAL">ATENDIDO TOTAL</option>
-            <option value="ENVIADO">ENVIADO (Despachado)</option>
-            <option value="CANCELADO">CANCELADO</option>
+            <option value="SOLICITADO">Solicitado (Pendente)</option>
+            <option value="RECEBIDO">Recebido (Em Separação)</option>
+            <option value="ATENDIDO_PARCIAL">Atendido Parcial</option>
+            <option value="ATENDIDO_TOTAL">Atendido Total</option>
+            <option value="ENVIADO">Enviado (Despachado)</option>
+            <option value="CANCELADO">Cancelado</option>
           </select>
 
-          <div className="relative w-48">
-            <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
+          <div className="relative w-52">
+            <Search className="absolute left-3 top-3 h-3.5 w-3.5 text-[#9C9C9C]" />
             <Input 
               type="text" 
               placeholder="Buscar Nº PBS, USF..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-9 pl-8 text-xs"
+              className="pl-8 text-xs"
             />
           </div>
         </div>
@@ -223,7 +223,7 @@ export const TriagemTab: React.FC<Props> = ({
                             )}
                             {p.status === 'SOLICITADO' && (
                               <Button 
-                                variant="emerald" 
+                                variant="default" 
                                 size="sm" 
                                 onClick={() => onAbrirRecebimento(p)}
                                 className="h-7 text-xs"
@@ -235,7 +235,7 @@ export const TriagemTab: React.FC<Props> = ({
                             {p.status === 'RECEBIDO' && (
                               <>
                                 <Button 
-                                  variant="default" 
+                                  variant="outline" 
                                   size="sm" 
                                   onClick={() => onAbrirAtendimento(p)}
                                   className="h-7 text-xs"
@@ -243,7 +243,7 @@ export const TriagemTab: React.FC<Props> = ({
                                   <Boxes className="h-3.5 w-3.5 mr-1" /> 2. Atender
                                 </Button>
                                 <Button 
-                                  variant="emerald" 
+                                  variant="default" 
                                   size="sm" 
                                   onClick={() => onAbrirEnvio(p)}
                                   className="h-7 text-xs"
@@ -264,7 +264,7 @@ export const TriagemTab: React.FC<Props> = ({
                                   <Edit className="h-3 w-3 mr-1" /> Qtds
                                 </Button>
                                 <Button 
-                                  variant="emerald" 
+                                  variant="default" 
                                   size="sm" 
                                   onClick={() => onAbrirEnvio(p)}
                                   className="h-7 text-xs"

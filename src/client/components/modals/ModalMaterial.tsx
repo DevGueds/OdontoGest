@@ -89,8 +89,8 @@ export const ModalMaterial: React.FC<Props> = ({ isOpen, onClose, onConfirm }) =
               onChange={(e) => setNatureza(e.target.value as NaturezaDespesa)}
               required
             >
-              <option value="CUSTEIO">💳 Custeio (Insumos de Consumo Operacional)</option>
-              <option value="INVESTIMENTO">🏗️ Investimento (Bens Permanentes / Capital)</option>
+              <option value="CUSTEIO">Custeio (Insumos e Consumo Operacional)</option>
+              <option value="INVESTIMENTO">Investimento (Bens Permanentes e Equipamentos)</option>
             </select>
           </div>
 

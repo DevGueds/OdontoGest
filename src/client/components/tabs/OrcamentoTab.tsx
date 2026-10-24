@@ -20,8 +20,6 @@ import {
   Landmark, 
   Wallet, 
   Receipt, 
-  TrendingUp, 
-  TrendingDown, 
   PlusCircle, 
   Check, 
   Trash2, 
@@ -29,8 +27,7 @@ import {
   Filter, 
   RotateCw, 
   Zap, 
-  Building2,
-  DollarSign
+  Building2
 } from 'lucide-react';
 
 interface Props {
@@ -102,98 +99,91 @@ export const OrcamentoTab: React.FC<Props> = ({
   return (
     <div className="space-y-6">
       {/* Resumo de Saldos e Fluxo Orçamentário */}
-      <Card className="border-l-4 border-l-primary shadow-sm">
-        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-border">
-          <div className="space-y-1">
-            <CardTitle className="text-xl flex items-center gap-2">
-              <Landmark className="w-5 h-5 text-primary" />
-              Visão Geral das Entradas & Saldos Segregados
+      <Card>
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-border/60">
+          <div>
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <Landmark className="w-4 h-4 text-muted-foreground" />
+              Visão Geral de Entradas & Saldos Segregados
             </CardTitle>
             <CardDescription>
-              Entradas de recursos cadastrados (Aportes/Repasses) deduzidos das saídas reais consolidadas (Insumos + RH + Manutenção).
+              Aportes cadastrados deduzidos das saídas operacionais consolidadas
             </CardDescription>
           </div>
-          <Badge variant="info" className="flex items-center gap-1.5 self-start sm:self-auto py-1 px-3">
-            <Building2 className="w-3.5 h-3.5" />
+          <Badge variant="outline" className="font-mono text-xs">
             Gestão de Recursos SMS
           </Badge>
         </CardHeader>
 
         <CardContent className="pt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Card Custeio */}
-            <div className="bg-muted/40 dark:bg-muted/20 border border-border rounded-xl p-5 space-y-4">
+            {/* Fluxo Custeio */}
+            <div className="border border-border/80 rounded-xl p-5 space-y-4 bg-muted/10">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Wallet className="w-5 h-5 text-primary" />
-                  <span className="font-bold text-sm tracking-wide text-foreground">
-                    FLUXO DE RECURSOS DE CUSTEIO
-                  </span>
-                </div>
-                <Badge variant="info">
+                <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  Recursos de Custeio (Operacional)
+                </span>
+                <Badge variant="secondary" className="font-mono">
                   {saldos.percentualCusteioComprometido.toFixed(1)}% Comprometido
                 </Badge>
               </div>
 
-              <div className="space-y-2 text-sm">
+              <div className="space-y-2 text-xs">
                 <div className="flex justify-between items-center text-muted-foreground">
-                  <span>(+) Entradas Cadastradas (Custeio):</span>
-                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                  <span>(+) Entradas Cadastradas:</span>
+                  <span className="font-mono font-medium text-foreground">
                     {formatarMoeda(saldos.orcamentoCusteioTotal)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center text-muted-foreground">
-                  <span>(-) Total Saídas (Pedidos + RH + Manut.):</span>
-                  <span className="font-semibold text-rose-600 dark:text-rose-400">
+                  <span>(-) Saídas Realizadas (Insumos + RH + Manut.):</span>
+                  <span className="font-mono font-medium text-foreground">
                     {formatarMoeda(saldos.gastoCusteioTotal)}
                   </span>
                 </div>
               </div>
 
-              <div className="h-px bg-border my-2" />
+              <div className="h-px bg-border/80 my-2" />
 
-              <div className="flex justify-between items-center text-base font-bold">
-                <span className="text-foreground text-sm">(=) SALDO DE CUSTEIO DISPONÍVEL:</span>
-                <span className={saldos.saldoCusteioDisponivel >= 0 ? 'text-emerald-600 dark:text-emerald-400 text-lg' : 'text-rose-600 dark:text-rose-400 text-lg'}>
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-semibold text-foreground">Saldo Custeio Disponível:</span>
+                <span className="font-mono text-xl font-bold text-foreground">
                   {formatarMoeda(saldos.saldoCusteioDisponivel)}
                 </span>
               </div>
             </div>
 
-            {/* Card Investimento */}
-            <div className="bg-muted/40 dark:bg-muted/20 border border-border rounded-xl p-5 space-y-4">
+            {/* Fluxo Investimento */}
+            <div className="border border-border/80 rounded-xl p-5 space-y-4 bg-muted/10">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Landmark className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                  <span className="font-bold text-sm tracking-wide text-foreground">
-                    FLUXO DE RECURSOS DE INVESTIMENTO
-                  </span>
-                </div>
-                <Badge variant="purple">
+                <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  Recursos de Investimento (Capital)
+                </span>
+                <Badge variant="secondary" className="font-mono">
                   {saldos.percentualInvestimentoComprometido.toFixed(1)}% Comprometido
                 </Badge>
               </div>
 
-              <div className="space-y-2 text-sm">
+              <div className="space-y-2 text-xs">
                 <div className="flex justify-between items-center text-muted-foreground">
-                  <span>(+) Entradas Cadastradas (Investimento):</span>
-                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                  <span>(+) Entradas Cadastradas:</span>
+                  <span className="font-mono font-medium text-foreground">
                     {formatarMoeda(saldos.orcamentoInvestimentoTotal)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center text-muted-foreground">
-                  <span>(-) Total Saídas (Equipamentos Permanentes):</span>
-                  <span className="font-semibold text-rose-600 dark:text-rose-400">
+                  <span>(-) Saídas Realizadas (Bens Permanentes):</span>
+                  <span className="font-mono font-medium text-foreground">
                     {formatarMoeda(saldos.gastoInvestimentoTotal)}
                   </span>
                 </div>
               </div>
 
-              <div className="h-px bg-border my-2" />
+              <div className="h-px bg-border/80 my-2" />
 
-              <div className="flex justify-between items-center text-base font-bold">
-                <span className="text-foreground text-sm">(=) SALDO DE INVESTIMENTO DISPONÍVEL:</span>
-                <span className={saldos.saldoInvestimentoDisponivel >= 0 ? 'text-purple-600 dark:text-purple-400 text-lg' : 'text-rose-600 dark:text-rose-400 text-lg'}>
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-semibold text-foreground">Saldo Investimento Disponível:</span>
+                <span className="font-mono text-xl font-bold text-foreground">
                   {formatarMoeda(saldos.saldoInvestimentoDisponivel)}
                 </span>
               </div>
@@ -204,14 +194,14 @@ export const OrcamentoTab: React.FC<Props> = ({
 
       {/* Formulário de Novo Lançamento de Entrada */}
       {!isReadOnly && (
-        <Card className="shadow-sm">
-          <CardHeader className="border-b border-border pb-4">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <PlusCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-              Cadastrar Nova Entrada / Aporte Financeiro
+        <Card>
+          <CardHeader className="border-b border-border/60 pb-4">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <PlusCircle className="w-4 h-4 text-muted-foreground" />
+              Cadastrar Aporte ou Entrada de Recursos
             </CardTitle>
             <CardDescription>
-              Informe os dados de novos aportes para compor o orçamento das unidades ou fundo geral.
+              Informe os dados de novos repasses para compor os orçamentos municipais
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
@@ -233,7 +223,7 @@ export const OrcamentoTab: React.FC<Props> = ({
 
                 <div className="space-y-1.5">
                   <label htmlFor="ent_valor" className="text-xs font-semibold text-foreground uppercase tracking-wider">
-                    Valor Total do Aporte (R$) *
+                    Valor Total (R$) *
                   </label>
                   <Input 
                     type="number" 
@@ -248,7 +238,7 @@ export const OrcamentoTab: React.FC<Props> = ({
 
                 <div className="space-y-1.5">
                   <label htmlFor="ent_natureza" className="text-xs font-semibold text-foreground uppercase tracking-wider">
-                    Natureza do Saldo / Recurso *
+                    Natureza da Despesa *
                   </label>
                   <select 
                     id="ent_natureza" 
@@ -257,8 +247,8 @@ export const OrcamentoTab: React.FC<Props> = ({
                     onChange={(e) => setNatureza(e.target.value as NaturezaDespesa)}
                     required
                   >
-                    <option value="CUSTEIO">💳 Custeio (Consumo / Operacional / RH / Manutenção)</option>
-                    <option value="INVESTIMENTO">🏗️ Investimento (Bens Permanentes / Capital)</option>
+                    <option value="CUSTEIO">Custeio (Insumos, RH e Manutenção)</option>
+                    <option value="INVESTIMENTO">Investimento (Bens Permanentes e Equipamentos)</option>
                   </select>
                 </div>
 
@@ -273,8 +263,8 @@ export const OrcamentoTab: React.FC<Props> = ({
                     onChange={(e) => setTipoRecorrencia(e.target.value as TipoRecorrencia)}
                     required
                   >
-                    <option value="RECORRENTE">🔄 Recorrente (Repasse Mensal Ordinário)</option>
-                    <option value="PARCELA_UNICA">⚡ Parcela Única (Emenda / Aporte Extra)</option>
+                    <option value="RECORRENTE">Recorrente (Mensal Ordinário)</option>
+                    <option value="PARCELA_UNICA">Parcela Única (Extraordinário)</option>
                   </select>
                 </div>
 
@@ -288,7 +278,7 @@ export const OrcamentoTab: React.FC<Props> = ({
                     value={unidadeId}
                     onChange={(e) => setUnidadeId(e.target.value)}
                   >
-                    <option value="">🌐 GLOBAL / Todas as Unidades (Fundo SMS)</option>
+                    <option value="">Fundo Municipal de Saúde (Global)</option>
                     {unidades.map(u => (
                       <option key={u.id} value={u.id}>{u.nome} ({u.tipo})</option>
                     ))}
@@ -297,7 +287,7 @@ export const OrcamentoTab: React.FC<Props> = ({
 
                 <div className="space-y-1.5">
                   <label htmlFor="ent_data" className="text-xs font-semibold text-foreground uppercase tracking-wider">
-                    Data do Crédito / Depósito *
+                    Data do Crédito *
                   </label>
                   <Input 
                     type="date" 
@@ -310,7 +300,7 @@ export const OrcamentoTab: React.FC<Props> = ({
 
                 <div className="space-y-1.5">
                   <label htmlFor="ent_mes" className="text-xs font-semibold text-foreground uppercase tracking-wider">
-                    Mês de Referência (YYYY-MM) *
+                    Mês de Referência *
                   </label>
                   <Input 
                     type="month" 
@@ -336,9 +326,9 @@ export const OrcamentoTab: React.FC<Props> = ({
               </div>
 
               <div className="flex justify-end pt-2">
-                <Button type="submit" variant="emerald" className="gap-2">
+                <Button type="submit" className="gap-2">
                   <Check className="w-4 h-4" />
-                  Registrar Entrada de Recursos
+                  Registrar Entrada
                 </Button>
               </div>
             </form>
@@ -347,23 +337,23 @@ export const OrcamentoTab: React.FC<Props> = ({
       )}
 
       {/* Tabela de Histórico de Entradas Cadastradas */}
-      <Card className="shadow-sm">
-        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-4">
-          <div className="space-y-1">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Receipt className="w-5 h-5 text-primary" />
-              Histórico de Entradas & Repasses Registrados
+      <Card>
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/60 pb-4">
+          <div>
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <Receipt className="w-4 h-4 text-muted-foreground" />
+              Histórico de Aportes Registrados
             </CardTitle>
             <CardDescription>
-              Entradas de capital que compõem os orçamentos de Custeio e Investimento
+              Entradas de recursos que compõem o saldo financeiro municipal
             </CardDescription>
           </div>
 
           <div className="flex items-center gap-2 self-start sm:self-auto">
-            <Filter className="w-4 h-4 text-muted-foreground" />
-            <span className="text-xs font-semibold text-muted-foreground">Natureza:</span>
+            <Filter className="w-3.5 h-3.5 text-muted-foreground" />
+            <span className="text-xs font-medium text-muted-foreground">Natureza:</span>
             <select 
-              className="h-9 rounded-md border border-input bg-background px-2 py-1 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              className="h-8 rounded-md border border-input bg-background px-2 py-1 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               value={filtroNatureza}
               onChange={(e) => setFiltroNatureza(e.target.value as any)}
             >
@@ -393,7 +383,7 @@ export const OrcamentoTab: React.FC<Props> = ({
               <TableBody>
                 {entradasFiltradas.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center text-muted-foreground py-10">
+                    <TableCell colSpan={9} className="text-center text-muted-foreground py-8 text-xs">
                       Nenhum aporte financeiro registrado para o filtro selecionado.
                     </TableCell>
                   </TableRow>
@@ -402,51 +392,35 @@ export const OrcamentoTab: React.FC<Props> = ({
                     const uni = unidades.find(u => u.id === ent.unidade_id);
                     return (
                       <TableRow key={ent.id}>
-                        <TableCell className="font-semibold text-muted-foreground">#{ent.id}</TableCell>
+                        <TableCell className="font-mono text-xs text-muted-foreground">#{ent.id}</TableCell>
                         <TableCell>
                           <div className="font-medium text-foreground">{ent.descricao}</div>
                           {ent.observacoes && (
-                            <div className="text-xs text-muted-foreground mt-0.5">
+                            <div className="text-[11px] text-muted-foreground mt-0.5">
                               {ent.observacoes}
                             </div>
                           )}
                         </TableCell>
                         <TableCell>
-                          {ent.natureza === 'INVESTIMENTO' ? (
-                            <Badge variant="purple" className="flex items-center gap-1 w-fit">
-                              <Landmark className="w-3 h-3" /> Investimento
-                            </Badge>
-                          ) : (
-                            <Badge variant="info" className="flex items-center gap-1 w-fit">
-                              <Receipt className="w-3 h-3" /> Custeio
-                            </Badge>
-                          )}
+                          <Badge variant="outline">{ent.natureza}</Badge>
                         </TableCell>
                         <TableCell>
-                          {ent.tipo_recorrencia === 'RECORRENTE' ? (
-                            <Badge variant="success" className="flex items-center gap-1 w-fit">
-                              <RotateCw className="w-3 h-3" /> Recorrente
-                            </Badge>
-                          ) : (
-                            <Badge variant="warning" className="flex items-center gap-1 w-fit">
-                              <Zap className="w-3 h-3" /> Parcela Única
-                            </Badge>
-                          )}
+                          <Badge variant="secondary" className="text-[10px]">
+                            {ent.tipo_recorrencia === 'RECORRENTE' ? 'Recorrente' : 'Parcela Única'}
+                          </Badge>
                         </TableCell>
                         <TableCell>
-                          {uni ? (
-                            <Badge variant="secondary" className="w-fit">{uni.nome}</Badge>
-                          ) : (
-                            <Badge variant="info" className="w-fit">GLOBAL (SMS)</Badge>
-                          )}
+                          <span className="text-xs text-muted-foreground">
+                            {uni ? uni.nome : 'Global (SMS)'}
+                          </span>
                         </TableCell>
-                        <TableCell className="text-xs text-muted-foreground">
+                        <TableCell className="text-xs font-mono text-muted-foreground">
                           {formatarData(ent.data_credito)}
                         </TableCell>
-                        <TableCell>
-                          <Badge variant="purple">{ent.mes_referencia}</Badge>
+                        <TableCell className="font-mono text-xs text-muted-foreground">
+                          {ent.mes_referencia}
                         </TableCell>
-                        <TableCell className="text-right font-bold text-emerald-600 dark:text-emerald-400">
+                        <TableCell className="text-right font-mono text-xs font-semibold text-foreground">
                           {formatarMoeda(ent.valor)}
                         </TableCell>
                         <TableCell className="text-center">
@@ -454,7 +428,7 @@ export const OrcamentoTab: React.FC<Props> = ({
                             <Button 
                               variant="ghost" 
                               size="icon" 
-                              className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40 h-8 w-8"
+                              className="text-muted-foreground hover:text-rose-600 h-7 w-7"
                               title="Remover Entrada"
                               onClick={() => {
                                 if (confirm(`Deseja remover o aporte "${ent.descricao}" no valor de ${formatarMoeda(ent.valor)}?`)) {
@@ -462,10 +436,10 @@ export const OrcamentoTab: React.FC<Props> = ({
                                 }
                               }}
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-3.5 h-3.5" />
                             </Button>
                           ) : (
-                            <span className="text-muted-foreground text-xs flex items-center justify-center gap-1">
+                            <span className="text-muted-foreground text-xs flex items-center justify-center">
                               <Lock className="w-3 h-3" />
                             </span>
                           )}

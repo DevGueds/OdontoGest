@@ -245,22 +245,22 @@ export const EquipamentosTab: React.FC<Props> = ({
     <div className="space-y-6">
       {/* Alertas Automatizados de Preventiva */}
       {alertasPreventivaAutomated.length > 0 && (
-        <Card className="border-l-4 border-l-cyan-600 bg-cyan-50/40 dark:bg-cyan-950/20">
+        <Card className="border border-border/80 bg-muted/20">
           <CardContent className="p-4">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-center gap-2.5">
-                <ShieldAlert className="h-5 w-5 text-cyan-600 dark:text-cyan-400 shrink-0" />
-                <strong className="text-sm text-cyan-900 dark:text-cyan-200">
+                <ShieldAlert className="h-4 w-4 text-muted-foreground shrink-0" />
+                <span className="text-xs font-semibold text-foreground">
                   Sugestões de Manutenção Preventiva ({alertasPreventivaAutomated.length} equipamento{alertasPreventivaAutomated.length > 1 ? 's' : ''})
-                </strong>
+                </span>
               </div>
               <Button 
                 variant="outline" 
                 size="sm"
                 onClick={() => setAlertasExpandidos(!alertasExpandidos)}
-                className="h-8 text-xs border-cyan-300 text-cyan-800 dark:border-cyan-800 dark:text-cyan-300"
+                className="h-7 text-xs"
               >
-                {alertasExpandidos ? <ChevronUp className="h-3.5 w-3.5 mr-1" /> : <ChevronDown className="h-3.5 w-3.5 mr-1" />}
+                {alertasExpandidos ? <ChevronUp className="h-3 w-3 mr-1" /> : <ChevronDown className="h-3 w-3 mr-1" />}
                 {alertasExpandidos ? 'Ocultar' : 'Ver Sugestões'}
               </Button>
             </div>
@@ -268,21 +268,21 @@ export const EquipamentosTab: React.FC<Props> = ({
             {alertasExpandidos && (
               <div className="mt-3 max-h-56 overflow-y-auto space-y-2 pr-1">
                 {alertasPreventivaAutomated.map((item, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-3 rounded-lg border border-cyan-200/80 bg-white dark:border-cyan-900/60 dark:bg-slate-900 text-xs gap-3">
+                  <div key={idx} className="flex items-center justify-between p-3 rounded-lg border border-border bg-background text-xs gap-3">
                     <div>
-                      <strong className="text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                        <Building2 className="h-3.5 w-3.5 text-cyan-600" />
+                      <strong className="text-foreground flex items-center gap-1.5 font-medium">
+                        <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
                         {item.unidade?.nome} — {item.equipamento.nome} {item.equipamento.numero_serie ? `(Patr: ${item.equipamento.numero_serie})` : ''}
                       </strong>
-                      <p className="text-slate-500 dark:text-slate-400 mt-0.5">{item.mensagem}</p>
+                      <p className="text-muted-foreground mt-0.5">{item.mensagem}</p>
                     </div>
                     <Button 
                       variant="outline" 
                       size="sm"
                       onClick={() => handleAbrirAgendamentoPreventiva(item.equipamento)}
-                      className="h-7 text-xs border-cyan-300 text-cyan-700 dark:border-cyan-800 dark:text-cyan-300 shrink-0"
+                      className="h-7 text-xs shrink-0 gap-1"
                     >
-                      <CalendarCheck className="h-3.5 w-3.5 mr-1" /> Agendar
+                      <CalendarCheck className="h-3 w-3" /> Agendar
                     </Button>
                   </div>
                 ))}
@@ -294,10 +294,10 @@ export const EquipamentosTab: React.FC<Props> = ({
 
       {/* Gestão de Equipamentos e Chamados */}
       <Card>
-        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#E8E8EC] dark:border-zinc-800 pb-5">
           <div>
-            <CardTitle className="text-xl font-bold">
-              <Wrench className="h-5 w-5 text-teal-600 dark:text-teal-400" />
+            <CardTitle className="text-lg font-bold">
+              <Wrench className="h-5 w-5 text-[#6366F1]" />
               Gestão de Equipamentos & Chamados de Manutenção
             </CardTitle>
             <CardDescription>
@@ -326,9 +326,9 @@ export const EquipamentosTab: React.FC<Props> = ({
           {/* Filtros */}
           <div className="flex gap-4 flex-wrap">
             <div className="min-w-[220px] space-y-1">
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Filtrar por Unidade:</label>
+              <label className="text-xs font-medium text-[#0A0A0A] dark:text-zinc-300">Filtrar por Unidade:</label>
               <select 
-                className="flex h-9 w-full rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
+                className="flex h-[38px] w-full rounded-[6px] border border-[#E8E8EC] bg-white px-3 py-1 text-xs text-[#0A0A0A] transition-all duration-150 focus-visible:outline-none focus-visible:border-[#6366F1] focus-visible:ring-2 focus-visible:ring-[#6366F1]/20 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
                 value={isSolicitante && user?.unidade_id ? user.unidade_id : unidadeFiltro}
                 onChange={e => {
                   setUnidadeFiltro(e.target.value === 'TODAS' ? 'TODAS' : Number(e.target.value));
@@ -346,9 +346,9 @@ export const EquipamentosTab: React.FC<Props> = ({
             </div>
 
             <div className="min-w-[240px] space-y-1">
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Filtrar por Equipamento:</label>
+              <label className="text-xs font-medium text-[#0A0A0A] dark:text-zinc-300">Filtrar por Equipamento:</label>
               <select 
-                className="flex h-9 w-full rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
+                className="flex h-[38px] w-full rounded-[6px] border border-[#E8E8EC] bg-white px-3 py-1 text-xs text-[#0A0A0A] transition-all duration-150 focus-visible:outline-none focus-visible:border-[#6366F1] focus-visible:ring-2 focus-visible:ring-[#6366F1]/20 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
                 value={equipamentoSelecionadoId}
                 onChange={e => setEquipamentoSelecionadoId(e.target.value === 'TODOS' ? 'TODOS' : Number(e.target.value))}
               >
@@ -362,8 +362,8 @@ export const EquipamentosTab: React.FC<Props> = ({
 
           {/* Chamados de Reparo Table */}
           <div className="space-y-3">
-            <h4 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
-              <ClipboardList className="h-4 w-4 text-teal-600" />
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] dark:text-zinc-400 flex items-center gap-2">
+              <ClipboardList className="h-4 w-4 text-[#6366F1]" />
               Histórico de Chamados de Manutenção
             </h4>
             <Table>
@@ -464,9 +464,9 @@ export const EquipamentosTab: React.FC<Props> = ({
           </div>
 
           {/* Equipamentos Instalados Table */}
-          <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800">
-            <h4 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
-              <Boxes className="h-4 w-4 text-teal-600" />
+          <div className="space-y-3 pt-4 border-t border-[#E8E8EC] dark:border-zinc-800">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] dark:text-zinc-400 flex items-center gap-2">
+              <Boxes className="h-4 w-4 text-[#6366F1]" />
               Equipamentos Instalados nas Unidades
             </h4>
             <Table>
@@ -546,8 +546,8 @@ export const EquipamentosTab: React.FC<Props> = ({
             <button onClick={() => setModalEquipamentoOpen(false)} className="absolute right-4 top-4 rounded-lg p-1 text-slate-400 hover:text-slate-600">
               <X className="h-4 w-4" />
             </button>
-            <h3 className="text-base font-bold font-display text-slate-900 dark:text-white flex items-center gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
-              <Plus className="h-4 w-4 text-teal-600" /> Cadastrar Novo Equipamento
+            <h3 className="text-base font-bold font-display text-slate-900 dark:text-white flex items-center gap-2 pb-3 border-b border-[#E8E8EC] dark:border-zinc-800">
+              <Plus className="h-4 w-4 text-[#6366F1]" /> Cadastrar Novo Equipamento
             </h3>
             <form onSubmit={handleSubmitEquipamento} className="mt-4 space-y-3 text-xs">
               <div className="space-y-1">
@@ -613,8 +613,8 @@ export const EquipamentosTab: React.FC<Props> = ({
             <button onClick={() => setModalEditEquipamentoOpen(false)} className="absolute right-4 top-4 rounded-lg p-1 text-slate-400 hover:text-slate-600">
               <X className="h-4 w-4" />
             </button>
-            <h3 className="text-base font-bold font-display text-slate-900 dark:text-white flex items-center gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
-              <Edit2 className="h-4 w-4 text-teal-600" /> Editar Equipamento #{equipamentoEdicao.id}
+            <h3 className="text-base font-bold font-display text-slate-900 dark:text-white flex items-center gap-2 pb-3 border-b border-[#E8E8EC] dark:border-zinc-800">
+              <Edit2 className="h-4 w-4 text-[#6366F1]" /> Editar Equipamento #{equipamentoEdicao.id}
             </h3>
             <form onSubmit={handleConfirmarEdicaoEquipamento} className="mt-4 space-y-3 text-xs">
               <div className="space-y-1">
@@ -728,7 +728,7 @@ export const EquipamentosTab: React.FC<Props> = ({
                   value={chDescricaoDefeito}
                   onChange={e => setChDescricaoDefeito(e.target.value)}
                   required
-                  className="w-full rounded-lg border border-slate-200 bg-white p-2.5 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
+                  className="w-full rounded-[6px] border border-[#E8E8EC] bg-white p-2.5 text-xs text-[#0A0A0A] transition-all duration-150 focus-visible:outline-none focus-visible:border-[#6366F1] focus-visible:ring-2 focus-visible:ring-[#6366F1]/20 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
                 />
               </div>
 
@@ -774,8 +774,8 @@ export const EquipamentosTab: React.FC<Props> = ({
             <button onClick={() => setChamadoEmEdicao(null)} className="absolute right-4 top-4 rounded-lg p-1 text-slate-400 hover:text-slate-600">
               <X className="h-4 w-4" />
             </button>
-            <h3 className="text-base font-bold font-display text-slate-900 dark:text-white flex items-center gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
-              <Wrench className="h-4 w-4 text-teal-600" /> Atualizar Chamado #{chamadoEmEdicao.id}
+            <h3 className="text-base font-bold font-display text-slate-900 dark:text-white flex items-center gap-2 pb-3 border-b border-[#E8E8EC] dark:border-zinc-800">
+              <Wrench className="h-4 w-4 text-[#6366F1]" /> Atualizar Chamado #{chamadoEmEdicao.id}
             </h3>
             <form onSubmit={(e) => {
               e.preventDefault();

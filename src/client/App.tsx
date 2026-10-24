@@ -439,7 +439,7 @@ export const AppContent: React.FC = () => {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100">
         <div className="flex flex-col items-center gap-3 p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl max-w-sm text-center">
-          <Loader2 className="h-10 w-10 animate-spin text-teal-600 dark:text-teal-400" />
+          <Loader2 className="h-10 w-10 animate-spin text-[#6366F1]" />
           <h2 className="text-base font-bold font-display">Validando Sessão Segura...</h2>
           <p className="text-xs text-slate-500 dark:text-slate-400">Autenticação HttpOnly & Proteção CSRF OWASP</p>
         </div>

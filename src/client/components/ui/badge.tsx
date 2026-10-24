@@ -3,26 +3,26 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 select-none",
+  "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors select-none",
   {
     variants: {
       variant: {
         default:
-          "border-transparent bg-teal-600 text-white shadow-sm hover:bg-teal-700",
+          "border-transparent bg-[#6366F1] text-white",
         secondary:
-          "border-transparent bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200",
-        destructive:
-          "border-transparent bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border-rose-200 dark:border-rose-800/50",
+          "border-[#E8E8EC] dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-800/80 text-[#6B6B6B] dark:text-zinc-400",
         outline:
-          "text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700",
+          "border-[#E8E8EC] dark:border-zinc-800 text-[#0A0A0A] dark:text-zinc-200 bg-transparent",
         success:
-          "border-emerald-200 dark:border-emerald-800/60 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300",
+          "border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-400",
         warning:
-          "border-amber-200 dark:border-amber-800/60 bg-amber-50 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300",
+          "border-amber-500/20 bg-amber-500/10 text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-400",
+        destructive:
+          "border-red-500/20 bg-red-500/10 text-[#EF4444] dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-400",
         info:
-          "border-cyan-200 dark:border-cyan-800/60 bg-cyan-50 text-cyan-800 dark:bg-cyan-950/60 dark:text-cyan-300",
+          "border-indigo-500/20 bg-indigo-500/10 text-[#6366F1] dark:border-indigo-500/30 dark:bg-indigo-500/15 dark:text-indigo-400",
         purple:
-          "border-purple-200 dark:border-purple-800/60 bg-purple-50 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300",
+          "border-purple-500/20 bg-purple-500/10 text-purple-700 dark:border-purple-500/30 dark:bg-purple-500/15 dark:text-purple-400",
       },
     },
     defaultVariants: {
