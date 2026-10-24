@@ -131,9 +131,9 @@ T1 → T2 → T3 → T4 → T5 → T6
 - Skill: NONE
 
 **Done when**:
-- [ ] Tabela de equipamentos usa botões de Editar (`Pencil`) e Preventiva (`CalendarCheck`) em `h-8 w-8 p-0`
-- [ ] Tabela de chamados usa botões de Aprovar, Rejeitar, Iniciar e Concluir em `h-7.5 px-2.5 text-xs`
-- [ ] `npx tsc --noEmit` passa sem erros
+- [x] Tabela de equipamentos usa botões de Editar (`Pencil`) e Preventiva (`CalendarCheck`) em `h-8 w-8 p-0`
+- [x] Tabela de chamados usa botões de Aprovar, Rejeitar, Iniciar e Concluir em `h-7.5 px-2.5 text-xs`
+- [x] `npx tsc --noEmit` passa sem erros
 
 **Tests**: integration
 **Gate**: quick

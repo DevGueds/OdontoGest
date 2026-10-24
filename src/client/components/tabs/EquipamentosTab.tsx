@@ -29,7 +29,7 @@ import {
   ChevronDown,
   ChevronUp,
   Plus,
-  Edit2,
+  Pencil,
   Check,
   X,
   Clock,
@@ -416,20 +416,24 @@ export const EquipamentosTab: React.FC<Props> = ({
                             {(isAdmin || isGestor) && ch.status === 'ABERTO' && (
                               <>
                                 <Button 
-                                  variant="emerald" 
+                                  variant="outline" 
                                   size="sm"
                                   onClick={() => onAprovarChamado && onAprovarChamado(ch.id, true)}
-                                  className="h-7 text-xs"
+                                  className="h-7.5 px-2.5 text-xs font-medium gap-1.5 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition-colors"
+                                  title="Aprovar Chamado"
+                                  aria-label="Aprovar Chamado"
                                 >
-                                  <Check className="h-3.5 w-3.5 mr-1" /> Aprovar
+                                  <Check className="h-3.5 w-3.5" /> Aprovar
                                 </Button>
                                 <Button 
-                                  variant="destructive" 
-                                  size="sm"
+                                  variant="outline" 
+                                  size="sm" 
                                   onClick={() => onAprovarChamado && onAprovarChamado(ch.id, false)}
-                                  className="h-7 text-xs"
+                                  className="h-7.5 px-2.5 text-xs font-medium gap-1.5 border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors"
+                                  title="Recusar Chamado"
+                                  aria-label="Recusar Chamado"
                                 >
-                                  <X className="h-3 w-3 mr-1" /> Recusar
+                                  <X className="h-3.5 w-3.5" /> Recusar
                                 </Button>
                               </>
                             )}
@@ -437,20 +441,22 @@ export const EquipamentosTab: React.FC<Props> = ({
                             {(isTecnico || isAdmin || isGestor) && (ch.status === 'APROVADO_ADM' || ch.status === 'EM_ANDAMENTO') && (
                               <Button 
                                 variant="default" 
-                                size="sm"
+                                size="sm" 
                                 onClick={() => {
                                   setChamadoEmEdicao(ch);
                                   setNovoStatus('EM_ANDAMENTO');
                                   setNovoCusto(String(ch.custo_reparo || ''));
                                 }}
-                                className="h-7 text-xs"
+                                className="h-7.5 px-2.5 text-xs font-medium gap-1.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-sm transition-colors"
+                                title="Atualizar Chamado"
+                                aria-label="Atualizar Chamado"
                               >
-                                <Wrench className="h-3.5 w-3.5 mr-1" /> Atualizar
+                                <Wrench className="h-3.5 w-3.5" /> Atualizar
                               </Button>
                             )}
 
                             {ch.status === 'CONCLUIDO' && (
-                              <span className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
+                              <span className="text-xs text-emerald-600 font-medium flex items-center gap-1">
                                 <Check className="h-3.5 w-3.5" /> Concluído
                               </span>
                             )}
@@ -478,7 +484,7 @@ export const EquipamentosTab: React.FC<Props> = ({
                   <TableHead>Patrimônio / Série</TableHead>
                   <TableHead>Última Preventiva</TableHead>
                   <TableHead>Status Operacional</TableHead>
-                  <TableHead className="text-center">Ações</TableHead>
+                  <TableHead className="text-center w-24">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -507,25 +513,29 @@ export const EquipamentosTab: React.FC<Props> = ({
                           )}
                         </TableCell>
                         <TableCell className="text-center">
-                          <div className="flex items-center justify-center gap-1.5">
+                          <div className="flex items-center justify-center gap-1">
                             {(isAdmin || isGestor) && (
                               <Button 
-                                variant="outline" 
+                                variant="ghost" 
                                 size="sm" 
                                 onClick={() => handleAbrirEditarEquipamento(eq)}
-                                className="h-7 text-xs"
+                                title="Editar Equipamento"
+                                aria-label="Editar Equipamento"
+                                className="h-8 w-8 p-0 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
                               >
-                                <Edit2 className="h-3 w-3 mr-1" /> Editar
+                                <Pencil className="w-3.5 h-3.5" />
                               </Button>
                             )}
                             {!isGestor && !isTecnico && (
                               <Button 
-                                variant="outline" 
+                                variant="ghost" 
                                 size="sm" 
                                 onClick={() => handleAbrirAgendamentoPreventiva(eq)}
-                                className="h-7 text-xs border-cyan-200 text-cyan-700 dark:border-cyan-800 dark:text-cyan-300"
+                                title="Agendar Preventiva"
+                                aria-label="Agendar Preventiva"
+                                className="h-8 w-8 p-0 text-muted-foreground hover:text-cyan-600 hover:bg-cyan-500/10 dark:hover:bg-cyan-950/30 transition-colors"
                               >
-                                <CalendarCheck className="h-3.5 w-3.5 mr-1" /> Preventiva
+                                <CalendarCheck className="w-3.5 h-3.5" />
                               </Button>
                             )}
                           </div>
@@ -616,7 +626,7 @@ export const EquipamentosTab: React.FC<Props> = ({
                 <X className="h-4 w-4" />
               </button>
               <h3 className="text-base font-bold font-display text-[#0A0A0A] dark:text-zinc-100 flex items-center gap-2 pb-3 border-b border-[#E8E8EC] dark:border-zinc-800">
-                <Edit2 className="h-4 w-4 text-[#2563EB]" /> Editar Equipamento #{equipamentoEdicao.id}
+                <Pencil className="h-4 w-4 text-primary" /> Editar Equipamento #{equipamentoEdicao.id}
               </h3>
               <form onSubmit={handleConfirmarEdicaoEquipamento} className="mt-4 space-y-3.5 text-xs">
                 <div className="space-y-1">
