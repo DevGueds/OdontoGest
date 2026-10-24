@@ -109,10 +109,10 @@ T1 → T2 → T3 → T4 → T5 → T6
 - Skill: NONE
 
 **Done when**:
-- [ ] Botões de Repor e Editar usam `h-8 w-8 p-0` com tooltips
-- [ ] Ícone `Edit2` unificado para `Pencil`
-- [ ] Cabeçalho da coluna renomeado para "Ações" com `w-24`
-- [ ] `npx tsc --noEmit` passa sem erros
+- [x] Botões de Repor e Editar usam `h-8 w-8 p-0` com tooltips
+- [x] Ícone `Edit2` unificado para `Pencil`
+- [x] Cabeçalho da coluna renomeado para "Ações" com `w-24`
+- [x] `npx tsc --noEmit` passa sem erros
 
 **Tests**: integration
 **Gate**: quick

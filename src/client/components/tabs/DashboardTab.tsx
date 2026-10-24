@@ -28,7 +28,7 @@ import {
   Search,
   ArrowRight,
   PlusCircle,
-  Edit2,
+  Pencil,
   FileSpreadsheet,
   FileText,
   Wallet,
@@ -495,7 +495,7 @@ export const DashboardTab: React.FC<Props> = ({
                     <TableHead>Fornecedor</TableHead>
                     <TableHead>Estoque Atual</TableHead>
                     <TableHead className="text-right">Valor Est.</TableHead>
-                    <TableHead className="text-center w-40">Ações Rápidas</TableHead>
+                    <TableHead className="text-center w-24">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -533,24 +533,26 @@ export const DashboardTab: React.FC<Props> = ({
                             {formatarMoeda(m.valor_estimado || 0)}
                           </TableCell>
                           <TableCell className="text-center">
-                            <div className="flex items-center justify-center gap-1.5">
+                            <div className="flex items-center justify-center gap-1">
                               <Button
-                                variant="outline"
+                                variant="ghost"
                                 size="sm"
                                 onClick={() => onAbrirAjusteEstoque(m)}
                                 title="Repor Estoque"
-                                className="h-7 text-xs px-2 gap-1 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10"
+                                aria-label="Repor Estoque"
+                                className="h-8 w-8 p-0 text-muted-foreground hover:text-emerald-600 hover:bg-emerald-500/10 dark:hover:bg-emerald-950/30 transition-colors"
                               >
-                                <PlusCircle className="h-3 w-3" /> Repor
+                                <PlusCircle className="w-3.5 h-3.5" />
                               </Button>
                               <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => onAbrirEditarMaterial(m)}
                                 title="Editar Insumo"
-                                className="h-7 text-xs px-2 gap-1 text-muted-foreground hover:text-foreground"
+                                aria-label="Editar Insumo"
+                                className="h-8 w-8 p-0 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
                               >
-                                <Edit2 className="h-3 w-3" /> Editar
+                                <Pencil className="w-3.5 h-3.5" />
                               </Button>
                             </div>
                           </TableCell>
