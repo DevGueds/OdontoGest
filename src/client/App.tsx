@@ -140,6 +140,21 @@ export const AppContent: React.FC = () => {
     }
   }, []);
 
+  const isTabPermittedForProfile = useCallback((tabName: string, perfil: PerfilUsuario): boolean => {
+    switch (perfil) {
+      case 'ADMINISTRADOR':
+        return true;
+      case 'GESTOR':
+        return ['dashboard', 'triagem', 'novo-pedido', 'equipamentos', 'orcamento', 'honorarios', 'catalogo'].includes(tabName);
+      case 'SOLICITANTE':
+        return ['triagem', 'novo-pedido', 'equipamentos'].includes(tabName);
+      case 'TECNICO':
+        return tabName === 'equipamentos';
+      default:
+        return false;
+    }
+  }, []);
+
   useEffect(() => {
     if (authenticated && user) {
       if (user.id !== prevUserIdRef.current) {
@@ -150,12 +165,10 @@ export const AppContent: React.FC = () => {
   }, [authenticated, user, getHomeTabForProfile]);
 
   useEffect(() => {
-    if (perfilAtual === 'TECNICO' && activeTab !== 'equipamentos') {
-      setActiveTab('equipamentos');
-    } else if (perfilAtual === 'SOLICITANTE' && ['dashboard', 'orcamento', 'catalogo', 'honorarios'].includes(activeTab)) {
-      setActiveTab('novo-pedido');
+    if (!isTabPermittedForProfile(activeTab, perfilAtual)) {
+      setActiveTab(getHomeTabForProfile(perfilAtual));
     }
-  }, [perfilAtual, activeTab]);
+  }, [perfilAtual, activeTab, isTabPermittedForProfile, getHomeTabForProfile]);
 
   const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'success') => {
     const id = String(Date.now());
@@ -164,8 +177,6 @@ export const AppContent: React.FC = () => {
       setToasts(prev => prev.filter(t => t.id !== id));
     }, 4000);
   }, []);
-
-
 
   const handleExportarSQL = async () => {
     if (perfilAtual !== 'ADMINISTRADOR') {
@@ -187,13 +198,14 @@ export const AppContent: React.FC = () => {
     }
   };
 
-  const handleSelectTab = (tabName: string) => {
-    if (perfilAtual === 'SOLICITANTE' && (tabName === 'dashboard' || tabName === 'catalogo')) {
-      showToast('Acesso restrito ao Perfil Gestor (Almoxarifado).', 'error');
+  const handleSelectTab = useCallback((tabName: string) => {
+    if (!isTabPermittedForProfile(tabName, perfilAtual)) {
+      showToast(`Acesso restrito: seu perfil (${perfilAtual}) não possui permissão para acessar esta área.`, 'error');
+      setActiveTab(getHomeTabForProfile(perfilAtual));
       return;
     }
     setActiveTab(tabName);
-  };
+  }, [perfilAtual, isTabPermittedForProfile, getHomeTabForProfile, showToast]);
 
   // Modals Actions with CSRF validation
   const handleNovoPedidoSubmit = async (dados: any) => {

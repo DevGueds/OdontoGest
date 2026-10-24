@@ -61,10 +61,10 @@
 **Tests**: none
 **Gate**: build
 **Done when**:
-- [ ] Solicitante is redirected if selecting `dashboard`, `orcamento`, `honorarios`, `catalogo`, or `usuarios`
-- [ ] Gestor is redirected if selecting `usuarios`
-- [ ] Técnico is restricted exclusively to `equipamentos`
-- [ ] Gate check passes: `npx tsc --noEmit; npx vite build`
+- [x] Solicitante is redirected if selecting `dashboard`, `orcamento`, `honorarios`, `catalogo`, or `usuarios`
+- [x] Gestor is redirected if selecting `usuarios`
+- [x] Técnico is restricted exclusively to `equipamentos`
+- [x] Gate check passes: `npx tsc --noEmit; npx vite build`
 **Commit**: `fix(auth): enforce strict tab permission matrix in app shell`
 
 ---
