@@ -543,8 +543,11 @@ async function bootstrap() {
     }
   });
 
-  // Exportar DUMP SQL
-  fastify.get('/api/export/sql', async (req, reply) => {
+  // Exportar DUMP SQL (Exclusivo Administrador)
+  fastify.get('/api/export/sql', { preHandler: [authenticate] }, async (req, reply) => {
+    if (req.userSession?.perfil !== 'ADMINISTRADOR') {
+      return reply.status(403).send({ error: 'Acesso negado. Apenas administradores podem exportar o dump SQL do banco de dados.' });
+    }
     const sql = await dataStore.exportarSQL();
     reply.header('Content-Type', 'text/sql');
     reply.header('Content-Disposition', `attachment; filename=almoxarifado_saude_dump_${new Date().toISOString().substring(0, 10)}.sql`);
