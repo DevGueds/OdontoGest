@@ -396,7 +396,7 @@ export const HonorariosTab: React.FC<Props> = ({
                     <option value="">-- Selecione o profissional da unidade --</option>
                     {profissionaisUnidade.map(p => (
                       <option key={p.id} value={String(p.id)}>
-                        {p.nome} {p.registro ? `(CRO: ${p.registro})` : '(Sem CRO)'}
+                        {p.nome}
                       </option>
                     ))}
                     <option value="MANUAL">-- Outro profissional (digitar nome manualmente) --</option>
