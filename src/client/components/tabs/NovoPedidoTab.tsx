@@ -282,7 +282,7 @@ export const NovoPedidoTab: React.FC<Props> = ({
       <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#E8E8EC] dark:border-zinc-800 pb-5">
         <div>
           <CardTitle className="text-lg font-bold">
-            <FilePlus2 className="h-5 w-5 text-[#6366F1]" />
+            <FilePlus2 className="h-5 w-5 text-[#2563EB]" />
             Formular Novo Pedido de Bens e Serviços (PBS)
           </CardTitle>
           <CardDescription>
@@ -299,109 +299,156 @@ export const NovoPedidoTab: React.FC<Props> = ({
       <CardContent className="pt-6">
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* 1. Identificação */}
-          <div className="space-y-4">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] dark:text-zinc-400 flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-[#6366F1]" />
-              1. Identificação do Estabelecimento de Saúde e Responsável
-            </h4>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div className="space-y-1.5 md:col-span-2 lg:col-span-1">
-                <label htmlFor="unidade_emitente_id" className="text-xs font-medium text-[#0A0A0A] dark:text-zinc-300">
-                  Unidade Emitente / Posto de Saúde *
-                </label>
-                <select 
-                  id="unidade_emitente_id" 
-                  className="flex h-[38px] w-full rounded-[6px] border border-[#E8E8EC] bg-white px-3 py-1 text-xs text-[#0A0A0A] transition-all duration-150 focus-visible:outline-none focus-visible:border-[#6366F1] focus-visible:ring-2 focus-visible:ring-[#6366F1]/20 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
-                  value={unidadeId}
-                  onChange={(e) => setUnidadeId(Number(e.target.value))}
-                  disabled={!isAdmin && Boolean(user?.unidade_id)}
-                  required
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] dark:text-zinc-400 flex items-center gap-2">
+                <Building2 className="h-4 w-4 text-[#2563EB]" />
+                1. Identificação do Estabelecimento de Saúde e Responsável
+              </h4>
+              {isSolicitante && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowEdicaoSolicitante(!showEdicaoSolicitante)}
+                  className="text-xs text-[#2563EB] hover:text-[#1D4ED8] hover:bg-[#2563EB]/5 gap-1.5 h-7"
                 >
-                  {unidades.map(u => (
-                    <option key={u.id} value={u.id}>{u.nome} ({u.tipo})</option>
-                  ))}
-                </select>
-                {!isAdmin && Boolean(user?.unidade_id) ? (
-                  <p className="text-[11px] text-[#9C9C9C] flex items-center gap-1">
-                    <Lock className="h-3 w-3" /> Unidade fixada conforme seu cadastro.
-                  </p>
-                ) : isAdmin ? (
-                  <p className="text-[11px] text-[#9C9C9C] flex items-center gap-1">
-                    <ShieldCheck className="h-3 w-3 text-[#6366F1]" /> Admin: alteração livre.
-                  </p>
-                ) : null}
-              </div>
-
-              <div className="space-y-1.5">
-                <label htmlFor="data_pedido" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  Data da Solicitação *
-                </label>
-                <Input 
-                  type="date" 
-                  id="data_pedido" 
-                  value={dataPedido}
-                  onChange={(e) => setDataPedido(e.target.value)}
-                  required 
-                  className="h-9 text-xs"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label htmlFor="responsavel_nome" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  Nome do Responsável *
-                </label>
-                <Input 
-                  type="text" 
-                  id="responsavel_nome" 
-                  placeholder="Ex: Dra. Maria Fernanda Silva" 
-                  value={responsavelNome}
-                  onChange={(e) => setResponsavelNome(e.target.value)}
-                  required 
-                  className="h-9 text-xs"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label htmlFor="responsavel_funcao" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  Função / Cargo
-                </label>
-                <Input 
-                  type="text" 
-                  id="responsavel_funcao" 
-                  placeholder="Ex: Cirurgiã Dentista"
-                  value={responsavelFuncao}
-                  onChange={(e) => setResponsavelFuncao(e.target.value)}
-                  className="h-9 text-xs"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label htmlFor="responsavel_registro" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  Registro Profissional
-                </label>
-                <Input 
-                  type="text" 
-                  id="responsavel_registro" 
-                  placeholder="Ex: CRO/PA 0592"
-                  value={responsavelRegistro}
-                  onChange={(e) => setResponsavelRegistro(e.target.value)}
-                  className="h-9 text-xs"
-                />
-              </div>
+                  <Edit3 className="h-3 w-3" />
+                  {showEdicaoSolicitante ? 'Ocultar Detalhes' : 'Alterar Dados'}
+                </Button>
+              )}
             </div>
+
+            {isSolicitante && !showEdicaoSolicitante ? (
+              <div className="rounded-[8px] border border-[#E8E8EC] dark:border-zinc-800 bg-[#F9FAFB] dark:bg-zinc-900/40 p-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[6px] bg-[#2563EB]/10 text-[#2563EB]">
+                      <Building2 className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-semibold text-sm text-[#0A0A0A] dark:text-zinc-100">
+                          {unidades.find(u => u.id === Number(unidadeId))?.nome || 'Unidade de Saúde'}
+                        </span>
+                        <Badge variant="outline" className="text-[10px] text-[#2563EB] border-[#2563EB]/30">
+                          Unidade Vinculada
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-[#6B6B6B] dark:text-zinc-400 mt-1">
+                        Solicitante: <span className="font-medium text-[#0A0A0A] dark:text-zinc-200">{responsavelNome || user?.nome || 'Não informado'}</span>
+                        {(responsavelFuncao || user?.funcao) && ` • ${responsavelFuncao || user?.funcao}`}
+                        {(responsavelRegistro || user?.registro) && ` (${responsavelRegistro || user?.registro})`}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="sm:border-l sm:border-[#E8E8EC] dark:sm:border-zinc-800 sm:pl-4 flex flex-col justify-center">
+                    <span className="text-[10px] uppercase font-semibold text-[#9C9C9C] block">Data da Solicitação</span>
+                    <span className="text-xs font-mono font-medium text-[#0A0A0A] dark:text-zinc-200">
+                      {new Date(dataPedido + 'T12:00:00').toLocaleDateString('pt-BR')}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 rounded-[8px] border border-[#E8E8EC] dark:border-zinc-800 p-4 bg-white dark:bg-[#121215]">
+                <div className="space-y-1.5 md:col-span-2 lg:col-span-1">
+                  <label htmlFor="unidade_emitente_id" className="text-xs font-medium text-[#0A0A0A] dark:text-zinc-300">
+                    Unidade Emitente / Posto de Saúde *
+                  </label>
+                  <select 
+                    id="unidade_emitente_id" 
+                    className="flex h-[38px] w-full rounded-[6px] border border-[#E8E8EC] bg-white px-3 py-1 text-xs text-[#0A0A0A] transition-all duration-150 focus-visible:outline-none focus-visible:border-[#2563EB] focus-visible:ring-2 focus-visible:ring-[#2563EB]/20 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
+                    value={unidadeId}
+                    onChange={(e) => setUnidadeId(Number(e.target.value))}
+                    disabled={!isAdmin && Boolean(user?.unidade_id)}
+                    required
+                  >
+                    {unidades.map(u => (
+                      <option key={u.id} value={u.id}>{u.nome} ({u.tipo})</option>
+                    ))}
+                  </select>
+                  {!isAdmin && Boolean(user?.unidade_id) ? (
+                    <p className="text-[11px] text-[#9C9C9C] flex items-center gap-1">
+                      <Lock className="h-3 w-3" /> Unidade fixada conforme seu cadastro.
+                    </p>
+                  ) : isAdmin ? (
+                    <p className="text-[11px] text-[#9C9C9C] flex items-center gap-1">
+                      <ShieldCheck className="h-3 w-3 text-[#2563EB]" /> Admin: alteração livre.
+                    </p>
+                  ) : null}
+                </div>
+
+                <div className="space-y-1.5">
+                  <label htmlFor="data_pedido" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    Data da Solicitação *
+                  </label>
+                  <Input 
+                    type="date" 
+                    id="data_pedido" 
+                    value={dataPedido}
+                    onChange={(e) => setDataPedido(e.target.value)}
+                    required 
+                    className="h-9 text-xs"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label htmlFor="responsavel_nome" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    Nome do Responsável *
+                  </label>
+                  <Input 
+                    type="text" 
+                    id="responsavel_nome" 
+                    placeholder="Ex: Dra. Maria Fernanda Silva" 
+                    value={responsavelNome}
+                    onChange={(e) => setResponsavelNome(e.target.value)}
+                    required 
+                    className="h-9 text-xs"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label htmlFor="responsavel_funcao" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    Função / Cargo
+                  </label>
+                  <Input 
+                    type="text" 
+                    id="responsavel_funcao" 
+                    placeholder="Ex: Cirurgiã Dentista"
+                    value={responsavelFuncao}
+                    onChange={(e) => setResponsavelFuncao(e.target.value)}
+                    className="h-9 text-xs"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label htmlFor="responsavel_registro" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    Registro Profissional
+                  </label>
+                  <Input 
+                    type="text" 
+                    id="responsavel_registro" 
+                    placeholder="Ex: CRO/PA 0592"
+                    value={responsavelRegistro}
+                    onChange={(e) => setResponsavelRegistro(e.target.value)}
+                    className="h-9 text-xs"
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* 2. Insumos Solicitados */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h4 className="text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] dark:text-zinc-400 flex items-center gap-2">
-                <Boxes className="h-4 w-4 text-[#6366F1]" />
+                <Boxes className="h-4 w-4 text-[#2563EB]" />
                 2. Materiais / Insumos Solicitados
               </h4>
-              <Button type="button" variant="outline" size="sm" onClick={handleAddLinha} className="text-xs">
-                <Plus className="h-3.5 w-3.5 mr-1" /> Adicionar Insumo
-              </Button>
+              <Badge variant="outline" className="font-mono text-[11px] text-[#6B6B6B] dark:text-zinc-400">
+                {itens.filter(i => Boolean(i.material_id)).length} de {itens.length} {itens.length === 1 ? 'item preenchido' : 'itens preenchidos'}
+              </Badge>
             </div>
 
             <Table>
@@ -426,7 +473,7 @@ export const NovoPedidoTab: React.FC<Props> = ({
                       <TableCell className="font-mono text-xs font-bold text-[#6B6B6B]">{index + 1}</TableCell>
                       <TableCell>
                         <select 
-                          className="flex h-[38px] w-full rounded-[6px] border border-[#E8E8EC] bg-white px-2.5 py-1 text-xs text-[#0A0A0A] transition-all duration-150 focus-visible:outline-none focus-visible:border-[#6366F1] focus-visible:ring-2 focus-visible:ring-[#6366F1]/20 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
+                          className="flex h-[38px] w-full rounded-[6px] border border-[#E8E8EC] bg-white px-2.5 py-1 text-xs text-[#0A0A0A] transition-all duration-150 focus-visible:outline-none focus-visible:border-[#2563EB] focus-visible:ring-2 focus-visible:ring-[#2563EB]/20 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
                           value={item.material_id}
                           onChange={(e) => handleMaterialChange(item.id, e.target.value)}
                           required
@@ -493,7 +540,7 @@ export const NovoPedidoTab: React.FC<Props> = ({
                 <TableFooter>
                   <TableRow className="bg-zinc-50 dark:bg-zinc-800/40 font-bold">
                     <TableCell colSpan={5} className="text-right text-xs uppercase tracking-wider text-[#6B6B6B]">VALOR TOTAL ESTIMADO:</TableCell>
-                    <TableCell className="font-mono text-sm font-semibold text-[#6366F1]">
+                    <TableCell className="font-mono text-sm font-semibold text-[#2563EB]">
                       {formatarMoeda(totalEstimado)}
                     </TableCell>
                     <TableCell></TableCell>
@@ -501,6 +548,22 @@ export const NovoPedidoTab: React.FC<Props> = ({
                 </TableFooter>
               )}
             </Table>
+
+            {/* Botão Adicionar Insumo diretamente abaixo da última linha da tabela */}
+            <div className="mt-3 flex items-center justify-between">
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm" 
+                onClick={handleAddLinha}
+                className="text-xs gap-1.5 border-dashed border-[#E8E8EC] dark:border-zinc-800 hover:border-[#2563EB] text-[#2563EB] hover:bg-[#2563EB]/5"
+              >
+                <Plus className="h-3.5 w-3.5" /> Adicionar Insumo
+              </Button>
+              <span className="text-xs text-[#9C9C9C]">
+                Total: {itens.length} {itens.length === 1 ? 'linha de item' : 'linhas de itens'}
+              </span>
+            </div>
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#E8E8EC] dark:border-zinc-800">

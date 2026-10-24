@@ -93,10 +93,10 @@
 **Tests**: none
 **Gate**: quick
 **Done when**:
-- [ ] Solicitante view displays compact summary (Unit, Professional, Date) without 5 redundant inputs
-- [ ] Admin/Gestor retains editable unit selection
-- [ ] Form submission continues to send complete valid payload
-- [ ] Gate check passes: `npx tsc --noEmit`
+- [x] Solicitante view displays compact summary (Unit, Professional, Date) without 5 redundant inputs
+- [x] Admin/Gestor retains editable unit selection
+- [x] Form submission continues to send complete valid payload
+- [x] Gate check passes: `npx tsc --noEmit`
 **Commit**: `refactor(novo-pedido): streamline header fields for solicitante role`
 
 ---
@@ -109,9 +109,9 @@
 **Tests**: none
 **Gate**: quick
 **Done when**:
-- [ ] "Adicionar Insumo" button renders immediately below the table
-- [ ] Clicking appends new row without forcing vertical scroll to the top
-- [ ] Gate check passes: `npx tsc --noEmit; npx vite build`
+- [x] "Adicionar Insumo" button renders immediately below the table
+- [x] Clicking appends new row without forcing vertical scroll to the top
+- [x] Gate check passes: `npx tsc --noEmit; npx vite build`
 **Commit**: `feat(novo-pedido): move add material button adjacent to last table row`
 
 ---
