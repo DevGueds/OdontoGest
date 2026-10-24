@@ -28,7 +28,8 @@ import {
   Boxes,
   Edit3,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  X
 } from 'lucide-react';
 
 interface FormItem {
@@ -528,6 +529,8 @@ export const NovoPedidoTab: React.FC<Props> = ({
                           size="iconSm" 
                           className="text-[#EF4444] hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/40"
                           onClick={() => handleRemoveLinha(item.id)}
+                          title="Remover este insumo da lista"
+                          aria-label="Remover linha"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -556,7 +559,9 @@ export const NovoPedidoTab: React.FC<Props> = ({
                 variant="outline" 
                 size="sm" 
                 onClick={handleAddLinha}
-                className="text-xs gap-1.5 border-dashed border-[#E8E8EC] dark:border-zinc-800 hover:border-[#2563EB] text-[#2563EB] hover:bg-[#2563EB]/5"
+                className="text-xs gap-1.5 border-dashed border-[#E8E8EC] dark:border-zinc-800 hover:border-[#2563EB] text-[#2563EB] hover:bg-[#2563EB]/5 hover:shadow-sm transition-all"
+                title="Adicionar uma nova linha de insumo ao pedido"
+                aria-label="Adicionar Insumo"
               >
                 <Plus className="h-3.5 w-3.5" /> Adicionar Insumo
               </Button>
@@ -567,11 +572,25 @@ export const NovoPedidoTab: React.FC<Props> = ({
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#E8E8EC] dark:border-zinc-800">
-            <Button type="button" variant="outline" onClick={onCancel}>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={onCancel}
+              className="gap-1.5 text-muted-foreground hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 dark:hover:bg-rose-950/30 dark:hover:text-rose-400 dark:hover:border-rose-800 transition-colors"
+              title="Cancelar emissão do pedido e retornar"
+              aria-label="Cancelar"
+            >
+              <X className="h-4 w-4" />
               Cancelar
             </Button>
-            <Button type="submit" size="default" className="font-medium text-sm">
-              <Send className="h-4 w-4 mr-1.5" /> Emitir Solicitação de PBS
+            <Button 
+              type="submit" 
+              size="default" 
+              className="font-medium text-sm gap-2 hover:shadow-md transition-all"
+              title="Confirmar e emitir solicitação oficial de Pedido de Bens e Serviços (PBS)"
+              aria-label="Emitir Solicitação de PBS"
+            >
+              <Send className="h-4 w-4" /> Emitir Solicitação de PBS
             </Button>
           </div>
         </form>

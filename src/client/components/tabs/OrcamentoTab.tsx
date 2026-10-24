@@ -28,6 +28,7 @@ import {
   Lock, 
   Filter, 
   RotateCw, 
+  RotateCcw,
   Zap, 
   Building2
 } from 'lucide-react';
@@ -91,6 +92,17 @@ export const OrcamentoTab: React.FC<Props> = ({
 
     setDescricao('');
     setValor('');
+    setObservacoes('');
+  };
+
+  const handleLimparFormulario = () => {
+    setDescricao('');
+    setValor('');
+    setNatureza('CUSTEIO');
+    setTipoRecorrencia('PARCELA_UNICA');
+    setUnidadeId('TODAS');
+    setMesReferencia(new Date().toISOString().substring(0, 7));
+    setDataCredito(new Date().toISOString().substring(0, 10));
     setObservacoes('');
   };
 
@@ -326,8 +338,24 @@ export const OrcamentoTab: React.FC<Props> = ({
                 </div>
               </div>
 
-              <div className="flex justify-end pt-2">
-                <Button type="submit" className="gap-2">
+              <div className="flex justify-end gap-2 pt-2">
+                <Button 
+                  type="button"
+                  variant="outline"
+                  onClick={handleLimparFormulario}
+                  className="gap-1.5 text-muted-foreground hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 dark:hover:bg-rose-950/30 dark:hover:text-rose-400 dark:hover:border-rose-800 transition-colors"
+                  title="Limpar todos os campos do formulário"
+                  aria-label="Limpar formulário"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  Limpar
+                </Button>
+                <Button 
+                  type="submit" 
+                  className="gap-2 hover:shadow-md transition-all"
+                  title="Confirmar registro do aporte orçamentário"
+                  aria-label="Registrar Entrada"
+                >
                   <Check className="w-4 h-4" />
                   Registrar Entrada
                 </Button>

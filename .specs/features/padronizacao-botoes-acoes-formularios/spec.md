@@ -73,11 +73,11 @@ Essa falta de padronização prejudica a ergonomia visual, a acessibilidade e a 
 
 | Requirement ID | Story | Phase | Status |
 | --- | --- | --- | --- |
-| FBTN-01 | P1: Padronização de Botões de Confirmação e Submissão (Salvar/Cadastrar/Registrar) | Execute | In Progress |
-| FBTN-02 | P1: Padronização de Botões de Cancelamento e Fechamento (Cancelar/Fechar) | Execute | In Progress |
-| FBTN-03 | P1: Padronização de Botões Destrutivos em Diálogos de Confirmação (Excluir) | Execute | In Progress |
-| FBTN-04 | P1: Padronização de Ações Especiais de Formulários (Adicionar Insumo, Exportações) | Execute | In Progress |
-| FBTN-05 | P1: Verificação de Build Limpo e Tipagem TypeScript | Execute | In Progress |
+| FBTN-01 | P1: Padronização de Botões de Confirmação e Submissão (Salvar/Cadastrar/Registrar) | Execute | Verified |
+| FBTN-02 | P1: Padronização de Botões de Cancelamento e Fechamento (Cancelar/Fechar) | Execute | Verified |
+| FBTN-03 | P1: Padronização de Botões Destrutivos em Diálogos de Confirmação (Excluir) | Execute | Verified |
+| FBTN-04 | P1: Padronização de Ações Especiais de Formulários (Adicionar Insumo, Exportações) | Execute | Verified |
+| FBTN-05 | P1: Verificação de Build Limpo e Tipagem TypeScript | Execute | Verified |
 
 **Coverage:** 5 total, 5 mapped to tasks, 0 unmapped.
 

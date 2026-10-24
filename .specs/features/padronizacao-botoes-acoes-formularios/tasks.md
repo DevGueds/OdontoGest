@@ -150,11 +150,11 @@ T1 → T2 → T3 → T4 → T5 → T6
 - Skill: NONE
 
 **Done when**:
-- [ ] Botão "Adicionar Insumo" possui ícone `<Plus />`, estilo semântico e tooltip
-- [ ] Botão "Cancelar" possui ícone `<X />` com hover rose suave e tooltip
-- [ ] Botão "Emitir Solicitação de PBS" possui ícone `<Send />`, elevação e tooltip
-- [ ] Botão "Registrar Entrada" em Orçamentos possui ícone `<Check />` e tooltip
-- [ ] `npx tsc --noEmit` e `npx vite build` concluem com 0 erros
+- [x] Botão "Adicionar Insumo" possui ícone `<Plus />`, estilo semântico e tooltip
+- [x] Botão "Cancelar" possui ícone `<X />` com hover rose suave e tooltip
+- [x] Botão "Emitir Solicitação de PBS" possui ícone `<Send />`, elevação e tooltip
+- [x] Botão "Registrar Entrada" em Orçamentos possui ícone `<Check />` e tooltip
+- [x] `npx tsc --noEmit` e `npx vite build` concluem com 0 erros
 
 **Tests**: static
 **Gate**: full

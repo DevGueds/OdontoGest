@@ -62,17 +62,26 @@
 - **Date**: 2026-10-24
 - **Status**: active
 
+### AD-009
+- **Decision**: Padronizar todos os botões de ações de formulários e caixas de diálogo no sistema com cores semânticas dedicadas, ícones da ação, transições suaves de hover e tooltips explícitos (`title` e `aria-label`).
+- **Reason**: Atender à solicitação do usuário eliminando botões monocromáticos sem ícones ou sem dica visual, elevando a ergonomia cognitiva, a acessibilidade e a uniformidade de toda a suíte de telas do OdontoGest.
+- **Trade-off**: Todos os botões de cancelamento passam a exibir `<X />` com hover suave em rose, botões de salvamento passam a ter elevação e ícones dedicados (`Save`, `Plus`, `Send`, `Check`), e botões destrutivos exibem `<Trash2 />`.
+- **Scope**: Todos os modais em `src/client/components/modals/`, `src/client/components/ui/confirm-dialog.tsx`, `LoginModal.tsx` e abas com formulários (`NovoPedidoTab.tsx`, `OrcamentoTab.tsx`, `UsuariosTab.tsx`, `EquipamentosTab.tsx`, `HonorariosTab.tsx`).
+- **Date**: 2026-10-24
+- **Status**: active
+
 ## Handoff
 
-- **Feature**: .specs/features/padronizacao-botoes-acoes-tabelas
+- **Feature**: .specs/features/padronizacao-botoes-acoes-formularios
 - **Phase / Task**: Verified / Complete
 - **Completed**:
-  - `CatalogoTab.tsx`: Botões de ações das tabelas de Unidades e Materiais convertidos para o padrão `h-8 w-8 p-0` com hover semântico e `TableHead` proporcional.
-  - `UsuariosTab.tsx`: Botões de Editar e Apagar Usuário ajustados com classes semânticas, `title`/`aria-label` e `TableHead w-24`.
-  - `OrcamentoTab.tsx`: Botão de Remover Entrada unificado para `h-8 w-8 p-0` e hover rose semântico.
-  - `DashboardTab.tsx`: Botões de Repor e Editar na tabela de insumos críticos padronizados em `h-8 w-8 p-0`, unificando `Edit2` para `Pencil`.
-  - `EquipamentosTab.tsx`: Botões da tabela de equipamentos unificados para icon-buttons `h-8 w-8 p-0` e botões da tabela de chamados harmonizados no padrão workflow `h-7.5 px-2.5 text-xs`.
-  - `TriagemTab.tsx`: Botões de fluxo operacional (Ficha, Cancelar, Receber, Atender, Enviar, Qtds) unificados no padrão workflow `h-7.5 px-2.5 text-xs`.
+  - `confirm-dialog.tsx`: Botões Cancelar e Excluir padronizados com ícones (`X` e `Trash2`), cores semânticas, hover suave e tooltips.
+  - `LoginModal.tsx`: Botão Entrar no Sistema padronizado com elevação, sombra no hover e tooltips.
+  - Modais de Catálogo (`ModalUnidade.tsx`, `ModalEditarUnidade.tsx`, `ModalMaterial.tsx`, `ModalEditarMaterial.tsx`, `ModalAjusteEstoque.tsx`): Botões Cancelar e Salvar/Cadastrar/Estoque padronizados com ícones (`X`, `Plus`, `Save`, `Check`), hover suave e tooltips.
+  - Modais de Workflow (`ModalEnvio.tsx`, `ModalRecebimento.tsx`, `ModalAtendimento.tsx`, `ModalRelatorio.tsx`, `ModalFichaPbs.tsx`): Botões de despacho, recebimento, atendimento, exportação Excel/PDF e impressão padronizados.
+  - `UsuariosTab.tsx` e `HonorariosTab.tsx`: Modais de cadastro/edição com Cancelar (`X` + hover rose) e Salvar (`Save` + hover glow + tooltips).
+  - `EquipamentosTab.tsx`: Todos os 4 modais (Novo Equipamento, Editar Equipamento, Abrir Chamado, Atualizar Status) padronizados com ícones semânticos e tooltips.
+  - `NovoPedidoTab.tsx` e `OrcamentoTab.tsx`: Botões de formulário (Adicionar Insumo, Remover Linha, Cancelar, Emitir PBS, Limpar e Registrar Entrada) padronizados.
   - Todos os gates determinísticos aprovados: `npx tsc --noEmit` (exit 0), `npx vite build` (exit 0), `validate_spec.py` (exit 0), `validate_tasks.py` (exit 0) e `validate_state.py` (exit 0).
 - **In-progress**: None
 - **Next step**: Homologação do usuário na interface
