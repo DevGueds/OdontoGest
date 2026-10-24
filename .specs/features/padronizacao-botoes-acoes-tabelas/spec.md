@@ -79,10 +79,10 @@ Atualmente, os botões de ação nas tabelas da aplicação apresentam inconsist
 
 | Requirement ID | Story | Phase | Status |
 | --- | --- | --- | --- |
-| BTN-01 | P1: Padronização de Botões CRUD em CatalogoTab | Execute | Pending |
-| BTN-02 | P1: Padronização de Botões CRUD em UsuariosTab e OrcamentoTab | Execute | Pending |
-| BTN-03 | P1: Padronização de Botões CRUD em DashboardTab e EquipamentosTab | Execute | Pending |
-| BTN-04 | P2: Padronização de Botões de Workflow em TriagemTab e Chamados | Execute | Pending |
+| BTN-01 | P1: Padronização de Botões CRUD em CatalogoTab | Execute | Verified |
+| BTN-02 | P1: Padronização de Botões CRUD em UsuariosTab e OrcamentoTab | Execute | Verified |
+| BTN-03 | P1: Padronização de Botões CRUD em DashboardTab e EquipamentosTab | Execute | Verified |
+| BTN-04 | P2: Padronização de Botões de Workflow em TriagemTab e Chamados | Execute | Verified |
 
 **Coverage:** 4 total, 4 mapped to tasks, 0 unmapped.
 

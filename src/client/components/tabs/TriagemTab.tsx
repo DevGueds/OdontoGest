@@ -263,21 +263,25 @@ export const TriagemTab: React.FC<Props> = ({
                           variant="outline" 
                           size="sm" 
                           onClick={() => onAbrirFicha(p)}
-                          className="h-7 text-xs"
+                          title="Visualizar Ficha PBS"
+                          aria-label="Visualizar Ficha PBS"
+                          className="h-7.5 px-2.5 text-xs font-medium gap-1.5 border-border text-foreground hover:bg-muted transition-colors"
                         >
-                          <FileText className="h-3.5 w-3.5 mr-1" /> Ficha
+                          <FileText className="h-3.5 w-3.5" /> Ficha
                         </Button>
 
                         {isPrivilegiado ? (
                           <>
                             {(p.status === 'SOLICITADO' || p.status === 'RECEBIDO') && (
                               <Button 
-                                variant="destructive" 
+                                variant="outline" 
                                 size="sm" 
                                 onClick={() => onCancelarPedido(p)}
-                                className="h-7 text-xs"
+                                title="Cancelar Solicitação"
+                                aria-label="Cancelar Solicitação"
+                                className="h-7.5 px-2.5 text-xs font-medium gap-1.5 border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors"
                               >
-                                <Ban className="h-3 w-3 mr-1" /> Cancelar
+                                <Ban className="h-3.5 w-3.5" /> Cancelar
                               </Button>
                             )}
                             {p.status === 'SOLICITADO' && (
@@ -285,9 +289,11 @@ export const TriagemTab: React.FC<Props> = ({
                                 variant="default" 
                                 size="sm" 
                                 onClick={() => onAbrirRecebimento(p)}
-                                className="h-7 text-xs"
+                                title="Confirmar Recebimento"
+                                aria-label="Confirmar Recebimento"
+                                className="h-7.5 px-2.5 text-xs font-medium gap-1.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-sm transition-colors"
                               >
-                                <ClipboardCheck className="h-3.5 w-3.5 mr-1" /> 1. Receber
+                                <ClipboardCheck className="h-3.5 w-3.5" /> 1. Receber
                               </Button>
                             )}
 
@@ -297,17 +303,21 @@ export const TriagemTab: React.FC<Props> = ({
                                   variant="outline" 
                                   size="sm" 
                                   onClick={() => onAbrirAtendimento(p)}
-                                  className="h-7 text-xs"
+                                  title="Atender Itens Solicitados"
+                                  aria-label="Atender Itens Solicitados"
+                                  className="h-7.5 px-2.5 text-xs font-medium gap-1.5 border-primary/30 text-primary hover:bg-primary/10 transition-colors"
                                 >
-                                  <Boxes className="h-3.5 w-3.5 mr-1" /> 2. Atender
+                                  <Boxes className="h-3.5 w-3.5" /> 2. Atender
                                 </Button>
                                 <Button 
                                   variant="default" 
                                   size="sm" 
                                   onClick={() => onAbrirEnvio(p)}
-                                  className="h-7 text-xs"
+                                  title="Despachar Pedido"
+                                  aria-label="Despachar Pedido"
+                                  className="h-7.5 px-2.5 text-xs font-medium gap-1.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-sm transition-colors"
                                 >
-                                  <Truck className="h-3.5 w-3.5 mr-1" /> 3. Enviar
+                                  <Truck className="h-3.5 w-3.5" /> 3. Enviar
                                 </Button>
                               </>
                             )}
@@ -318,17 +328,21 @@ export const TriagemTab: React.FC<Props> = ({
                                   variant="outline" 
                                   size="sm" 
                                   onClick={() => onAbrirAtendimento(p)}
-                                  className="h-7 text-xs"
+                                  title="Editar Quantidades Atendidas"
+                                  aria-label="Editar Quantidades Atendidas"
+                                  className="h-7.5 px-2.5 text-xs font-medium gap-1.5 border-primary/30 text-primary hover:bg-primary/10 transition-colors"
                                 >
-                                  <Edit className="h-3 w-3 mr-1" /> Qtds
+                                  <Boxes className="h-3.5 w-3.5" /> Qtds
                                 </Button>
                                 <Button 
                                   variant="default" 
                                   size="sm" 
                                   onClick={() => onAbrirEnvio(p)}
-                                  className="h-7 text-xs"
+                                  title="Despachar Pedido"
+                                  aria-label="Despachar Pedido"
+                                  className="h-7.5 px-2.5 text-xs font-medium gap-1.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-sm transition-colors"
                                 >
-                                  <Truck className="h-3.5 w-3.5 mr-1" /> 3. Enviar
+                                  <Truck className="h-3.5 w-3.5" /> 3. Enviar
                                 </Button>
                               </>
                             )}

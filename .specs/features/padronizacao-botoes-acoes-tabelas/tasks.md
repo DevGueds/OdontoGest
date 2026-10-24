@@ -152,9 +152,9 @@ T1 → T2 → T3 → T4 → T5 → T6
 - Skill: NONE
 
 **Done when**:
-- [ ] Botões de Ficha, Cancelar, Receber, Atender e Enviar seguem as dimensões `h-7.5 px-2.5 text-xs`
-- [ ] Ícones dimensionados para `h-3.5 w-3.5`
-- [ ] `npx tsc --noEmit` e `npx vite build` passam sem erros
+- [x] Botões de Ficha, Cancelar, Receber, Atender e Enviar seguem as dimensões `h-7.5 px-2.5 text-xs`
+- [x] Ícones dimensionados para `h-3.5 w-3.5`
+- [x] `npx tsc --noEmit` e `npx vite build` passam sem erros
 
 **Tests**: integration
 **Gate**: full
