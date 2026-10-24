@@ -18,13 +18,21 @@
 - **Date**: 2026-10-23
 - **Status**: active
 
+### AD-003
+- **Decision**: Adotar paleta de Azul Clínico (`#2563EB` / HSL `221 83% 53%`), ícone odontológico dedicado (`ToothIcon`), simplificação ergonômica da emissão de pedidos por perfil e contenção de viewport no shell de navegação com hover expand.
+- **Reason**: Alinhar a identidade visual do OdontoGest ao segmento odontológico, mitigar sobrecarga cognitiva de solicitantes de USF eliminando campos redundantes, e resolver atritos de usabilidade na barra lateral e rolagem.
+- **Trade-off**: Substitui o tom índigo anterior pelo azul clínico; campos de identificação de solicitante tornam-se compactos por padrão com expansão sob demanda.
+- **Scope**: Shell (`App.tsx`, `Navigation.tsx`, `Header.tsx`), Tokens (`index.css`, `tailwind.config.js`), e Telas (`NovoPedidoTab.tsx`, `DashboardTab.tsx`).
+- **Date**: 2026-10-23
+- **Status**: active
+
 ## Handoff
 
-- **Feature**: .specs/features/restrict-solicitante-access
-- **Phase / Task**: Execute / Validation Complete
-- **Completed**: AUTH-01 through AUTH-04 (Endpoint /api/export/sql protected with RBAC 403; Header reports button restricted; App guards in place; automated test suite verified)
-- **In-progress** (file:line): none
-- **Next step**: User acceptance testing or deployment.
+- **Feature**: .specs/features/ui-ux-ergonomics-rebrand
+- **Phase / Task**: Execute / T1-T8
+- **Completed**: Specification and task breakdown completed
+- **In-progress** (file:line): Phase 1: T1 (src/client/components/icons/ToothIcon.tsx)
+- **Next step**: Execute T1 through T8 sequentially with atomic commits and gate checks
 - **Blockers**: none
 - **Uncommitted files**: none
 - **Branch**: main
