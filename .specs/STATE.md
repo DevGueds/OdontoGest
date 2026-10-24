@@ -34,20 +34,35 @@
 - **Date**: 2026-10-23
 - **Status**: active
 
+### AD-005
+- **Decision**: Tornar a marca no Header navegável para o menu inicial do perfil logado (Dashboard para Gestor/Admin, Meus Pedidos para Solicitante, Equipamentos para Técnico), liberar ações de atendimento de pedidos para o Almoxarifado Gestor em TriagemTab, endurecer guards de abas no App Shell e implementar middleware RBAC declarativo nos endpoints administrativos do Fastify.
+- **Reason**: Atender à expectativa de usabilidade padrão de navegação pela marca, eliminar bloqueio indevido de gestores no fluxo operacional de materiais e reforçar conformidade com OWASP A01 (Broken Access Control) no backend e frontend.
+- **Trade-off**: Ações no Header tornam-se interativas; requisições diretas a endpoints restritos retornam 403 Forbidden.
+- **Scope**: `src/client/components/Header.tsx`, `src/client/App.tsx`, `src/client/components/tabs/TriagemTab.tsx`, `src/server/server.ts`.
+- **Date**: 2026-10-23
+- **Status**: active
+
+### AD-006
+- **Decision**: Substituir diálogos nativos `confirm()` por um componente `ConfirmDeleteDialog` do shadcn/ui, criar a suíte de componentes `select.tsx` baseada em `@radix-ui/react-select` e eliminar todas as cores roxas residuais (`#6366F1`) em favor do azul clínico (`#2563EB`).
+- **Reason**: Elevar a sofisticação da UI, eliminar interrupções síncronas antiquadas do navegador e garantir fidelidade 100% à nova identidade visual clínica em todos os modais e abas.
+- **Trade-off**: Ações destrutivas agora gerenciam estado de abertura de modal localmente.
+- **Scope**: `src/client/components/ui/confirm-dialog.tsx`, `src/client/components/ui/select.tsx`, tabs e modais com confirmação de exclusão e cores roxas.
+- **Date**: 2026-10-24
+- **Status**: active
+
 ## Handoff
 
-- **Feature**: .specs/features/ui-ux-ergonomics-rebrand
-- **Phase / Task**: Execute / Verification Complete
+- **Feature**: .specs/features/ui-modals-selects-rebrand-cleanup
+- **Phase / Task**: Verified / Complete
 - **Completed**:
-  - REBRAND-01: Primary palette updated to clinical blue (`#2563EB` / HSL `221 83% 53%` with `#1D4ED8` hover).
-  - REBRAND-02: Dedicated dental `ToothIcon` created and integrated in Header and Login.
-  - DASH-01: Balanced semantic icon colors across Dashboard KPI cards (emerald, blue, amber, rose).
-  - PEDIDO-01: Role-adapted Novo Pedido header (compact summary card for Solicitante; editable grid for Admin/Gestor).
-  - PEDIDO-02: "Adicionar Insumo" button relocated directly below the last row of the materials table.
-  - NAV-01: Shell constrained to `h-screen flex flex-col overflow-hidden` with pinned sidebar toggle.
-  - NAV-02: Collapsed sidebar rail expanded smoothly on hover (`isHovered`) without layout reflow.
-- **In-progress** (file:line): none
-- **Next step**: User feedback / acceptance review.
-- **Blockers**: none
+  - `ConfirmDeleteDialog` implemented (`src/client/components/ui/confirm-dialog.tsx`)
+  - All 5 native `confirm()` calls replaced with `ConfirmDeleteDialog` (`UsuariosTab.tsx`, `OrcamentoTab.tsx`, `CatalogoTab.tsx`, `App.tsx`)
+  - Official shadcn/ui `Select` component suite created wrapping `@radix-ui/react-select` (`src/client/components/ui/select.tsx`)
+  - Shadcn `Select` integrated into `TriagemTab.tsx`, `UsuariosTab.tsx`, and `OrcamentoTab.tsx`
+  - All residual `#6366F1` legacy purple occurrences purged across `EquipamentosTab.tsx`, `ModalRecebimento.tsx`, `ModalEnvio.tsx`, `ModalAtendimento.tsx`, and `ModalFichaPbs.tsx`
+  - Passed verification gates: `npx tsc --noEmit` (exit 0) and `npx vite build` (exit 0)
+- **In-progress**: None
+- **Next step**: User acceptance testing
+- **Blockers**: None
 - **Uncommitted files**: none
 - **Branch**: main
