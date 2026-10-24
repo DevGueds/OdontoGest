@@ -31,8 +31,10 @@ import {
   Calendar,
   ClipboardCheck,
   Edit,
-  Hourglass
+  Hourglass,
+  Building2
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 interface Props {
   pedidos: PedidoPBS[];
@@ -57,11 +59,16 @@ export const TriagemTab: React.FC<Props> = ({
   onCancelarPedido,
   formatarData
 }) => {
+  const { user } = useAuth();
   const isGestor = perfilAtual === 'GESTOR';
   const isAdmin = perfilAtual === 'ADMINISTRADOR';
+  const isSolicitante = perfilAtual === 'SOLICITANTE';
   const isPrivilegiado = isGestor || isAdmin;
   const [filterStatus, setFilterStatus] = useState<string>('TODOS');
+  const [filterUnidade, setFilterUnidade] = useState<string>('TODAS');
   const [search, setSearch] = useState<string>('');
+
+  const userUnidade = unidades.find(u => u.id === user?.unidade_id);
 
   const renderBadgeStatus = (status: StatusPedido) => {
     switch (status) {
@@ -83,6 +90,18 @@ export const TriagemTab: React.FC<Props> = ({
   };
 
   const filtrados = pedidos.filter(p => {
+    // Regra de Isolamento por Unidade de Saúde:
+    // Usuários com perfil SOLICITANTE visualizam estritamente os pedidos de sua própria unidade
+    if (isSolicitante) {
+      if (!user?.unidade_id || p.unidade_emitente_id !== user.unidade_id) {
+        return false;
+      }
+    } else if (isPrivilegiado && filterUnidade !== 'TODAS') {
+      if (p.unidade_emitente_id !== Number(filterUnidade)) {
+        return false;
+      }
+    }
+
     if (filterStatus !== 'TODOS' && p.status !== filterStatus) return false;
     const u = unidades.find(uni => uni.id === p.unidade_emitente_id);
     const nomeUnidade = u ? u.nome.toLowerCase() : '';
@@ -100,20 +119,48 @@ export const TriagemTab: React.FC<Props> = ({
     <Card>
       <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#E8E8EC] dark:border-zinc-800 pb-4">
         <div>
-          <CardTitle className="text-lg font-bold">
-            <Boxes className="h-5 w-5 text-[#2563EB]" />
-            {isPrivilegiado ? 'Central de Atendimento & Triagem de Pedidos' : 'Meus Pedidos & Acompanhamento'}
-          </CardTitle>
+          <div className="flex items-center gap-2 flex-wrap">
+            <CardTitle className="text-lg font-bold flex items-center gap-2">
+              <Boxes className="h-5 w-5 text-[#2563EB]" />
+              {isPrivilegiado ? 'Central de Atendimento & Triagem de Pedidos' : 'Meus Pedidos & Acompanhamento'}
+            </CardTitle>
+            {isSolicitante && userUnidade && (
+              <Badge variant="outline" className="bg-blue-50/70 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800 text-[11px] font-semibold flex items-center">
+                <Building2 className="h-3 w-3 mr-1 text-blue-600 dark:text-blue-400" />
+                {userUnidade.nome}
+              </Badge>
+            )}
+          </div>
           <CardDescription>
             {isPrivilegiado 
               ? 'Receba solicitações das USFs, faça a conferência de itens e confirme o envio.' 
               : isGestor
               ? 'Acompanhe as solicitações das USFs e visualize o status de atendimento.'
+              : userUnidade
+              ? `Exibindo exclusivamente as solicitações emitidas para sua unidade (${userUnidade.nome}).`
               : 'Acompanhe a situação dos pedidos emitidos pela sua unidade de saúde.'}
           </CardDescription>
         </div>
 
         <div className="flex items-center gap-3 flex-wrap">
+          {isPrivilegiado && (
+            <div className="w-56">
+              <Select value={filterUnidade} onValueChange={(val) => setFilterUnidade(val)}>
+                <SelectTrigger className="h-[38px] text-xs font-medium">
+                  <SelectValue placeholder="Todas as Unidades" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="TODAS">Todas as Unidades</SelectItem>
+                  {unidades.map(uni => (
+                    <SelectItem key={uni.id} value={String(uni.id)}>
+                      {uni.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
           <div className="w-52">
             <Select value={filterStatus} onValueChange={(val) => setFilterStatus(val)}>
               <SelectTrigger className="h-[38px] text-xs font-medium">
@@ -162,7 +209,9 @@ export const TriagemTab: React.FC<Props> = ({
             {filtrados.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={8} className="text-center text-slate-500 py-8">
-                  Nenhuma solicitação localizada com os filtros atuais.
+                  {isSolicitante 
+                    ? 'Nenhuma solicitação localizada para a sua unidade de saúde.' 
+                    : 'Nenhuma solicitação localizada com os filtros atuais.'}
                 </TableCell>
               </TableRow>
             ) : (

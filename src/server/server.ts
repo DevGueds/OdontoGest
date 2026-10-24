@@ -369,13 +369,39 @@ async function bootstrap() {
   });
 
   // Pedidos
-  fastify.get('/api/pedidos', async () => {
-    return await dataStore.getPedidos();
+  fastify.get('/api/pedidos', async (req, reply) => {
+    const sessionId = req.cookies.session_id;
+    const session = sessionId ? getSession(sessionId) : undefined;
+    const { unidade_id } = req.query as any;
+    let pedidos = await dataStore.getPedidos();
+
+    // Se a requisição pertencer a um SOLICITANTE autenticado, filtra estritamente pela sua unidade
+    if (session?.perfil === 'SOLICITANTE') {
+      const user = await getUserById(session.userId);
+      if (user?.unidade_id) {
+        return pedidos.filter(p => p.unidade_emitente_id === user.unidade_id);
+      }
+      return [];
+    }
+
+    if (unidade_id && unidade_id !== 'TODAS') {
+      pedidos = pedidos.filter(p => p.unidade_emitente_id === Number(unidade_id));
+    }
+    return pedidos;
   });
 
   fastify.post('/api/pedidos', { preHandler: [authenticate] }, async (req, reply) => {
     try {
-      const novo = await dataStore.salvarPedido(req.body as any);
+      const session = req.userSession;
+      const body = req.body as any;
+      if (session?.perfil === 'SOLICITANTE') {
+        const user = await getUserById(session.userId);
+        if (user?.unidade_id) {
+          // Garante integridade: o solicitante só pode emitir para a sua própria unidade
+          body.unidade_emitente_id = user.unidade_id;
+        }
+      }
+      const novo = await dataStore.salvarPedido(body);
       return novo;
     } catch (err: any) {
       return reply.status(400).send({ error: err.message });
@@ -417,7 +443,16 @@ async function bootstrap() {
 
   fastify.put('/api/pedidos/:id/cancelar', { preHandler: [authenticate] }, async (req, reply) => {
     const { id } = req.params as any;
+    const session = req.userSession;
     try {
+      if (session?.perfil === 'SOLICITANTE') {
+        const user = await getUserById(session.userId);
+        const pedidos = await dataStore.getPedidos();
+        const pedido = pedidos.find(p => p.id === Number(id));
+        if (pedido && user?.unidade_id && pedido.unidade_emitente_id !== user.unidade_id) {
+          return reply.status(403).send({ error: 'Acesso negado. Você só pode cancelar pedidos da sua unidade.' });
+        }
+      }
       const ped = await dataStore.cancelarPedido(Number(id));
       return ped;
     } catch (err: any) {

@@ -478,7 +478,14 @@ export const AppContent: React.FC = () => {
     return <LoginModal />;
   }
 
-  const pendentesCount = pedidos.filter(p => p.status === 'SOLICITADO' || p.status === 'RECEBIDO').length;
+  const pendentesCount = pedidos.filter(p => {
+    if (perfilAtual === 'SOLICITANTE') {
+      if (!user?.unidade_id || p.unidade_emitente_id !== user.unidade_id) {
+        return false;
+      }
+    }
+    return p.status === 'SOLICITADO' || p.status === 'RECEBIDO';
+  }).length;
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-slate-50/70 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200">
