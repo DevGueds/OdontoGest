@@ -54,11 +54,36 @@ T1 → T2 → T3 → T4
 
 ---
 
-### T2: Passar prop usuarios para HonorariosTab no App Shell
+### T2: Implementar select de profissionais no modal de Registrar Honorário
+
+**What**: Atualizar `src/client/components/tabs/HonorariosTab.tsx` para aceitar `usuarios`, filtrar os profissionais da unidade selecionada (`u.unidade_id === unidadeId`), exibir o select com Nome e CRO e autopreencher os inputs de nome e CRO (com suporte a fallback manual).
+**Where**: `src/client/components/tabs/HonorariosTab.tsx`
+**Depends on**: T1
+**Requirement**: HONOR-02, HONOR-03, HONOR-04
+
+**Tools**:
+- MCP: `filesystem`
+- Skill: NONE
+
+**Done when**:
+- [x] Recebe `usuarios?: UserSistema[]` em Props
+- [x] Filtra profissionais da unidade selecionada (`u.unidade_id === unidadeId`)
+- [x] Exibe select de profissionais com formato `Nome - Registro/CRO`
+- [x] Ao escolher um profissional, preenche `nomeDentista` e `cro`
+- [x] Ao alternar a unidade, atualiza a lista de profissionais e reseta a seleção
+- [x] Permite preenchimento manual caso nenhum profissional seja selecionado ou a unidade não tenha profissionais
+- [x] `npx tsc --noEmit` passa sem erros
+
+**Tests**: integration
+**Gate**: quick
+
+---
+
+### T3: Passar prop usuarios para HonorariosTab no App Shell
 
 **What**: Adicionar a prop `usuarios={usuarios}` na invocação de `<HonorariosTab />` dentro de `src/client/App.tsx`.
 **Where**: `src/client/App.tsx`
-**Depends on**: T1
+**Depends on**: T2
 **Requirement**: HONOR-01
 
 **Tools**:
@@ -68,31 +93,6 @@ T1 → T2 → T3 → T4
 **Done when**:
 - [ ] `HonorariosTab` recebe `usuarios={usuarios}`
 - [ ] TypeScript compila sem erros
-
-**Tests**: integration
-**Gate**: quick
-
----
-
-### T3: Implementar select de profissionais no modal de Registrar Honorário
-
-**What**: Atualizar `src/client/components/tabs/HonorariosTab.tsx` para receber `usuarios`, filtrar os profissionais da unidade selecionada (`u.unidade_id === unidadeId`), exibir o select com Nome e CRO e autopreencher os inputs de nome e CRO (com suporte a fallback manual).
-**Where**: `src/client/components/tabs/HonorariosTab.tsx`
-**Depends on**: T2
-**Requirement**: HONOR-02, HONOR-03, HONOR-04
-
-**Tools**:
-- MCP: `filesystem`
-- Skill: NONE
-
-**Done when**:
-- [ ] Recebe `usuarios: UserSistema[]` em Props
-- [ ] Filtra profissionais da unidade selecionada (`u.unidade_id === unidadeId`)
-- [ ] Exibe select de profissionais com formato `Nome - Registro/CRO`
-- [ ] Ao escolher um profissional, preenche `nomeDentista` e `cro`
-- [ ] Ao alternar a unidade, atualiza a lista de profissionais e reseta a seleção
-- [ ] Permite preenchimento manual caso nenhum profissional seja selecionado ou a unidade não tenha profissionais
-- [ ] `npx tsc --noEmit` passa sem erros
 
 **Tests**: integration
 **Gate**: quick
