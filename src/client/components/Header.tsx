@@ -96,8 +96,8 @@ export const Header: React.FC<HeaderProps> = ({ perfilAtual, onExportarSQL, onAb
             )}
           </Button>
 
-          {/* Reports button */}
-          {onAbrirModalRelatorios && (
+          {/* Reports button (Gestor and Admin only - hidden for Solicitante) */}
+          {(perfilAtual === 'GESTOR' || perfilAtual === 'ADMINISTRADOR') && onAbrirModalRelatorios && (
             <Button
               variant="outline"
               size="sm"
