@@ -91,6 +91,20 @@ async function bootstrap() {
     req.userSession = session;
   };
 
+  // RBAC Authorization Middleware (OWASP A01: Broken Access Control)
+  const requireRoles = (roles: string[]) => {
+    return async (req: FastifyRequest, reply: FastifyReply) => {
+      await authenticate(req, reply);
+      if (reply.sent) return;
+
+      if (!req.userSession || !roles.includes(req.userSession.perfil)) {
+        return reply.status(403).send({ 
+          error: `Acesso negado. Esta operação requer perfil [${roles.join(', ')}].` 
+        });
+      }
+    };
+  };
+
   // CSRF Protection Hook on Mutative Requests (POST, PUT, PATCH, DELETE)
   fastify.addHook('onRequest', async (req, reply) => {
     if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method) && req.url.startsWith('/api')) {
@@ -368,7 +382,7 @@ async function bootstrap() {
     }
   });
 
-  fastify.put('/api/pedidos/:id/receber', { preHandler: [authenticate] }, async (req, reply) => {
+  fastify.put('/api/pedidos/:id/receber', { preHandler: [requireRoles(['ADMINISTRADOR', 'GESTOR'])] }, async (req, reply) => {
     const { id } = req.params as any;
     const { apontador_recebimento_nome, data_recebimento } = req.body as any;
     try {
@@ -379,7 +393,7 @@ async function bootstrap() {
     }
   });
 
-  fastify.put('/api/pedidos/:id/atender', { preHandler: [authenticate] }, async (req, reply) => {
+  fastify.put('/api/pedidos/:id/atender', { preHandler: [requireRoles(['ADMINISTRADOR', 'GESTOR'])] }, async (req, reply) => {
     const { id } = req.params as any;
     const { itensAtendidos } = req.body as any;
     try {
@@ -390,7 +404,7 @@ async function bootstrap() {
     }
   });
 
-  fastify.put('/api/pedidos/:id/enviar', { preHandler: [authenticate] }, async (req, reply) => {
+  fastify.put('/api/pedidos/:id/enviar', { preHandler: [requireRoles(['ADMINISTRADOR', 'GESTOR'])] }, async (req, reply) => {
     const { id } = req.params as any;
     const { apontador_envio_nome, data_envio } = req.body as any;
     try {
@@ -469,7 +483,7 @@ async function bootstrap() {
     }
   });
 
-  fastify.patch('/api/chamados/:id/aprovar', { preHandler: [authenticate] }, async (req, reply) => {
+  fastify.patch('/api/chamados/:id/aprovar', { preHandler: [requireRoles(['ADMINISTRADOR', 'GESTOR'])] }, async (req, reply) => {
     const { id } = req.params as any;
     const { aprovar } = req.body as any;
     try {
@@ -511,12 +525,12 @@ async function bootstrap() {
       return reply.status(400).send({ error: err.message });
     }
   });
-  // Gerenciamento de Usuários (Administrador)
-  fastify.get('/api/usuarios', { preHandler: [authenticate] }, async () => {
+  // Gerenciamento de Usuários (Exclusivo Administrador)
+  fastify.get('/api/usuarios', { preHandler: [requireRoles(['ADMINISTRADOR'])] }, async () => {
     return await getAllUsers();
   });
 
-  fastify.post('/api/usuarios', { preHandler: [authenticate] }, async (req, reply) => {
+  fastify.post('/api/usuarios', { preHandler: [requireRoles(['ADMINISTRADOR'])] }, async (req, reply) => {
     try {
       return await addUser(req.body as any);
     } catch (err: any) {
@@ -524,7 +538,7 @@ async function bootstrap() {
     }
   });
 
-  fastify.put('/api/usuarios/:id', { preHandler: [authenticate] }, async (req, reply) => {
+  fastify.put('/api/usuarios/:id', { preHandler: [requireRoles(['ADMINISTRADOR'])] }, async (req, reply) => {
     const { id } = req.params as any;
     try {
       return await updateUser(Number(id), req.body as any);
@@ -533,7 +547,7 @@ async function bootstrap() {
     }
   });
 
-  fastify.delete('/api/usuarios/:id', { preHandler: [authenticate] }, async (req, reply) => {
+  fastify.delete('/api/usuarios/:id', { preHandler: [requireRoles(['ADMINISTRADOR'])] }, async (req, reply) => {
     const { id } = req.params as any;
     try {
       await deleteUser(Number(id));

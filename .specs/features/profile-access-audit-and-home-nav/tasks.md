@@ -79,7 +79,7 @@
 **Tests**: none
 **Gate**: build
 **Done when**:
-- [ ] `/api/usuarios` routes require `ADMINISTRADOR`
-- [ ] `/api/honorarios` and `/api/entradas` routes require `ADMINISTRADOR` or `GESTOR`
-- [ ] Gate check passes: `npx tsc --noEmit; npx vite build`
+- [x] `/api/usuarios` routes require `ADMINISTRADOR`
+- [x] `/api/honorarios` and `/api/entradas` routes require `ADMINISTRADOR` or `GESTOR`
+- [x] Gate check passes: `npx tsc --noEmit; npx vite build`
 **Commit**: `sec(api): enforce rbac middleware on sensitive administrative endpoints`
