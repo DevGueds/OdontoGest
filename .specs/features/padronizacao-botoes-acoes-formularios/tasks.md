@@ -128,11 +128,11 @@ T1 → T2 → T3 → T4 → T5 → T6
 - Skill: NONE
 
 **Done when**:
-- [ ] Modal Novo Equipamento possui botões com ícones (`X` e `Plus`), cores e tooltips
-- [ ] Modal Editar Equipamento possui botões com ícones (`X` e `Save`), cores e tooltips
-- [ ] Modal Abrir Chamado possui botões com ícones (`X` e `Wrench`/`CalendarCheck`), cores e tooltips
-- [ ] Modal Atualizar Status possui botões com ícones (`X` e `Check`), cores e tooltips
-- [ ] `npx tsc --noEmit` passa sem erros
+- [x] Modal Novo Equipamento possui botões com ícones (`X` e `Plus`), cores e tooltips
+- [x] Modal Editar Equipamento possui botões com ícones (`X` e `Save`), cores e tooltips
+- [x] Modal Abrir Chamado possui botões com ícones (`X` e `Wrench`/`CalendarCheck`), cores e tooltips
+- [x] Modal Atualizar Status possui botões com ícones (`X` e `Check`), cores e tooltips
+- [x] `npx tsc --noEmit` passa sem erros
 
 **Tests**: static
 **Gate**: quick

@@ -38,7 +38,8 @@ import {
   Calendar,
   Lock,
   Boxes,
-  ClipboardList
+  ClipboardList,
+  Save
 } from 'lucide-react';
 
 interface Props {
@@ -607,8 +608,28 @@ export const EquipamentosTab: React.FC<Props> = ({
                 </div>
 
                 <div className="flex justify-end gap-2 pt-4 border-t border-[#E8E8EC] dark:border-zinc-800">
-                  <Button type="button" variant="outline" size="sm" onClick={() => setModalEquipamentoOpen(false)}>Cancelar</Button>
-                  <Button type="submit" size="sm">Cadastrar Equipamento</Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setModalEquipamentoOpen(false)}
+                    className="gap-1.5 text-muted-foreground hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 dark:hover:bg-rose-950/30 dark:hover:text-rose-400 dark:hover:border-rose-800 transition-colors"
+                    title="Cancelar e fechar formulário"
+                    aria-label="Cancelar"
+                  >
+                    <X className="h-4 w-4" />
+                    Cancelar
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    size="sm"
+                    className="gap-1.5 hover:shadow-md transition-all"
+                    title="Confirmar cadastro do novo equipamento permanente"
+                    aria-label="Cadastrar Equipamento"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Cadastrar Equipamento
+                  </Button>
                 </div>
               </form>
             </div>
@@ -672,8 +693,28 @@ export const EquipamentosTab: React.FC<Props> = ({
                 </div>
 
                 <div className="flex justify-end gap-2 pt-4 border-t border-[#E8E8EC] dark:border-zinc-800">
-                  <Button type="button" variant="outline" size="sm" onClick={() => setModalEditEquipamentoOpen(false)}>Cancelar</Button>
-                  <Button type="submit" size="sm">Salvar Alterações</Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setModalEditEquipamentoOpen(false)}
+                    className="gap-1.5 text-muted-foreground hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 dark:hover:bg-rose-950/30 dark:hover:text-rose-400 dark:hover:border-rose-800 transition-colors"
+                    title="Cancelar e fechar formulário"
+                    aria-label="Cancelar"
+                  >
+                    <X className="h-4 w-4" />
+                    Cancelar
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    size="sm"
+                    className="gap-1.5 hover:shadow-md transition-all"
+                    title="Salvar alterações no equipamento"
+                    aria-label="Salvar Alterações"
+                  >
+                    <Save className="h-4 w-4" />
+                    Salvar Alterações
+                  </Button>
                 </div>
               </form>
             </div>
@@ -772,8 +813,32 @@ export const EquipamentosTab: React.FC<Props> = ({
                 </div>
 
                 <div className="flex justify-end gap-2 pt-4 border-t border-[#E8E8EC] dark:border-zinc-800">
-                  <Button type="button" variant="outline" size="sm" onClick={() => { setModalChamadoOpen(false); setModalPreventivaOpen(false); }}>Cancelar</Button>
-                  <Button type="submit" size="sm">Registrar Chamado</Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => { setModalChamadoOpen(false); setModalPreventivaOpen(false); }}
+                    className="gap-1.5 text-muted-foreground hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 dark:hover:bg-rose-950/30 dark:hover:text-rose-400 dark:hover:border-rose-800 transition-colors"
+                    title="Cancelar e fechar formulário"
+                    aria-label="Cancelar"
+                  >
+                    <X className="h-4 w-4" />
+                    Cancelar
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    size="sm"
+                    className="gap-1.5 hover:shadow-md transition-all"
+                    title={chTipo === 'PREVENTIVA' ? "Confirmar agendamento de preventiva" : "Confirmar abertura de chamado de reparo"}
+                    aria-label="Registrar Chamado"
+                  >
+                    {chTipo === 'PREVENTIVA' ? (
+                      <CalendarCheck className="h-4 w-4" />
+                    ) : (
+                      <Wrench className="h-4 w-4" />
+                    )}
+                    Registrar Chamado
+                  </Button>
                 </div>
               </form>
             </div>
@@ -824,8 +889,28 @@ export const EquipamentosTab: React.FC<Props> = ({
                 </div>
 
                 <div className="flex justify-end gap-2 pt-4 border-t border-[#E8E8EC] dark:border-zinc-800">
-                  <Button type="button" variant="outline" size="sm" onClick={() => setChamadoEmEdicao(null)}>Cancelar</Button>
-                  <Button type="submit" size="sm">Salvar Status</Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setChamadoEmEdicao(null)}
+                    className="gap-1.5 text-muted-foreground hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 dark:hover:bg-rose-950/30 dark:hover:text-rose-400 dark:hover:border-rose-800 transition-colors"
+                    title="Cancelar e fechar formulário"
+                    aria-label="Cancelar"
+                  >
+                    <X className="h-4 w-4" />
+                    Cancelar
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    size="sm"
+                    className="gap-1.5 hover:shadow-md transition-all"
+                    title="Salvar novo status e custos do chamado técnico"
+                    aria-label="Salvar Status"
+                  >
+                    <Check className="h-4 w-4" />
+                    Salvar Status
+                  </Button>
                 </div>
               </form>
             </div>
