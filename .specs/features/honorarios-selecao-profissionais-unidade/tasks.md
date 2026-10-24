@@ -91,8 +91,8 @@ T1 → T2 → T3 → T4
 - Skill: NONE
 
 **Done when**:
-- [ ] `HonorariosTab` recebe `usuarios={usuarios}`
-- [ ] TypeScript compila sem erros
+- [x] `HonorariosTab` recebe `usuarios={usuarios}`
+- [x] TypeScript compila sem erros
 
 **Tests**: integration
 **Gate**: quick

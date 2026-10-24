@@ -563,6 +563,7 @@ export const AppContent: React.FC = () => {
             <HonorariosTab 
               unidades={unidades}
               honorarios={honorarios}
+              usuarios={usuarios}
               perfilAtual={perfilAtual}
               onAddHonorario={handleAddHonorario}
               formatarMoeda={formatarMoeda}
