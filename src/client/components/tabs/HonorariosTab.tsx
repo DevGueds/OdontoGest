@@ -44,7 +44,7 @@ export const HonorariosTab: React.FC<Props> = ({
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
   const [unidadeId, setUnidadeId] = useState<number>(unidades[0]?.id || 1);
-  const [selectedProfissionalId, setSelectedProfissionalId] = useState<string>('MANUAL');
+  const [selectedProfissionalId, setSelectedProfissionalId] = useState<string>('');
   const [nomeDentista, setNomeDentista] = useState('');
   const [cro, setCro] = useState('');
   const [mesReferencia, setMesReferencia] = useState(new Date().toISOString().substring(0, 7));
@@ -55,15 +55,33 @@ export const HonorariosTab: React.FC<Props> = ({
   // Profissionais da unidade selecionada no modal
   const profissionaisUnidade = usuarios.filter(u => u.unidade_id === Number(unidadeId));
 
+  const handleAbrirModal = () => {
+    const defaultUnidade = unidadeFiltro !== 'TODAS' ? Number(unidadeFiltro) : (unidades[0]?.id || 1);
+    setUnidadeId(defaultUnidade);
+    setSelectedProfissionalId('');
+    setNomeDentista('');
+    setCro('');
+    setValorFixo('');
+    setValorComissao('');
+    setObservacoes('');
+    setMesReferencia(new Date().toISOString().substring(0, 7));
+    setModalOpen(true);
+  };
+
   const handleUnidadeModalChange = (novoId: number) => {
     setUnidadeId(novoId);
-    setSelectedProfissionalId('MANUAL');
+    setSelectedProfissionalId('');
     setNomeDentista('');
     setCro('');
   };
 
   const handleProfissionalChange = (profId: string) => {
     setSelectedProfissionalId(profId);
+    if (!profId) {
+      setNomeDentista('');
+      setCro('');
+      return;
+    }
     if (profId === 'MANUAL') {
       setNomeDentista('');
       setCro('');
@@ -91,10 +109,13 @@ export const HonorariosTab: React.FC<Props> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!nomeDentista.trim()) {
+      return;
+    }
     onAddHonorario({
       unidade_id: Number(unidadeId),
-      nome_dentista: nomeDentista,
-      cro,
+      nome_dentista: nomeDentista.trim(),
+      cro: cro.trim(),
       tipo_contrato: 'FOLHA_FIXA',
       mes_referencia: mesReferencia,
       valor_fixo: parseFloat(valorFixo) || 0,
@@ -108,7 +129,7 @@ export const HonorariosTab: React.FC<Props> = ({
     setValorFixo('');
     setValorComissao('');
     setObservacoes('');
-    setSelectedProfissionalId('MANUAL');
+    setSelectedProfissionalId('');
     setModalOpen(false);
   };
 
@@ -199,7 +220,7 @@ export const HonorariosTab: React.FC<Props> = ({
           </div>
 
           {!isReadOnly ? (
-            <Button size="sm" onClick={() => setModalOpen(true)} className="gap-2">
+            <Button size="sm" onClick={handleAbrirModal} className="gap-2">
               <Plus className="w-4 h-4" />
               Registrar Honorário
             </Button>
@@ -352,55 +373,73 @@ export const HonorariosTab: React.FC<Props> = ({
 
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label htmlFor="select-profissional-unidade" className="text-xs font-semibold text-foreground uppercase tracking-wider">
-                  Profissional da Unidade (Nome e CRO)
+                <label htmlFor="select-nome-dentista" className="text-xs font-semibold text-foreground uppercase tracking-wider">
+                  Nome Completo do Cirurgião Dentista *
                 </label>
                 {profissionaisUnidade.length > 0 && (
                   <span className="text-[11px] font-medium text-primary">
-                    {profissionaisUnidade.length} profissional(is)
+                    {profissionaisUnidade.length} profissional(is) na unidade
                   </span>
                 )}
               </div>
-              <select
-                id="select-profissional-unidade"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                value={selectedProfissionalId}
-                onChange={e => handleProfissionalChange(e.target.value)}
-              >
-                <option value="MANUAL">
-                  {profissionaisUnidade.length === 0 
-                    ? '-- Nenhum profissional cadastrado (digitação manual) --' 
-                    : '-- Selecione o profissional (ou digite abaixo) --'}
-                </option>
-                {profissionaisUnidade.map(p => (
-                  <option key={p.id} value={String(p.id)}>
-                    {p.nome} {p.registro ? `- ${p.registro}` : '- (S/ CRO)'}
-                  </option>
-                ))}
-              </select>
-              <p className="text-[11px] text-muted-foreground">
-                Selecione para preencher Nome e CRO automaticamente ou digite nos campos abaixo.
-              </p>
-            </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-foreground uppercase tracking-wider">
-                Nome Completo do Cirurgião Dentista *
-              </label>
-              <Input 
-                type="text" 
-                placeholder="Ex: Dra. Maria Fernanda Silva"
-                value={nomeDentista}
-                onChange={e => setNomeDentista(e.target.value)}
-                required
-              />
+              {profissionaisUnidade.length > 0 ? (
+                <div className="space-y-2">
+                  <select
+                    id="select-nome-dentista"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={selectedProfissionalId}
+                    onChange={e => handleProfissionalChange(e.target.value)}
+                    required
+                  >
+                    <option value="">-- Selecione o profissional da unidade --</option>
+                    {profissionaisUnidade.map(p => (
+                      <option key={p.id} value={String(p.id)}>
+                        {p.nome} {p.registro ? `(CRO: ${p.registro})` : '(Sem CRO)'}
+                      </option>
+                    ))}
+                    <option value="MANUAL">-- Outro profissional (digitar nome manualmente) --</option>
+                  </select>
+
+                  {selectedProfissionalId === 'MANUAL' && (
+                    <Input 
+                      type="text" 
+                      placeholder="Digite o nome completo do Cirurgião Dentista"
+                      value={nomeDentista}
+                      onChange={e => setNomeDentista(e.target.value)}
+                      required
+                      autoFocus
+                    />
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  <Input 
+                    type="text" 
+                    placeholder="Digite o nome completo do Cirurgião Dentista"
+                    value={nomeDentista}
+                    onChange={e => setNomeDentista(e.target.value)}
+                    required
+                  />
+                  <p className="text-[11px] text-muted-foreground">
+                    Nenhum profissional vinculado a esta unidade. Digite o nome manualmente.
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground uppercase tracking-wider">
-                  CRO (Opcional)
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-foreground uppercase tracking-wider">
+                    CRO
+                  </label>
+                  {selectedProfissionalId && selectedProfissionalId !== 'MANUAL' && cro && (
+                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
+                      Automático
+                    </span>
+                  )}
+                </div>
                 <Input 
                   type="text" 
                   placeholder="Ex: CRO/PA 0592"
