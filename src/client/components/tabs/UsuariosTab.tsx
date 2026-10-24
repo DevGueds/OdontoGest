@@ -7,6 +7,7 @@ import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
+import { ConfirmDeleteDialog } from '../ui/confirm-dialog';
 import { 
   Users, 
   UserPlus, 
@@ -43,6 +44,7 @@ export const UsuariosTab: React.FC<Props> = ({
 }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [usuarioEdicao, setUsuarioEdicao] = useState<UserSistema | null>(null);
+  const [userToDelete, setUserToDelete] = useState<UserSistema | null>(null);
 
   const { items: sortedUsuarios, requestSort, getSortIndicator } = useSortableData(usuarios, { key: 'nome', direction: 'asc' });
 
@@ -265,11 +267,7 @@ export const UsuariosTab: React.FC<Props> = ({
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => {
-                                if (confirm(`Deseja realmente apagar o usuário "${u.nome}" (${u.email})?`)) {
-                                  onDeleteUsuario(u.id);
-                                }
-                              }}
+                              onClick={() => setUserToDelete(u)}
                               title="Apagar Usuário"
                               className="h-8 w-8 p-0 text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40"
                             >
@@ -461,6 +459,20 @@ export const UsuariosTab: React.FC<Props> = ({
           </form>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDeleteDialog
+        open={Boolean(userToDelete)}
+        onOpenChange={(open) => !open && setUserToDelete(null)}
+        title="Excluir Usuário"
+        description={`Deseja realmente apagar o usuário "${userToDelete?.nome}" (${userToDelete?.email})? Esta ação revogará permanentemente o acesso deste profissional ao sistema.`}
+        confirmLabel="Sim, Excluir Usuário"
+        onConfirm={() => {
+          if (userToDelete) {
+            onDeleteUsuario(userToDelete.id);
+            setUserToDelete(null);
+          }
+        }}
+      />
     </div>
   );
 };

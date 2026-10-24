@@ -16,6 +16,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '.
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
+import { ConfirmDeleteDialog } from '../ui/confirm-dialog';
 import { 
   Landmark, 
   Wallet, 
@@ -58,6 +59,7 @@ export const OrcamentoTab: React.FC<Props> = ({
   formatarData
 }) => {
   const isReadOnly = perfilAtual === 'GESTOR';
+  const [entradaToDelete, setEntradaToDelete] = useState<EntradaRecurso | null>(null);
   const [descricao, setDescricao] = useState('');
   const [valor, setValor] = useState('');
   const [natureza, setNatureza] = useState<NaturezaDespesa>('CUSTEIO');
@@ -430,11 +432,7 @@ export const OrcamentoTab: React.FC<Props> = ({
                               size="icon" 
                               className="text-muted-foreground hover:text-rose-600 h-7 w-7"
                               title="Remover Entrada"
-                              onClick={() => {
-                                if (confirm(`Deseja remover o aporte "${ent.descricao}" no valor de ${formatarMoeda(ent.valor)}?`)) {
-                                  onDeleteEntrada(ent.id);
-                                }
-                              }}
+                              onClick={() => setEntradaToDelete(ent)}
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </Button>
@@ -453,6 +451,20 @@ export const OrcamentoTab: React.FC<Props> = ({
           </div>
         </CardContent>
       </Card>
+
+      <ConfirmDeleteDialog
+        open={Boolean(entradaToDelete)}
+        onOpenChange={(open) => !open && setEntradaToDelete(null)}
+        title="Remover Aporte Orçamentário"
+        description={`Deseja realmente remover o aporte "${entradaToDelete?.descricao}" no valor de ${formatarMoeda(entradaToDelete?.valor || 0)}? O saldo disponível será recalculado imediatamente.`}
+        confirmLabel="Sim, Remover Aporte"
+        onConfirm={() => {
+          if (entradaToDelete) {
+            onDeleteEntrada(entradaToDelete.id);
+            setEntradaToDelete(null);
+          }
+        }}
+      />
     </div>
   );
 };

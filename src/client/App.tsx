@@ -41,6 +41,7 @@ import { ModalUnidade } from './components/modals/ModalUnidade';
 import { ModalEditarUnidade } from './components/modals/ModalEditarUnidade';
 import { ModalFichaPbs } from './components/modals/ModalFichaPbs';
 import { ModalRelatorio } from './components/modals/ModalRelatorio';
+import { ConfirmDeleteDialog } from './components/ui/confirm-dialog';
 
 export const AppContent: React.FC = () => {
   const { user, authenticated, loading: authLoading, csrfToken, login, logout } = useAuth();
@@ -81,6 +82,7 @@ export const AppContent: React.FC = () => {
   const [selectedPedido, setSelectedPedido] = useState<PedidoPBS | null>(null);
   const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
   const [selectedUnidade, setSelectedUnidade] = useState<UnidadeSaude | null>(null);
+  const [pedidoToCancel, setPedidoToCancel] = useState<PedidoPBS | null>(null);
 
   // Modals visibility
   const [modalRecOpen, setModalRecOpen] = useState(false);
@@ -252,11 +254,12 @@ export const AppContent: React.FC = () => {
     }
   };
 
-  const handleCancelarPedido = async (pedidoId: number) => {
-    if (!window.confirm('Tem certeza que deseja cancelar este pedido? Esta ação não pode ser desfeita.')) return;
+  const handleConfirmarCancelamento = async () => {
+    if (!pedidoToCancel) return;
     try {
-      await dbService.cancelarPedido(pedidoId, csrfToken);
-      showToast('Pedido cancelado com sucesso!', 'info');
+      await dbService.cancelarPedido(pedidoToCancel.id, csrfToken);
+      showToast(`Pedido #${pedidoToCancel.id} cancelado com sucesso!`, 'info');
+      setPedidoToCancel(null);
       await reloadData();
     } catch (err: any) {
       showToast(err.message, 'error');
@@ -525,7 +528,7 @@ export const AppContent: React.FC = () => {
               onAbrirRecebimento={(p) => { setSelectedPedido(p); setModalRecOpen(true); }}
               onAbrirAtendimento={(p) => { setSelectedPedido(p); setModalAtendOpen(true); }}
               onAbrirEnvio={(p) => { setSelectedPedido(p); setModalEnvioOpen(true); }}
-              onCancelarPedido={(p) => handleCancelarPedido(p.id)}
+              onCancelarPedido={(p) => setPedidoToCancel(p)}
               formatarData={formatarData}
             />
           </div>
@@ -709,6 +712,15 @@ export const AppContent: React.FC = () => {
         onClose={() => setModalRelatoriosOpen(false)}
         formatarData={formatarData}
         formatarMoeda={formatarMoeda}
+      />
+
+      <ConfirmDeleteDialog
+        open={Boolean(pedidoToCancel)}
+        onOpenChange={(open) => !open && setPedidoToCancel(null)}
+        title="Cancelar Solicitação de Materiais"
+        description={`Deseja realmente cancelar o pedido ${pedidoToCancel?.numero_pbs ? `PBS ${pedidoToCancel.numero_pbs}` : `#${pedidoToCancel?.id}`}? Esta ação não pode ser desfeita.`}
+        confirmLabel="Sim, Cancelar Pedido"
+        onConfirm={handleConfirmarCancelamento}
       />
 
       <Toast toasts={toasts} />

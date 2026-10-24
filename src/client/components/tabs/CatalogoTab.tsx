@@ -5,6 +5,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '../ui/table';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
+import { ConfirmDeleteDialog } from '../ui/confirm-dialog';
 import { 
   Building2, 
   Package, 
@@ -53,6 +54,8 @@ export const CatalogoTab: React.FC<Props> = ({
   formatarMoeda
 }) => {
   const isReadOnly = perfilAtual === 'GESTOR';
+  const [unidadeToDelete, setUnidadeToDelete] = React.useState<UnidadeSaude | null>(null);
+  const [materialToDelete, setMaterialToDelete] = React.useState<Material | null>(null);
 
   const { items: sortedUnidades, requestSort: requestSortUnidades, getSortIndicator: getSortUnidades } = useSortableData(unidades, { key: 'id', direction: 'asc' });
   const { items: sortedMateriais, requestSort: requestSortMateriais, getSortIndicator: getSortMateriais } = useSortableData(materiais, { key: 'descricao', direction: 'asc' });
@@ -64,7 +67,7 @@ export const CatalogoTab: React.FC<Props> = ({
         <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#E8E8EC] dark:border-zinc-800 pb-4">
           <div className="space-y-1">
             <CardTitle className="text-lg flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-[#6366F1]" />
+              <Building2 className="w-5 h-5 text-[#2563EB]" />
               Estabelecimentos / Postos de Saúde
             </CardTitle>
             <CardDescription>
@@ -116,7 +119,7 @@ export const CatalogoTab: React.FC<Props> = ({
                               size="sm" 
                               onClick={() => onAbrirEditarUnidade(u)}
                               title="Editar Estabelecimento"
-                              className="h-8 gap-1 text-[#6366F1] hover:text-[#4F46E5] hover:bg-[#6366F1]/10"
+                              className="h-8 gap-1 text-[#2563EB] hover:text-[#1D4ED8] hover:bg-[#2563EB]/10"
                             >
                               <Pencil className="w-3.5 h-3.5" />
                               <span className="hidden sm:inline text-xs">Editar</span>
@@ -124,11 +127,7 @@ export const CatalogoTab: React.FC<Props> = ({
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              onClick={() => {
-                                if (confirm(`Deseja realmente apagar o estabelecimento "${u.nome}"?`)) {
-                                  onDeletarUnidade(u.id);
-                                }
-                              }}
+                              onClick={() => setUnidadeToDelete(u)}
                               title="Apagar Estabelecimento"
                               className="h-8 gap-1 text-[#EF4444] hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/40"
                             >
@@ -156,7 +155,7 @@ export const CatalogoTab: React.FC<Props> = ({
         <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#E8E8EC] dark:border-zinc-800 pb-4">
           <div className="space-y-1">
             <CardTitle className="text-lg flex items-center gap-2">
-              <Boxes className="w-5 h-5 text-[#6366F1]" />
+              <Boxes className="w-5 h-5 text-[#2563EB]" />
               Catálogo de Materiais & Insumos
             </CardTitle>
             <CardDescription>
@@ -268,7 +267,7 @@ export const CatalogoTab: React.FC<Props> = ({
                               size="sm" 
                               onClick={() => onAbrirEditarMaterial(m)}
                               title="Editar Insumo"
-                              className="h-8 px-2 text-[#6366F1] hover:text-[#4F46E5] hover:bg-[#6366F1]/10 text-xs gap-1"
+                              className="h-8 px-2 text-[#2563EB] hover:text-[#1D4ED8] hover:bg-[#2563EB]/10 text-xs gap-1"
                             >
                               <Pencil className="w-3.5 h-3.5" />
                               <span className="hidden xl:inline">Editar</span>
@@ -286,11 +285,7 @@ export const CatalogoTab: React.FC<Props> = ({
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              onClick={() => {
-                                if (confirm(`Deseja realmente excluir o insumo "${m.descricao}"?`)) {
-                                  onDeletarMaterial(m.id);
-                                }
-                              }}
+                              onClick={() => setMaterialToDelete(m)}
                               title="Excluir Insumo"
                               className="h-8 px-2 text-[#EF4444] hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/40 text-xs"
                             >
@@ -311,6 +306,34 @@ export const CatalogoTab: React.FC<Props> = ({
           </div>
         </CardContent>
       </Card>
+
+      <ConfirmDeleteDialog
+        open={Boolean(unidadeToDelete)}
+        onOpenChange={(open) => !open && setUnidadeToDelete(null)}
+        title="Excluir Estabelecimento"
+        description={`Deseja realmente apagar o estabelecimento "${unidadeToDelete?.nome}"? Pedidos vinculados a esta unidade podem ser impactados.`}
+        confirmLabel="Sim, Excluir Unidade"
+        onConfirm={() => {
+          if (unidadeToDelete) {
+            onDeletarUnidade(unidadeToDelete.id);
+            setUnidadeToDelete(null);
+          }
+        }}
+      />
+
+      <ConfirmDeleteDialog
+        open={Boolean(materialToDelete)}
+        onOpenChange={(open) => !open && setMaterialToDelete(null)}
+        title="Excluir Insumo"
+        description={`Deseja realmente excluir o insumo "${materialToDelete?.descricao}" do catálogo? O histórico de pedidos anteriores será preservado.`}
+        confirmLabel="Sim, Excluir Insumo"
+        onConfirm={() => {
+          if (materialToDelete) {
+            onDeletarMaterial(materialToDelete.id);
+            setMaterialToDelete(null);
+          }
+        }}
+      />
     </div>
   );
 };
