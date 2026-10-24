@@ -54,21 +54,28 @@
 - **Trade-off**: A aba de honorários passa a receber a lista de usuários do estado global.
 - **Scope**: `src/server/server.ts`, `src/client/App.tsx`, `src/client/components/tabs/HonorariosTab.tsx`, `tests/honorarios-profissionais-unidade.test.ts`.
 - **Date**: 2026-10-24
+### AD-008
+- **Decision**: Padronizar todos os botões de ações de linha das tabelas no formato icon-button compacto `h-8 w-8 p-0` com tooltips via `title` e cores semânticas clínicas (Primary para edição com ícone `Pencil`, Rose para exclusão com `Trash2`, Emerald para reposição com `Boxes`/`PlusCircle` e Cyan para preventiva com `CalendarCheck`), e unificar botões de transição de workflow em `h-7.5 px-2.5 text-xs font-medium gap-1.5`.
+- **Reason**: Eliminar dispersão de larguras, cores hexadecimais inline, truncamentos de texto e inconsistências entre abas, elevando a densidade informacional e o alinhamento com o design system do shadcn/ui.
+- **Trade-off**: Ações CRUD deixam de exibir texto para usar ícones autoexplicativos com tooltips e `aria-label`.
+- **Scope**: `src/client/components/tabs/CatalogoTab.tsx`, `src/client/components/tabs/UsuariosTab.tsx`, `src/client/components/tabs/OrcamentoTab.tsx`, `src/client/components/tabs/DashboardTab.tsx`, `src/client/components/tabs/EquipamentosTab.tsx`, `src/client/components/tabs/TriagemTab.tsx`.
+- **Date**: 2026-10-24
 - **Status**: active
 
 ## Handoff
 
-- **Feature**: .specs/features/honorarios-selecao-profissionais-unidade
+- **Feature**: .specs/features/padronizacao-botoes-acoes-tabelas
 - **Phase / Task**: Verified / Complete
 - **Completed**:
-  - `GET /api/usuarios` no backend atualizado para permitir papéis `ADMINISTRADOR` e `GESTOR`, com sanitização do campo `senha` (`src/server/server.ts`)
-  - Componente `HonorariosTab` atualizado para receber `usuarios` e filtrar profissionais pela unidade de saúde alocada no modal (`src/client/components/tabs/HonorariosTab.tsx`)
-  - Select de profissional implementado no modal com exibição formatada `Nome - Registro/CRO`, autopreenchimento reativo dos campos de texto e opção fallback de digitação manual
-  - `App.tsx` atualizado repassando `usuarios={usuarios}` para `<HonorariosTab />` (`src/client/App.tsx`)
-  - Teste de integração automatizado cobrindo RBAC, sanitização e associação de honorários criado e validado com sucesso (`tests/honorarios-profissionais-unidade.test.ts`)
-  - Todos os gates determinísticos aprovados: `npx tsc --noEmit` (exit 0), `npx vite build` (exit 0), `validate_spec.py` (exit 0), `validate_tasks.py` (exit 0) e `validate_state.py` (exit 0)
+  - `CatalogoTab.tsx`: Botões de ações das tabelas de Unidades e Materiais convertidos para o padrão `h-8 w-8 p-0` com hover semântico e `TableHead` proporcional.
+  - `UsuariosTab.tsx`: Botões de Editar e Apagar Usuário ajustados com classes semânticas, `title`/`aria-label` e `TableHead w-24`.
+  - `OrcamentoTab.tsx`: Botão de Remover Entrada unificado para `h-8 w-8 p-0` e hover rose semântico.
+  - `DashboardTab.tsx`: Botões de Repor e Editar na tabela de insumos críticos padronizados em `h-8 w-8 p-0`, unificando `Edit2` para `Pencil`.
+  - `EquipamentosTab.tsx`: Botões da tabela de equipamentos unificados para icon-buttons `h-8 w-8 p-0` e botões da tabela de chamados harmonizados no padrão workflow `h-7.5 px-2.5 text-xs`.
+  - `TriagemTab.tsx`: Botões de fluxo operacional (Ficha, Cancelar, Receber, Atender, Enviar, Qtds) unificados no padrão workflow `h-7.5 px-2.5 text-xs`.
+  - Todos os gates determinísticos aprovados: `npx tsc --noEmit` (exit 0), `npx vite build` (exit 0), `validate_spec.py` (exit 0), `validate_tasks.py` (exit 0) e `validate_state.py` (exit 0).
 - **In-progress**: None
-- **Next step**: Validação do usuário em ambiente de desenvolvimento
+- **Next step**: Homologação do usuário na interface
 - **Blockers**: None
 - **Uncommitted files**: none
 - **Branch**: main
