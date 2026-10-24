@@ -95,7 +95,7 @@ export const CatalogoTab: React.FC<Props> = ({
                   <TableHead onClick={() => requestSortUnidades('criado_em')} className="cursor-pointer select-none">
                     <span className="flex items-center gap-1">Data Cadastro {getSortUnidades('criado_em')}</span>
                   </TableHead>
-                  <TableHead className="text-center w-36">Ações</TableHead>
+                  <TableHead className="text-center w-24">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -113,26 +113,26 @@ export const CatalogoTab: React.FC<Props> = ({
                       <TableCell className="text-sm text-muted-foreground">{formatarData(u.criado_em)}</TableCell>
                       <TableCell className="text-center">
                         {!isReadOnly ? (
-                          <div className="flex items-center justify-center gap-1.5">
+                          <div className="flex items-center justify-center gap-1">
                             <Button 
                               variant="ghost" 
                               size="sm" 
                               onClick={() => onAbrirEditarUnidade(u)}
                               title="Editar Estabelecimento"
-                              className="h-8 gap-1 text-[#2563EB] hover:text-[#1D4ED8] hover:bg-[#2563EB]/10"
+                              aria-label="Editar Estabelecimento"
+                              className="h-8 w-8 p-0 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
                             >
                               <Pencil className="w-3.5 h-3.5" />
-                              <span className="hidden sm:inline text-xs">Editar</span>
                             </Button>
                             <Button 
                               variant="ghost" 
                               size="sm" 
                               onClick={() => setUnidadeToDelete(u)}
                               title="Apagar Estabelecimento"
-                              className="h-8 gap-1 text-[#EF4444] hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/40"
+                              aria-label="Apagar Estabelecimento"
+                              className="h-8 w-8 p-0 text-muted-foreground hover:text-rose-600 hover:bg-rose-500/10 dark:hover:bg-rose-950/30 transition-colors"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
-                              <span className="hidden sm:inline text-xs">Apagar</span>
                             </Button>
                           </div>
                         ) : (
@@ -195,7 +195,7 @@ export const CatalogoTab: React.FC<Props> = ({
                   <TableHead onClick={() => requestSortMateriais('limite_max_pedido')} className="cursor-pointer select-none">
                     <span className="flex items-center gap-1">Limite Máx. {getSortMateriais('limite_max_pedido')}</span>
                   </TableHead>
-                  <TableHead className="text-center w-56">Ações</TableHead>
+                  <TableHead className="text-center w-28">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -267,27 +267,28 @@ export const CatalogoTab: React.FC<Props> = ({
                               size="sm" 
                               onClick={() => onAbrirEditarMaterial(m)}
                               title="Editar Insumo"
-                              className="h-8 px-2 text-[#2563EB] hover:text-[#1D4ED8] hover:bg-[#2563EB]/10 text-xs gap-1"
+                              aria-label="Editar Insumo"
+                              className="h-8 w-8 p-0 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
                             >
                               <Pencil className="w-3.5 h-3.5" />
-                              <span className="hidden xl:inline">Editar</span>
                             </Button>
                             <Button 
-                              variant="outline" 
+                              variant="ghost" 
                               size="sm" 
                               onClick={() => onAbrirAjusteEstoque(m)}
                               title="Repor Estoque"
-                              className="h-8 px-2 text-xs gap-1"
+                              aria-label="Repor Estoque"
+                              className="h-8 w-8 p-0 text-muted-foreground hover:text-emerald-600 hover:bg-emerald-500/10 dark:hover:bg-emerald-950/30 transition-colors"
                             >
-                              <Boxes className="w-3.5 h-3.5 text-muted-foreground" />
-                              <span className="hidden xl:inline">Estoque</span>
+                              <Boxes className="w-3.5 h-3.5" />
                             </Button>
                             <Button 
                               variant="ghost" 
                               size="sm" 
                               onClick={() => setMaterialToDelete(m)}
                               title="Excluir Insumo"
-                              className="h-8 px-2 text-[#EF4444] hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/40 text-xs"
+                              aria-label="Excluir Insumo"
+                              className="h-8 w-8 p-0 text-muted-foreground hover:text-rose-600 hover:bg-rose-500/10 dark:hover:bg-rose-950/30 transition-colors"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </Button>
