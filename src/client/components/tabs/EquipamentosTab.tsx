@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   UnidadeSaude, 
   Equipamento, 
@@ -540,9 +541,9 @@ export const EquipamentosTab: React.FC<Props> = ({
       </Card>
 
       {/* Modal Novo Equipamento */}
-      {modalEquipamentoOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-zinc-950/60 backdrop-blur-sm p-4 animate-in fade-in-0 duration-150">
-          <div className="min-h-full flex items-center justify-center py-6">
+      {modalEquipamentoOpen && createPortal(
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-zinc-950/60 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in-0 duration-150">
+          <div className="min-h-full flex justify-center items-start">
             <div className="w-full max-w-lg my-auto rounded-[12px] border border-[#E8E8EC] bg-white p-6 shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:border-zinc-800 dark:bg-[#121215] relative">
               <button onClick={() => setModalEquipamentoOpen(false)} className="absolute right-4 top-4 rounded-[6px] p-1 text-[#9C9C9C] hover:text-[#0A0A0A] dark:hover:text-zinc-200 transition-colors">
                 <X className="h-4 w-4" />
@@ -602,13 +603,14 @@ export const EquipamentosTab: React.FC<Props> = ({
               </form>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Modal Editar Equipamento */}
-      {modalEditEquipamentoOpen && equipamentoEdicao && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-zinc-950/60 backdrop-blur-sm p-4 animate-in fade-in-0 duration-150">
-          <div className="min-h-full flex items-center justify-center py-6">
+      {modalEditEquipamentoOpen && equipamentoEdicao && createPortal(
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-zinc-950/60 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in-0 duration-150">
+          <div className="min-h-full flex justify-center items-start">
             <div className="w-full max-w-lg my-auto rounded-[12px] border border-[#E8E8EC] bg-white p-6 shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:border-zinc-800 dark:bg-[#121215] relative">
               <button onClick={() => setModalEditEquipamentoOpen(false)} className="absolute right-4 top-4 rounded-[6px] p-1 text-[#9C9C9C] hover:text-[#0A0A0A] dark:hover:text-zinc-200 transition-colors">
                 <X className="h-4 w-4" />
@@ -666,13 +668,14 @@ export const EquipamentosTab: React.FC<Props> = ({
               </form>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Modal Abrir Chamado */}
-      {(modalChamadoOpen || modalPreventivaOpen) && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-zinc-950/60 backdrop-blur-sm p-4 animate-in fade-in-0 duration-150">
-          <div className="min-h-full flex items-center justify-center py-6">
+      {(modalChamadoOpen || modalPreventivaOpen) && createPortal(
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-zinc-950/60 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in-0 duration-150">
+          <div className="min-h-full flex justify-center items-start">
             <div className="w-full max-w-lg my-auto rounded-[12px] border border-[#E8E8EC] bg-white p-6 shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:border-zinc-800 dark:bg-[#121215] relative">
               <button 
                 onClick={() => { setModalChamadoOpen(false); setModalPreventivaOpen(false); }} 
@@ -765,13 +768,14 @@ export const EquipamentosTab: React.FC<Props> = ({
               </form>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Modal Atualizar Status */}
-      {chamadoEmEdicao && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-zinc-950/60 backdrop-blur-sm p-4 animate-in fade-in-0 duration-150">
-          <div className="min-h-full flex items-center justify-center py-6">
+      {chamadoEmEdicao && createPortal(
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-zinc-950/60 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in-0 duration-150">
+          <div className="min-h-full flex justify-center items-start">
             <div className="w-full max-w-md my-auto rounded-[12px] border border-[#E8E8EC] bg-white p-6 shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:border-zinc-800 dark:bg-[#121215] relative">
               <button onClick={() => setChamadoEmEdicao(null)} className="absolute right-4 top-4 rounded-[6px] p-1 text-[#9C9C9C] hover:text-[#0A0A0A] dark:hover:text-zinc-200 transition-colors">
                 <X className="h-4 w-4" />
@@ -816,7 +820,8 @@ export const EquipamentosTab: React.FC<Props> = ({
               </form>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

@@ -37,8 +37,9 @@ export const LoginModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-sm animate-in fade-in-0 duration-200">
-      <div className="w-full max-w-sm rounded-[12px] border border-[#E8E8EC] bg-white p-7 shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:border-zinc-800 dark:bg-[#121215]">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-zinc-950/60 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in-0 duration-200">
+      <div className="min-h-full flex justify-center items-start">
+        <div className="w-full max-w-sm my-auto rounded-[12px] border border-[#E8E8EC] bg-white p-7 shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:border-zinc-800 dark:bg-[#121215]">
         {/* Header */}
         <div className="text-left mb-6">
           <div className="flex h-10 w-10 items-center justify-center rounded-[6px] bg-[#6366F1]/10 text-[#6366F1] mb-3">
@@ -123,5 +124,6 @@ export const LoginModal: React.FC = () => {
         </form>
       </div>
     </div>
-  );
+  </div>
+);
 };

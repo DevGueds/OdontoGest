@@ -199,8 +199,9 @@ export const ModalFichaPbs: React.FC<Props> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-sm animate-in fade-in-0 duration-150">
-      <div className="w-full max-w-4xl rounded-[12px] border border-[#E8E8EC] bg-white shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:border-zinc-800 dark:bg-[#121215] max-h-[92vh] flex flex-col overflow-hidden relative">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-zinc-950/60 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in-0 duration-150">
+      <div className="min-h-full flex justify-center items-start">
+        <div className="w-full max-w-4xl my-auto rounded-[12px] border border-[#E8E8EC] bg-white shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:border-zinc-800 dark:bg-[#121215] max-h-[92vh] flex flex-col overflow-hidden relative">
         <div className="flex items-center justify-between p-4 px-6 border-b border-[#E8E8EC] dark:border-zinc-800 shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-[6px] bg-[#6366F1]/10 text-[#6366F1]">
@@ -312,5 +313,6 @@ export const ModalFichaPbs: React.FC<Props> = ({
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 };

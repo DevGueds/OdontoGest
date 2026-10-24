@@ -75,8 +75,9 @@ export const ModalAtendimento: React.FC<Props> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-sm animate-in fade-in-0 duration-150">
-      <div className="w-full max-w-3xl rounded-[12px] border border-[#E8E8EC] bg-white p-6 shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:border-zinc-800 dark:bg-[#121215] relative max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-zinc-950/60 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in-0 duration-150">
+      <div className="min-h-full flex justify-center items-start">
+        <div className="w-full max-w-3xl my-auto rounded-[12px] border border-[#E8E8EC] bg-white p-6 shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:border-zinc-800 dark:bg-[#121215] relative max-h-[90vh] flex flex-col">
         <button 
           onClick={onClose} 
           className="absolute right-4 top-4 rounded-[6px] p-1 text-[#9C9C9C] hover:text-[#0A0A0A] dark:hover:text-zinc-200 transition-colors"
@@ -162,5 +163,6 @@ export const ModalAtendimento: React.FC<Props> = ({
         </form>
       </div>
     </div>
-  );
+  </div>
+);
 };
