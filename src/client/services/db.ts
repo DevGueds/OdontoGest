@@ -249,6 +249,19 @@ class ApiService {
     }, csrfToken);
   }
 
+  async updateHonorario(id: number, dados: Partial<HonorarioOdontologo>, csrfToken?: string | null): Promise<HonorarioOdontologo> {
+    return this.request<HonorarioOdontologo>(`/api/honorarios/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(dados)
+    }, csrfToken);
+  }
+
+  async deleteHonorario(id: number, csrfToken?: string | null): Promise<void> {
+    return this.request<void>(`/api/honorarios/${id}`, {
+      method: 'DELETE'
+    }, csrfToken);
+  }
+
   // Equipamentos
   async getEquipamentos(): Promise<Equipamento[]> {
     return this.request<Equipamento[]>('/api/equipamentos');

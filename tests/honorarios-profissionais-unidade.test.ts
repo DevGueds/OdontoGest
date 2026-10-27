@@ -138,6 +138,46 @@ async function runTests() {
     throw new Error(`Nome do dentista esperado '${targetProf.nome}', obtido '${honorarioCriado.nome_dentista}'`);
   }
 
+  // 7. Testando edição de honorário (PUT /api/honorarios/:id)
+  console.log('7. Testando edição do honorário criado');
+  const resEdit = await fetch(`http://localhost:3001/api/honorarios/${honorarioCriado.id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Cookie': adminCookies,
+      'x-csrf-token': csrfAdmin || ''
+    },
+    body: JSON.stringify({
+      valor_fixo: 6000.00,
+      valor_comissao: 800.00,
+      observacoes: 'Honorário atualizado com sucesso'
+    })
+  });
+  console.log('   Edit honorário status =', resEdit.status);
+  if (resEdit.status !== 200) {
+    throw new Error(`Falha ao editar honorário: ${resEdit.status}`);
+  }
+  const honorarioAtualizado = await resEdit.json();
+  if (Number(honorarioAtualizado.valor_total) !== 6800.00) {
+    throw new Error(`Valor total esperado 6800.00, obtido: ${honorarioAtualizado.valor_total}`);
+  }
+  console.log(`   Honorário atualizado com sucesso: Novo Total ${honorarioAtualizado.valor_total}`);
+
+  // 8. Testando exclusão de honorário (DELETE /api/honorarios/:id)
+  console.log('8. Testando exclusão do honorário criado');
+  const resDel = await fetch(`http://localhost:3001/api/honorarios/${honorarioCriado.id}`, {
+    method: 'DELETE',
+    headers: {
+      'Cookie': adminCookies,
+      'x-csrf-token': csrfAdmin || ''
+    }
+  });
+  console.log('   Delete honorário status =', resDel.status);
+  if (resDel.status !== 200) {
+    throw new Error(`Falha ao deletar honorário: ${resDel.status}`);
+  }
+  console.log('   Honorário excluído com sucesso');
+
   console.log('>>> TODOS OS TESTES DE INTEGRAÇÃO PASSARAM COM SUCESSO! <<<');
 }
 

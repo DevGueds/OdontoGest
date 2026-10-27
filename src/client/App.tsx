@@ -351,6 +351,26 @@ export const AppContent: React.FC = () => {
     }
   };
 
+  const handleEditarHonorario = async (id: number, dados: Partial<HonorarioOdontologo>) => {
+    try {
+      const h = await dbService.updateHonorario(id, dados, csrfToken);
+      showToast(`Honorário de "${h.nome_dentista}" atualizado com sucesso!`, 'success');
+      await reloadData();
+    } catch (err: any) {
+      showToast(err.message || 'Erro ao atualizar honorário', 'error');
+    }
+  };
+
+  const handleDeletarHonorario = async (id: number) => {
+    try {
+      await dbService.deleteHonorario(id, csrfToken);
+      showToast('Registro de honorário excluído com sucesso!', 'info');
+      await reloadData();
+    } catch (err: any) {
+      showToast(err.message || 'Erro ao excluir honorário', 'error');
+    }
+  };
+
   const handleAddEquipamento = async (dados: Omit<Equipamento, 'id'>) => {
     try {
       const novo = await dbService.addEquipamento(dados, csrfToken);
@@ -566,6 +586,8 @@ export const AppContent: React.FC = () => {
               usuarios={usuarios}
               perfilAtual={perfilAtual}
               onAddHonorario={handleAddHonorario}
+              onUpdateHonorario={handleEditarHonorario}
+              onDeleteHonorario={handleDeletarHonorario}
               formatarMoeda={formatarMoeda}
             />
           </div>

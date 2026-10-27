@@ -17,8 +17,11 @@ import {
   Building2,
   Stethoscope,
   Save,
-  X
+  X,
+  Pencil,
+  Trash2
 } from 'lucide-react';
+import { ConfirmDeleteDialog } from '../ui/confirm-dialog';
 
 interface Props {
   unidades: UnidadeSaude[];
@@ -26,6 +29,8 @@ interface Props {
   usuarios?: UserSistema[];
   perfilAtual?: PerfilUsuario;
   onAddHonorario: (dados: Omit<HonorarioOdontologo, 'id'>) => void;
+  onUpdateHonorario?: (id: number, dados: Partial<HonorarioOdontologo>) => void;
+  onDeleteHonorario?: (id: number) => void;
   formatarMoeda: (v: number) => string;
 }
 
@@ -35,6 +40,8 @@ export const HonorariosTab: React.FC<Props> = ({
   usuarios = [],
   perfilAtual = 'ADMINISTRADOR',
   onAddHonorario,
+  onUpdateHonorario,
+  onDeleteHonorario,
   formatarMoeda
 }) => {
   const isReadOnly = perfilAtual === 'GESTOR';
@@ -44,6 +51,8 @@ export const HonorariosTab: React.FC<Props> = ({
   
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
+  const [honorarioEditando, setHonorarioEditando] = useState<HonorarioOdontologo | null>(null);
+  const [honorarioToDelete, setHonorarioToDelete] = useState<HonorarioOdontologo | null>(null);
   const [unidadeId, setUnidadeId] = useState<number>(unidades[0]?.id || 1);
   const [selectedProfissionalId, setSelectedProfissionalId] = useState<string>('');
   const [nomeDentista, setNomeDentista] = useState('');
@@ -57,6 +66,7 @@ export const HonorariosTab: React.FC<Props> = ({
   const profissionaisUnidade = usuarios.filter(u => u.unidade_id === Number(unidadeId));
 
   const handleAbrirModal = () => {
+    setHonorarioEditando(null);
     const defaultUnidade = unidadeFiltro !== 'TODAS' ? Number(unidadeFiltro) : (unidades[0]?.id || 1);
     setUnidadeId(defaultUnidade);
     setSelectedProfissionalId('');
@@ -67,6 +77,31 @@ export const HonorariosTab: React.FC<Props> = ({
     setObservacoes('');
     setMesReferencia(new Date().toISOString().substring(0, 7));
     setModalOpen(true);
+  };
+
+  const handleAbrirEditar = (h: HonorarioOdontologo) => {
+    setHonorarioEditando(h);
+    setUnidadeId(h.unidade_id);
+    const matchingProf = usuarios.find(u => u.unidade_id === h.unidade_id && u.nome.trim().toLowerCase() === h.nome_dentista.trim().toLowerCase());
+    if (matchingProf) {
+      setSelectedProfissionalId(String(matchingProf.id));
+    } else {
+      setSelectedProfissionalId('MANUAL');
+    }
+    setNomeDentista(h.nome_dentista);
+    setCro(h.cro || '');
+    setValorFixo(String(h.valor_fixo || ''));
+    setValorComissao(String(h.valor_comissao || ''));
+    setObservacoes(h.observacoes || '');
+    setMesReferencia(h.mes_referencia || new Date().toISOString().substring(0, 7));
+    setModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (honorarioToDelete && onDeleteHonorario) {
+      onDeleteHonorario(honorarioToDelete.id);
+    }
+    setHonorarioToDelete(null);
   };
 
   const handleUnidadeModalChange = (novoId: number) => {
@@ -113,18 +148,25 @@ export const HonorariosTab: React.FC<Props> = ({
     if (!nomeDentista.trim()) {
       return;
     }
-    onAddHonorario({
+    const dados = {
       unidade_id: Number(unidadeId),
       nome_dentista: nomeDentista.trim(),
       cro: cro.trim(),
-      tipo_contrato: 'FOLHA_FIXA',
+      tipo_contrato: 'FOLHA_FIXA' as const,
       mes_referencia: mesReferencia,
       valor_fixo: parseFloat(valorFixo) || 0,
       valor_comissao: parseFloat(valorComissao) || 0,
       valor_total: (parseFloat(valorFixo) || 0) + (parseFloat(valorComissao) || 0),
       observacoes
-    });
+    };
 
+    if (honorarioEditando && onUpdateHonorario) {
+      onUpdateHonorario(honorarioEditando.id, dados);
+    } else {
+      onAddHonorario(dados);
+    }
+
+    setHonorarioEditando(null);
     setNomeDentista('');
     setCro('');
     setValorFixo('');
@@ -136,15 +178,17 @@ export const HonorariosTab: React.FC<Props> = ({
 
   return (
     <div className="space-y-6">
-      {/* Modern Metric Cards (No rainbow borders) */}
+      {/* Modern Metric Cards com Ícones Coloridos */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="hover:border-border transition-colors">
+        <Card className="hover:border-border transition-all">
           <CardContent className="p-5">
             <div className="flex items-center justify-between text-muted-foreground">
               <span className="text-xs font-medium uppercase tracking-wider">
                 Dentistas Ativos
               </span>
-              <Users className="h-4 w-4 text-muted-foreground/70" />
+              <div className="flex h-7 w-7 items-center justify-center rounded-[6px] bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                <Users className="h-4 w-4" />
+              </div>
             </div>
             <div className="text-2xl font-bold tracking-tight text-foreground font-mono mt-2">
               {honorariosFiltrados.length}
@@ -155,13 +199,15 @@ export const HonorariosTab: React.FC<Props> = ({
           </CardContent>
         </Card>
 
-        <Card className="hover:border-border transition-colors">
+        <Card className="hover:border-border transition-all">
           <CardContent className="p-5">
             <div className="flex items-center justify-between text-muted-foreground">
               <span className="text-xs font-medium uppercase tracking-wider">
                 Folha Base Fixa
               </span>
-              <FileText className="h-4 w-4 text-muted-foreground/70" />
+              <div className="flex h-7 w-7 items-center justify-center rounded-[6px] bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+                <FileText className="h-4 w-4" />
+              </div>
             </div>
             <div className="text-2xl font-bold tracking-tight text-foreground font-mono mt-2">
               {formatarMoeda(totalFixos)}
@@ -172,13 +218,15 @@ export const HonorariosTab: React.FC<Props> = ({
           </CardContent>
         </Card>
 
-        <Card className="hover:border-border transition-colors">
+        <Card className="hover:border-border transition-all">
           <CardContent className="p-5">
             <div className="flex items-center justify-between text-muted-foreground">
               <span className="text-xs font-medium uppercase tracking-wider">
                 Comissões & Plantões
               </span>
-              <DollarSign className="h-4 w-4 text-muted-foreground/70" />
+              <div className="flex h-7 w-7 items-center justify-center rounded-[6px] bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                <DollarSign className="h-4 w-4" />
+              </div>
             </div>
             <div className="text-2xl font-bold tracking-tight text-foreground font-mono mt-2">
               {formatarMoeda(totalComissoes)}
@@ -189,13 +237,15 @@ export const HonorariosTab: React.FC<Props> = ({
           </CardContent>
         </Card>
 
-        <Card className="hover:border-border transition-colors">
+        <Card className="hover:border-border transition-all">
           <CardContent className="p-5">
             <div className="flex items-center justify-between text-muted-foreground">
               <span className="text-xs font-medium uppercase tracking-wider">
                 Custo Total Pessoal
               </span>
-              <Wallet className="h-4 w-4 text-muted-foreground/70" />
+              <div className="flex h-7 w-7 items-center justify-center rounded-[6px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                <Wallet className="h-4 w-4" />
+              </div>
             </div>
             <div className="text-2xl font-bold tracking-tight text-foreground font-mono mt-2">
               {formatarMoeda(totalGeralHonorarios)}
@@ -212,7 +262,9 @@ export const HonorariosTab: React.FC<Props> = ({
         <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/60 pb-4">
           <div>
             <CardTitle className="text-base font-semibold flex items-center gap-2">
-              <Stethoscope className="w-4 h-4 text-muted-foreground" />
+              <div className="flex h-7 w-7 items-center justify-center rounded-[6px] bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                <Stethoscope className="w-4 h-4" />
+              </div>
               Gestão de Folha e Honorários dos Cirurgiões Dentistas
             </CardTitle>
             <CardDescription>
@@ -272,12 +324,13 @@ export const HonorariosTab: React.FC<Props> = ({
                   <TableHead className="text-right">Valor Fixo (R$)</TableHead>
                   <TableHead className="text-right">Comissões (R$)</TableHead>
                   <TableHead className="text-right">Total Honorário (R$)</TableHead>
+                  {!isReadOnly && <TableHead className="text-center w-24">Ações</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {honorariosFiltrados.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground py-8 text-xs">
+                    <TableCell colSpan={isReadOnly ? 7 : 8} className="text-center text-muted-foreground py-8 text-xs">
                       Nenhum registro de honorário/salário encontrado.
                     </TableCell>
                   </TableRow>
@@ -314,6 +367,32 @@ export const HonorariosTab: React.FC<Props> = ({
                         <TableCell className="text-right font-mono text-xs font-semibold text-foreground">
                           {formatarMoeda(h.valor_total)}
                         </TableCell>
+                        {!isReadOnly && (
+                          <TableCell className="text-center">
+                            <div className="flex items-center justify-center gap-1">
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => handleAbrirEditar(h)}
+                                title="Editar Honorário"
+                                aria-label="Editar Honorário"
+                                className="h-8 w-8 p-0 text-blue-600 bg-blue-50/80 hover:bg-blue-100 hover:text-blue-700 dark:bg-blue-950/30 dark:text-blue-400 dark:hover:bg-blue-900/50 transition-colors"
+                              >
+                                <Pencil className="w-3.5 h-3.5" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => setHonorarioToDelete(h)}
+                                title="Excluir Honorário"
+                                aria-label="Excluir Honorário"
+                                className="h-8 w-8 p-0 text-rose-600 bg-rose-50/80 hover:bg-rose-100 hover:text-rose-700 dark:bg-rose-950/30 dark:text-rose-400 dark:hover:bg-rose-900/50 transition-colors"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        )}
                       </TableRow>
                     );
                   })
@@ -334,6 +413,7 @@ export const HonorariosTab: React.FC<Props> = ({
                     <TableCell className="text-right font-mono text-sm font-bold text-foreground">
                       {formatarMoeda(totalGeralHonorarios)}
                     </TableCell>
+                    {!isReadOnly && <TableCell />}
                   </TableRow>
                 </tfoot>
               )}
@@ -342,16 +422,18 @@ export const HonorariosTab: React.FC<Props> = ({
         </CardContent>
       </Card>
 
-      {/* Modal Registrar Honorário */}
+      {/* Modal Registrar/Editar Honorário */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Stethoscope className="w-5 h-5 text-primary" />
-              Registrar Honorário Odontológico
+              {honorarioEditando ? 'Editar Honorário Odontológico' : 'Registrar Honorário Odontológico'}
             </DialogTitle>
             <DialogDescription>
-              Lance o salário base e eventuais adicionais do profissional.
+              {honorarioEditando 
+                ? 'Atualize os dados cadastrais e remunerações do cirurgião dentista.' 
+                : 'Lance o salário base e eventuais adicionais do profissional.'}
             </DialogDescription>
           </DialogHeader>
 
@@ -506,7 +588,7 @@ export const HonorariosTab: React.FC<Props> = ({
               <Button 
                 type="button" 
                 variant="outline" 
-                onClick={() => setModalOpen(false)}
+                onClick={() => { setModalOpen(false); setHonorarioEditando(null); }}
                 className="gap-1.5 text-muted-foreground hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 dark:hover:bg-rose-950/30 dark:hover:text-rose-400 dark:hover:border-rose-800 transition-colors"
                 title="Cancelar e fechar formulário"
                 aria-label="Cancelar"
@@ -517,16 +599,26 @@ export const HonorariosTab: React.FC<Props> = ({
               <Button 
                 type="submit" 
                 className="gap-2 hover:shadow-md transition-all"
-                title="Confirmar lançamento do honorário odontológico"
-                aria-label="Salvar Honorário"
+                title={honorarioEditando ? "Salvar alterações do honorário" : "Gravar registro de honorário"}
+                aria-label={honorarioEditando ? "Salvar alterações" : "Gravar Honorário"}
               >
                 <Save className="w-4 h-4" />
-                Salvar Honorário
+                {honorarioEditando ? 'Salvar Alterações' : 'Salvar Honorário'}
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Diálogo de Confirmação de Exclusão de Honorário */}
+      <ConfirmDeleteDialog 
+        open={!!honorarioToDelete}
+        onOpenChange={(isOpen) => { if (!isOpen) setHonorarioToDelete(null); }}
+        title="Excluir Registro de Honorário"
+        description={`Tem certeza que deseja excluir o registro de honorário de "${honorarioToDelete?.nome_dentista}" (${honorarioToDelete?.mes_referencia}) no valor de ${formatarMoeda(honorarioToDelete?.valor_total || 0)}? Esta ação não pode ser desfeita.`}
+        confirmLabel="Excluir Honorário"
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
 };

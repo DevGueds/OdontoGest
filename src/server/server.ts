@@ -465,9 +465,28 @@ async function bootstrap() {
     return await dataStore.getHonorarios();
   });
 
-  fastify.post('/api/honorarios', { preHandler: [authenticate] }, async (req, reply) => {
+  fastify.post('/api/honorarios', { preHandler: [requireRoles(['ADMINISTRADOR'])] }, async (req, reply) => {
     try {
       return await dataStore.addHonorario(req.body as any);
+    } catch (err: any) {
+      return reply.status(400).send({ error: err.message });
+    }
+  });
+
+  fastify.put('/api/honorarios/:id', { preHandler: [requireRoles(['ADMINISTRADOR'])] }, async (req, reply) => {
+    const { id } = req.params as { id: string };
+    try {
+      return await dataStore.updateHonorario(Number(id), req.body as any);
+    } catch (err: any) {
+      return reply.status(400).send({ error: err.message });
+    }
+  });
+
+  fastify.delete('/api/honorarios/:id', { preHandler: [requireRoles(['ADMINISTRADOR'])] }, async (req, reply) => {
+    const { id } = req.params as { id: string };
+    try {
+      await dataStore.deleteHonorario(Number(id));
+      return { success: true };
     } catch (err: any) {
       return reply.status(400).send({ error: err.message });
     }

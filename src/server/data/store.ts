@@ -992,6 +992,68 @@ class DataStore {
     }
   }
 
+  async updateHonorario(id: number, dados: Partial<HonorarioOdontologo>): Promise<HonorarioOdontologo> {
+    const hIndex = this.inMemoryHonorarios.findIndex(h => h.id === Number(id));
+    const current = hIndex !== -1 ? this.inMemoryHonorarios[hIndex] : null;
+
+    const vFixo = dados.valor_fixo !== undefined ? Number(dados.valor_fixo) : (current ? current.valor_fixo : 0);
+    const vComissao = dados.valor_comissao !== undefined ? Number(dados.valor_comissao) : (current ? current.valor_comissao : 0);
+    const vTotal = vFixo + vComissao;
+
+    try {
+      const h = await (prisma as any).honorarioOdontologo.update({
+        where: { id: Number(id) },
+        data: {
+          ...(dados.unidade_id !== undefined ? { unidadeId: Number(dados.unidade_id) } : {}),
+          ...(dados.nome_dentista !== undefined ? { nomeDentista: dados.nome_dentista } : {}),
+          ...(dados.cro !== undefined ? { cro: dados.cro } : {}),
+          ...(dados.tipo_contrato !== undefined ? { tipoContrato: dados.tipo_contrato } : {}),
+          ...(dados.mes_referencia !== undefined ? { mesReferencia: dados.mes_referencia } : {}),
+          ...(dados.valor_fixo !== undefined ? { valorFixo: vFixo } : {}),
+          ...(dados.valor_comissao !== undefined ? { valorComissao: vComissao } : {}),
+          valorTotal: vTotal,
+          ...(dados.observacoes !== undefined ? { observacoes: dados.observacoes } : {})
+        }
+      });
+      const updated: HonorarioOdontologo = {
+        id: h.id,
+        unidade_id: h.unidadeId,
+        nome_dentista: h.nomeDentista,
+        cro: h.cro,
+        tipo_contrato: h.tipoContrato as any,
+        mes_referencia: h.mesReferencia,
+        valor_fixo: Number(h.valorFixo),
+        valor_comissao: Number(h.valorComissao),
+        valor_total: Number(h.valorTotal),
+        observacoes: h.observacoes || undefined
+      };
+      if (hIndex !== -1) {
+        this.inMemoryHonorarios[hIndex] = updated;
+      }
+      return updated;
+    } catch (err) {
+      if (hIndex === -1) throw new Error("Honorário não encontrado.");
+      const updated: HonorarioOdontologo = {
+        ...this.inMemoryHonorarios[hIndex],
+        ...dados,
+        valor_fixo: vFixo,
+        valor_comissao: vComissao,
+        valor_total: vTotal
+      };
+      this.inMemoryHonorarios[hIndex] = updated;
+      return updated;
+    }
+  }
+
+  async deleteHonorario(id: number): Promise<void> {
+    try {
+      await (prisma as any).honorarioOdontologo.delete({
+        where: { id: Number(id) }
+      });
+    } catch (err) {}
+    this.inMemoryHonorarios = this.inMemoryHonorarios.filter(h => h.id !== Number(id));
+  }
+
   // Equipamentos
   async getEquipamentos(): Promise<Equipamento[]> {
     try {
