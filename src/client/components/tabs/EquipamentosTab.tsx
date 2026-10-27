@@ -522,7 +522,7 @@ export const EquipamentosTab: React.FC<Props> = ({
                                 onClick={() => handleAbrirEditarEquipamento(eq)}
                                 title="Editar Equipamento"
                                 aria-label="Editar Equipamento"
-                                className="h-8 w-8 p-0 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                                className="h-8 w-8 p-0 text-blue-600 bg-blue-50/80 hover:bg-blue-100 hover:text-blue-700 dark:bg-blue-950/30 dark:text-blue-400 dark:hover:bg-blue-900/50 transition-colors"
                               >
                                 <Pencil className="w-3.5 h-3.5" />
                               </Button>
@@ -534,7 +534,7 @@ export const EquipamentosTab: React.FC<Props> = ({
                                 onClick={() => handleAbrirAgendamentoPreventiva(eq)}
                                 title="Agendar Preventiva"
                                 aria-label="Agendar Preventiva"
-                                className="h-8 w-8 p-0 text-muted-foreground hover:text-cyan-600 hover:bg-cyan-500/10 dark:hover:bg-cyan-950/30 transition-colors"
+                                className="h-8 w-8 p-0 text-cyan-600 bg-cyan-50/80 hover:bg-cyan-100 hover:text-cyan-700 dark:bg-cyan-950/30 dark:text-cyan-400 dark:hover:bg-cyan-900/50 transition-colors"
                               >
                                 <CalendarCheck className="w-3.5 h-3.5" />
                               </Button>

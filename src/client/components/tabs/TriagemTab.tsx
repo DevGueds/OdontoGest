@@ -265,7 +265,7 @@ export const TriagemTab: React.FC<Props> = ({
                           onClick={() => onAbrirFicha(p)}
                           title="Visualizar Ficha PBS"
                           aria-label="Visualizar Ficha PBS"
-                          className="h-7.5 px-2.5 text-xs font-medium gap-1.5 border-border text-foreground hover:bg-muted transition-colors"
+                          className="h-7.5 px-2.5 text-xs font-medium gap-1.5 border-blue-200/70 text-blue-600 bg-blue-50/80 hover:bg-blue-100 hover:text-blue-700 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/50 transition-colors"
                         >
                           <FileText className="h-3.5 w-3.5" /> Ficha
                         </Button>
@@ -279,7 +279,7 @@ export const TriagemTab: React.FC<Props> = ({
                                 onClick={() => onCancelarPedido(p)}
                                 title="Cancelar Solicitação"
                                 aria-label="Cancelar Solicitação"
-                                className="h-7.5 px-2.5 text-xs font-medium gap-1.5 border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors"
+                                className="h-7.5 px-2.5 text-xs font-medium gap-1.5 border-rose-200/70 text-rose-600 bg-rose-50/80 hover:bg-rose-100 hover:text-rose-700 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/50 transition-colors"
                               >
                                 <Ban className="h-3.5 w-3.5" /> Cancelar
                               </Button>
@@ -291,7 +291,7 @@ export const TriagemTab: React.FC<Props> = ({
                                 onClick={() => onAbrirRecebimento(p)}
                                 title="Confirmar Recebimento"
                                 aria-label="Confirmar Recebimento"
-                                className="h-7.5 px-2.5 text-xs font-medium gap-1.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-sm transition-colors"
+                                className="h-7.5 px-2.5 text-xs font-medium gap-1.5 bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors"
                               >
                                 <ClipboardCheck className="h-3.5 w-3.5" /> 1. Receber
                               </Button>
@@ -305,7 +305,7 @@ export const TriagemTab: React.FC<Props> = ({
                                   onClick={() => onAbrirAtendimento(p)}
                                   title="Atender Itens Solicitados"
                                   aria-label="Atender Itens Solicitados"
-                                  className="h-7.5 px-2.5 text-xs font-medium gap-1.5 border-primary/30 text-primary hover:bg-primary/10 transition-colors"
+                                  className="h-7.5 px-2.5 text-xs font-medium gap-1.5 border-amber-300/80 text-amber-700 bg-amber-50/90 hover:bg-amber-100 hover:text-amber-800 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800/60 transition-colors"
                                 >
                                   <Boxes className="h-3.5 w-3.5" /> 2. Atender
                                 </Button>
@@ -315,7 +315,7 @@ export const TriagemTab: React.FC<Props> = ({
                                   onClick={() => onAbrirEnvio(p)}
                                   title="Despachar Pedido"
                                   aria-label="Despachar Pedido"
-                                  className="h-7.5 px-2.5 text-xs font-medium gap-1.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-sm transition-colors"
+                                  className="h-7.5 px-2.5 text-xs font-medium gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-colors"
                                 >
                                   <Truck className="h-3.5 w-3.5" /> 3. Enviar
                                 </Button>
@@ -330,7 +330,7 @@ export const TriagemTab: React.FC<Props> = ({
                                   onClick={() => onAbrirAtendimento(p)}
                                   title="Editar Quantidades Atendidas"
                                   aria-label="Editar Quantidades Atendidas"
-                                  className="h-7.5 px-2.5 text-xs font-medium gap-1.5 border-primary/30 text-primary hover:bg-primary/10 transition-colors"
+                                  className="h-7.5 px-2.5 text-xs font-medium gap-1.5 border-amber-300/80 text-amber-700 bg-amber-50/90 hover:bg-amber-100 hover:text-amber-800 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800/60 transition-colors"
                                 >
                                   <Boxes className="h-3.5 w-3.5" /> Qtds
                                 </Button>
@@ -340,7 +340,7 @@ export const TriagemTab: React.FC<Props> = ({
                                   onClick={() => onAbrirEnvio(p)}
                                   title="Despachar Pedido"
                                   aria-label="Despachar Pedido"
-                                  className="h-7.5 px-2.5 text-xs font-medium gap-1.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-sm transition-colors"
+                                  className="h-7.5 px-2.5 text-xs font-medium gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-colors"
                                 >
                                   <Truck className="h-3.5 w-3.5" /> 3. Enviar
                                 </Button>
@@ -351,12 +351,14 @@ export const TriagemTab: React.FC<Props> = ({
                           <>
                             {p.status === 'SOLICITADO' && (
                               <Button 
-                                variant="destructive" 
+                                variant="outline" 
                                 size="sm" 
                                 onClick={() => onCancelarPedido(p)}
-                                className="h-7 text-xs"
+                                title="Cancelar Solicitação"
+                                aria-label="Cancelar Solicitação"
+                                className="h-7.5 px-2.5 text-xs font-medium gap-1.5 border-rose-200/70 text-rose-600 bg-rose-50/80 hover:bg-rose-100 hover:text-rose-700 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/50 transition-colors"
                               >
-                                <Ban className="h-3 w-3 mr-1" /> Cancelar
+                                <Ban className="h-3.5 w-3.5" /> Cancelar
                               </Button>
                             )}
                             {p.status === 'SOLICITADO' && (

@@ -540,7 +540,7 @@ export const DashboardTab: React.FC<Props> = ({
                                 onClick={() => onAbrirAjusteEstoque(m)}
                                 title="Repor Estoque"
                                 aria-label="Repor Estoque"
-                                className="h-8 w-8 p-0 text-muted-foreground hover:text-emerald-600 hover:bg-emerald-500/10 dark:hover:bg-emerald-950/30 transition-colors"
+                                className="h-8 w-8 p-0 text-amber-600 bg-amber-50/80 hover:bg-amber-100 hover:text-amber-700 dark:bg-amber-950/30 dark:text-amber-400 dark:hover:bg-amber-900/50 transition-colors"
                               >
                                 <PlusCircle className="w-3.5 h-3.5" />
                               </Button>
@@ -550,7 +550,7 @@ export const DashboardTab: React.FC<Props> = ({
                                 onClick={() => onAbrirEditarMaterial(m)}
                                 title="Editar Insumo"
                                 aria-label="Editar Insumo"
-                                className="h-8 w-8 p-0 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                                className="h-8 w-8 p-0 text-blue-600 bg-blue-50/80 hover:bg-blue-100 hover:text-blue-700 dark:bg-blue-950/30 dark:text-blue-400 dark:hover:bg-blue-900/50 transition-colors"
                               >
                                 <Pencil className="w-3.5 h-3.5" />
                               </Button>

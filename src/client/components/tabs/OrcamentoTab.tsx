@@ -460,7 +460,7 @@ export const OrcamentoTab: React.FC<Props> = ({
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="h-8 w-8 p-0 text-muted-foreground hover:text-rose-600 hover:bg-rose-500/10 dark:hover:bg-rose-950/30 transition-colors mx-auto"
+                              className="h-8 w-8 p-0 text-rose-600 bg-rose-50/80 hover:bg-rose-100 hover:text-rose-700 dark:bg-rose-950/30 dark:text-rose-400 dark:hover:bg-rose-900/50 transition-colors mx-auto"
                               title="Remover Entrada"
                               aria-label="Remover Entrada"
                               onClick={() => setEntradaToDelete(ent)}

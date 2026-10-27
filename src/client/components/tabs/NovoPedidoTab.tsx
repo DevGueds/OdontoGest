@@ -526,13 +526,13 @@ export const NovoPedidoTab: React.FC<Props> = ({
                         <Button 
                           type="button" 
                           variant="ghost" 
-                          size="iconSm" 
-                          className="text-[#EF4444] hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/40"
+                          size="sm" 
+                          className="h-8 w-8 p-0 text-rose-600 bg-rose-50/80 hover:bg-rose-100 hover:text-rose-700 dark:bg-rose-950/30 dark:text-rose-400 dark:hover:bg-rose-900/50 transition-colors mx-auto"
                           onClick={() => handleRemoveLinha(item.id)}
                           title="Remover este insumo da lista"
                           aria-label="Remover linha"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="w-3.5 h-3.5" />
                         </Button>
                       </TableCell>
                     </TableRow>

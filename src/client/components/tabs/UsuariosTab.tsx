@@ -263,7 +263,7 @@ export const UsuariosTab: React.FC<Props> = ({
                               onClick={() => handleAbrirEditar(u)}
                               title="Editar Usuário"
                               aria-label="Editar Usuário"
-                              className="h-8 w-8 p-0 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                              className="h-8 w-8 p-0 text-blue-600 bg-blue-50/80 hover:bg-blue-100 hover:text-blue-700 dark:bg-blue-950/30 dark:text-blue-400 dark:hover:bg-blue-900/50 transition-colors"
                             >
                               <Pencil className="w-3.5 h-3.5" />
                             </Button>
@@ -273,7 +273,7 @@ export const UsuariosTab: React.FC<Props> = ({
                               onClick={() => setUserToDelete(u)}
                               title="Apagar Usuário"
                               aria-label="Apagar Usuário"
-                              className="h-8 w-8 p-0 text-muted-foreground hover:text-rose-600 hover:bg-rose-500/10 dark:hover:bg-rose-950/30 transition-colors"
+                              className="h-8 w-8 p-0 text-rose-600 bg-rose-50/80 hover:bg-rose-100 hover:text-rose-700 dark:bg-rose-950/30 dark:text-rose-400 dark:hover:bg-rose-900/50 transition-colors"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </Button>
