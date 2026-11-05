@@ -41,7 +41,7 @@ Na aba **Central de Atendimento & Triagem de Pedidos** (`TriagemTab.tsx`), a col
 
 **Acceptance Criteria** (each line is one EARS pattern):
 
-1. The system SHALL render all action buttons in `TriagemTab.tsx` (`Visualizar Ficha PBS`, `Cancelar Solicitação`, `Confirmar Recebimento`, `Atender Itens Solicitados`, `Editar Quantidades Atendidas`, and `Despachar Pedido`) as icon-only buttons with class `h-8 w-8 p-0` and without inline text labels (`Ficha`, `Cancelar`, `1. Receber`, `2. Atender`, `Qtds`, `3. Enviar`).
+1. The system SHALL render all action buttons in `TriagemTab.tsx` (`Visualizar Ficha PBS`, `Cancelar Solicitação`, `Confirmar Recebimento`, `Atender Itens Solicitados`, `Editar Quantidades Atendidas`, and `Despachar Pedido`) side by side on a single horizontal row (`flex-nowrap`) as icon-only buttons with class `h-8 w-8 p-0 shrink-0` and without inline text labels (`Ficha`, `Cancelar`, `1. Receber`, `2. Atender`, `Qtds`, `3. Enviar`).
 2. WHEN the user hovers or focuses any action button in `TriagemTab.tsx` THEN the system SHALL provide its corresponding descriptive tooltip via `TooltipContent` and native `title`/`aria-label` attributes (`Visualizar Ficha PBS`, `Cancelar Solicitação`, `Confirmar Recebimento`, `Atender Itens Solicitados`, `Editar Quantidades Atendidas`, `Despachar Pedido`).
 3. WHILE rendering action buttons in `TriagemTab.tsx` the system SHALL preserve the existing semantic color classes and click handlers (`onAbrirFicha`, `onCancelarPedido`, `onAbrirRecebimento`, `onAbrirAtendimento`, `onAbrirEnvio`) for each order status and user profile.
 

@@ -208,7 +208,7 @@ export const TriagemTab: React.FC<Props> = ({
               <TableHead>Status Atual</TableHead>
               <TableHead>Recepção Almox.</TableHead>
               <TableHead>Envio / Despacho</TableHead>
-              <TableHead className="text-center">Ações</TableHead>
+              <TableHead className="text-center whitespace-nowrap">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -263,9 +263,9 @@ export const TriagemTab: React.FC<Props> = ({
                     <TableCell>{renderBadgeStatus(p.status)}</TableCell>
                     <TableCell>{recInfo}</TableCell>
                     <TableCell>{envInfo}</TableCell>
-                    <TableCell className="text-center">
+                    <TableCell className="text-center whitespace-nowrap">
                       <TooltipProvider delayDuration={150}>
-                        <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                        <div className="flex items-center justify-center gap-1.5 flex-nowrap">
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Button 
@@ -274,7 +274,7 @@ export const TriagemTab: React.FC<Props> = ({
                                 onClick={() => onAbrirFicha(p)}
                                 title="Visualizar Ficha PBS"
                                 aria-label="Visualizar Ficha PBS"
-                                className="h-8 w-8 p-0 border-blue-200/70 text-blue-600 bg-blue-50/80 hover:bg-blue-100 hover:text-blue-700 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/50 transition-colors"
+                                className="h-8 w-8 p-0 shrink-0 border-blue-200/70 text-blue-600 bg-blue-50/80 hover:bg-blue-100 hover:text-blue-700 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/50 transition-colors"
                               >
                                 <FileText className="h-3.5 w-3.5" />
                               </Button>
@@ -293,7 +293,7 @@ export const TriagemTab: React.FC<Props> = ({
                                       onClick={() => onCancelarPedido(p)}
                                       title="Cancelar Solicitação"
                                       aria-label="Cancelar Solicitação"
-                                      className="h-8 w-8 p-0 border-rose-200/70 text-rose-600 bg-rose-50/80 hover:bg-rose-100 hover:text-rose-700 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/50 transition-colors"
+                                      className="h-8 w-8 p-0 shrink-0 border-rose-200/70 text-rose-600 bg-rose-50/80 hover:bg-rose-100 hover:text-rose-700 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/50 transition-colors"
                                     >
                                       <Ban className="h-3.5 w-3.5" />
                                     </Button>
@@ -310,7 +310,7 @@ export const TriagemTab: React.FC<Props> = ({
                                       onClick={() => onAbrirRecebimento(p)}
                                       title="Confirmar Recebimento"
                                       aria-label="Confirmar Recebimento"
-                                      className="h-8 w-8 p-0 bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors"
+                                      className="h-8 w-8 p-0 shrink-0 bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors"
                                     >
                                       <ClipboardCheck className="h-3.5 w-3.5" />
                                     </Button>
@@ -329,7 +329,7 @@ export const TriagemTab: React.FC<Props> = ({
                                         onClick={() => onAbrirAtendimento(p)}
                                         title="Atender Itens Solicitados"
                                         aria-label="Atender Itens Solicitados"
-                                        className="h-8 w-8 p-0 border-amber-300/80 text-amber-700 bg-amber-50/90 hover:bg-amber-100 hover:text-amber-800 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800/60 transition-colors"
+                                        className="h-8 w-8 p-0 shrink-0 border-amber-300/80 text-amber-700 bg-amber-50/90 hover:bg-amber-100 hover:text-amber-800 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800/60 transition-colors"
                                       >
                                         <Boxes className="h-3.5 w-3.5" />
                                       </Button>
@@ -344,7 +344,7 @@ export const TriagemTab: React.FC<Props> = ({
                                         onClick={() => onAbrirEnvio(p)}
                                         title="Despachar Pedido"
                                         aria-label="Despachar Pedido"
-                                        className="h-8 w-8 p-0 bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-colors"
+                                        className="h-8 w-8 p-0 shrink-0 bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-colors"
                                       >
                                         <Truck className="h-3.5 w-3.5" />
                                       </Button>
@@ -364,7 +364,7 @@ export const TriagemTab: React.FC<Props> = ({
                                         onClick={() => onAbrirAtendimento(p)}
                                         title="Editar Quantidades Atendidas"
                                         aria-label="Editar Quantidades Atendidas"
-                                        className="h-8 w-8 p-0 border-amber-300/80 text-amber-700 bg-amber-50/90 hover:bg-amber-100 hover:text-amber-800 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800/60 transition-colors"
+                                        className="h-8 w-8 p-0 shrink-0 border-amber-300/80 text-amber-700 bg-amber-50/90 hover:bg-amber-100 hover:text-amber-800 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800/60 transition-colors"
                                       >
                                         <Boxes className="h-3.5 w-3.5" />
                                       </Button>
@@ -379,7 +379,7 @@ export const TriagemTab: React.FC<Props> = ({
                                         onClick={() => onAbrirEnvio(p)}
                                         title="Despachar Pedido"
                                         aria-label="Despachar Pedido"
-                                        className="h-8 w-8 p-0 bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-colors"
+                                        className="h-8 w-8 p-0 shrink-0 bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-colors"
                                       >
                                         <Truck className="h-3.5 w-3.5" />
                                       </Button>
@@ -400,7 +400,7 @@ export const TriagemTab: React.FC<Props> = ({
                                       onClick={() => onCancelarPedido(p)}
                                       title="Cancelar Solicitação"
                                       aria-label="Cancelar Solicitação"
-                                      className="h-8 w-8 p-0 border-rose-200/70 text-rose-600 bg-rose-50/80 hover:bg-rose-100 hover:text-rose-700 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/50 transition-colors"
+                                      className="h-8 w-8 p-0 shrink-0 border-rose-200/70 text-rose-600 bg-rose-50/80 hover:bg-rose-100 hover:text-rose-700 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/50 transition-colors"
                                     >
                                       <Ban className="h-3.5 w-3.5" />
                                     </Button>

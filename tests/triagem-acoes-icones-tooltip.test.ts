@@ -158,9 +158,14 @@ async function runTests() {
     assert.equal(btn.className.includes('h-8'), true, `Botão '${btn.title}' deve possuir classe h-8`);
     assert.equal(btn.className.includes('w-8'), true, `Botão '${btn.title}' deve possuir classe w-8`);
     assert.equal(btn.className.includes('p-0'), true, `Botão '${btn.title}' deve possuir classe p-0`);
+    assert.equal(btn.className.includes('shrink-0'), true, `Botão '${btn.title}' deve possuir classe shrink-0`);
     assert.equal(btn.className.includes('px-2.5'), false, `Botão '${btn.title}' não deve possuir padding horizontal largo px-2.5`);
     assert.equal(btn.innerHtml.includes('<svg'), true, `Botão '${btn.title}' deve renderizar um ícone SVG`);
   }
+
+  // Verificar que o container de ações mantém os ícones lado a lado (flex-nowrap, sem flex-wrap na coluna de ações)
+  assert.equal(htmlPrivilegiado.includes('justify-center gap-1.5 flex-nowrap'), true, 'O container de ações deve usar flex-nowrap para manter os ícones lado a lado');
+  assert.equal(htmlPrivilegiado.includes('justify-center gap-1.5 flex-wrap'), false, 'O container de ações não deve usar flex-wrap');
 
   // AC 2 (TRIAG-02) & Edge Case 2: Verificar títulos/aria-labels exatos por pedido e status
   const titlesInOrder = actionButtons.map(b => b.title);
