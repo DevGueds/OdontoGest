@@ -96,29 +96,7 @@ setInterval(() => {
 
 export async function getAllUsers(): Promise<User[]> {
   try {
-    let list = await prisma.usuario.findMany();
-    if (list.length === 0) {
-      // Semear unidade SMS e Administrador padrao no MySQL caso a tabela esteja vazia
-      let uni = await prisma.unidadeSaude.findFirst();
-      if (!uni) {
-        uni = await prisma.unidadeSaude.create({
-          data: { nome: "SECRETARIA MUNICIPAL DE SAÚDE (SMS)", tipo: "SMS" }
-        });
-      }
-      const admin = await prisma.usuario.create({
-        data: {
-          email: "admin@saude.gov.br",
-          senhaHash: DEFAULT_ADMIN_HASH,
-          nome: "Dr. Roberto Sotillo (Administrador)",
-          funcao: "Administrador Geral SMS",
-          registro: "ADM/PA 001",
-          perfil: "ADMINISTRADOR" as any,
-          unidadeId: uni.id
-        }
-      });
-      list = [admin];
-    }
-
+    const list = await prisma.usuario.findMany();
     return list.map(u => ({
       id: u.id,
       email: u.email,

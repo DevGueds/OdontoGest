@@ -33,3 +33,4 @@ USER node
 
 # Comando de inicialização do backend
 CMD ["npx", "tsx", "src/server/server.ts"]
+
