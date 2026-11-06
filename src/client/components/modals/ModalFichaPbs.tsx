@@ -43,6 +43,17 @@ export const ModalFichaPbs: React.FC<Props> = ({
     return acc + (qAtend * vUnit);
   }, 0);
 
+  // Helper to escape HTML characters before document.write (DOM XSS mitigation)
+  const escapeHtml = (val: any): string => {
+    if (val === null || val === undefined) return '';
+    return String(val)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  };
+
   const handlePrint = () => {
     const itensHtml = (pedido.itens || []).map(it => {
       const mat = materiais.find(m => m.id === it.material_id);
@@ -52,8 +63,8 @@ export const ModalFichaPbs: React.FC<Props> = ({
       let html = `
         <tr>
           <td style="text-align: center;">${it.numero_item}</td>
-          <td>${mat ? mat.descricao : `Material #${it.material_id}`}</td>
-          <td style="text-align: center;">${mat ? mat.unidade_medida : 'un'}</td>
+          <td>${mat ? escapeHtml(mat.descricao) : `Material #${it.material_id}`}</td>
+          <td style="text-align: center;">${mat ? escapeHtml(mat.unidade_medida) : 'un'}</td>
           <td style="text-align: center;"><strong>${it.qtd_pedida}</strong></td>
           <td style="text-align: center; color: ${it.qtd_atendida > 0 ? '#047857' : '#000'}">
             <strong>${it.qtd_atendida || 0}</strong>
@@ -105,7 +116,7 @@ export const ModalFichaPbs: React.FC<Props> = ({
       <html lang="pt-BR">
       <head>
         <meta charset="UTF-8">
-        <title>Ficha PBS - ${pedido.numero_pbs}</title>
+        <title>Ficha PBS - ${escapeHtml(pedido.numero_pbs)}</title>
         <style>
           @page { size: A4 portrait; margin: 15mm; }
           body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 10pt; color: #000; line-height: 1.3; }
@@ -122,21 +133,21 @@ export const ModalFichaPbs: React.FC<Props> = ({
       <body>
         <div class="pbs-header">
           <h2>SECRETARIA MUNICIPAL DE SAÚDE</h2>
-          <h3>PEDIDO DE BENS E SERVIÇOS (PBS) - Nº ${pedido.numero_pbs}</h3>
+          <h3>PEDIDO DE BENS E SERVIÇOS (PBS) - Nº ${escapeHtml(pedido.numero_pbs)}</h3>
           <p style="font-size: 8.5pt; margin: 3px 0 0;">
-            Status: <strong>${pedido.status}</strong> | Emissão: ${formatarData(pedido.data_pedido)}
+            Status: <strong>${escapeHtml(pedido.status)}</strong> | Emissão: ${formatarData(pedido.data_pedido)}
           </p>
         </div>
 
         <table class="pbs-info-table">
           <tbody>
             <tr>
-              <td style="width: 60%;"><strong>UNIDADE EMITENTE:</strong> ${nomeUnidade}</td>
+              <td style="width: 60%;"><strong>UNIDADE EMITENTE:</strong> ${escapeHtml(nomeUnidade)}</td>
               <td style="width: 40%;"><strong>DATA PEDIDO:</strong> ${formatarData(pedido.data_pedido)}</td>
             </tr>
             <tr>
-              <td><strong>RESPONSÁVEL USF:</strong> ${pedido.responsavel_nome}</td>
-              <td><strong>FUNÇÃO / REGISTRO:</strong> ${(pedido.responsavel_funcao || '')} ${(pedido.responsavel_registro ? ` - ${pedido.responsavel_registro}` : '')}</td>
+              <td><strong>RESPONSÁVEL USF:</strong> ${escapeHtml(pedido.responsavel_nome)}</td>
+              <td><strong>FUNÇÃO / REGISTRO:</strong> ${escapeHtml(pedido.responsavel_funcao || '')} ${pedido.responsavel_registro ? ` - ${escapeHtml(pedido.responsavel_registro)}` : ''}</td>
             </tr>
           </tbody>
         </table>
@@ -163,8 +174,8 @@ export const ModalFichaPbs: React.FC<Props> = ({
 
         <div style="margin-top: 15px; border: 1px solid #000; padding: 8px; font-size: 8.5pt;">
           <strong>RASTREABILIDADE DE RECEPÇÃO E ENVIO (ALMOXARIFADO CENTRAL):</strong><br />
-          - Recebimento no Almoxarifado: <strong>${pedido.apontador_recebimento_nome || 'Pendente'}</strong> em <strong>${pedido.data_recebimento ? formatarData(pedido.data_recebimento) : 'N/D'}</strong><br />
-          - Despacho / Envio do Material: <strong>${pedido.apontador_envio_nome || 'Pendente'}</strong> em <strong>${pedido.data_envio ? formatarData(pedido.data_envio) : 'N/D'}</strong>
+          - Recebimento no Almoxarifado: <strong>${escapeHtml(pedido.apontador_recebimento_nome || 'Pendente')}</strong> em <strong>${pedido.data_recebimento ? formatarData(pedido.data_recebimento) : 'N/D'}</strong><br />
+          - Despacho / Envio do Material: <strong>${escapeHtml(pedido.apontador_envio_nome || 'Pendente')}</strong> em <strong>${pedido.data_envio ? formatarData(pedido.data_envio) : 'N/D'}</strong>
         </div>
 
         <div style="display: flex; justify-content: center; margin-top: 40px; page-break-inside: avoid;">

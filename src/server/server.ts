@@ -8,7 +8,7 @@ import fs from 'fs';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 
-import { USERS_SEED, SESSIONS, OAUTH_CODES, createSession, getSession, destroySession, generatePKCEChallenge, authenticateUser, getUserById, getAllUsers, addUser, updateUser, deleteUser } from './auth/store.js';
+import { USERS_SEED, SESSIONS, OAUTH_CODES, createSession, getSession, destroySession, generatePKCEChallenge, authenticateUser, getUserById, getAllUsers, addUser, updateUser, deleteUser, sanitizeUser } from './auth/store.js';
 import { dataStore } from './data/store.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -32,15 +32,39 @@ declare module 'fastify' {
   }
 }
 
+// Trusted origins for CORS
+const ALLOWED_ORIGINS = new Set([
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:3001'
+]);
+if (process.env.APP_URL) {
+  try {
+    ALLOWED_ORIGINS.add(new URL(process.env.APP_URL).origin);
+  } catch {}
+}
+
 async function bootstrap() {
-  // 1. CORS plugin
+  // 1. CORS plugin with explicit origin allowlist
   await fastify.register(fastifyCors, {
     origin: (origin, cb) => {
-      // Allow local origin or same-domain requests
-      cb(null, true);
+      // Allow requests with no origin (like mobile apps, curl, or same-origin)
+      if (!origin || ALLOWED_ORIGINS.has(origin)) {
+        return cb(null, true);
+      }
+      cb(new Error('Origem não permitida pela política CORS'), false);
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
+  });
+
+  // Security Headers
+  fastify.addHook('onSend', async (_request, reply) => {
+    reply.header('X-Content-Type-Options', 'nosniff');
+    reply.header('X-Frame-Options', 'SAMEORIGIN');
   });
 
   // 2. Cookie plugin
@@ -88,6 +112,14 @@ async function bootstrap() {
       return;
     }
 
+    const user = await getUserById(session.userId);
+    if (!user) {
+      destroySession(sessionId);
+      reply.clearCookie('session_id', { path: '/' });
+      reply.status(401).send({ error: 'Conta de usuário desativada ou não encontrada.' });
+      return;
+    }
+
     req.userSession = session;
   };
 
@@ -103,6 +135,24 @@ async function bootstrap() {
         });
       }
     };
+  };
+
+  // Helper for safe client error messaging
+  const sendClientError = (reply: FastifyReply, err: any, defaultMessage: string = 'Erro ao processar solicitação.') => {
+    fastify.log.error(err);
+    const msg = err?.message;
+    const isSafeDomainMessage = typeof msg === 'string' && (
+      msg.startsWith('E-mail') ||
+      msg.startsWith('Acesso negado') ||
+      msg.startsWith('Pedido') ||
+      msg.startsWith('Usuário') ||
+      msg.startsWith('Não') ||
+      msg.startsWith('Material') ||
+      msg.startsWith('Chamado') ||
+      msg.startsWith('Estoque') ||
+      msg.startsWith('Quantidade')
+    );
+    return reply.status(400).send({ error: isSafeDomainMessage ? msg : defaultMessage });
   };
 
   // CSRF Protection Hook on Mutative Requests (POST, PUT, PATCH, DELETE)
@@ -145,15 +195,27 @@ async function bootstrap() {
     return { csrfToken: token };
   });
 
-  // OAuth 2.0 /authorize (Gerar Código de Autorização com PKCE)
+  // OAuth 2.0 /authorize (Gerar Código de Autorização com PKCE) - Requer Sessão Autenticada
   fastify.get('/api/auth/authorize', async (req, reply) => {
-    const { response_type, client_id, state, code_challenge, code_challenge_method, user_id } = req.query as any;
+    const sessionId = req.cookies.session_id;
+    if (!sessionId) {
+      return reply.status(401).send({ error: 'Autenticação prévia obrigatória para gerar código de autorização.' });
+    }
+
+    const session = getSession(sessionId);
+    if (!session) {
+      reply.clearCookie('session_id', { path: '/' });
+      return reply.status(401).send({ error: 'Sessão inválida ou expirada.' });
+    }
+
+    const { state, code_challenge, code_challenge_method } = req.query as any;
 
     if (!code_challenge || code_challenge_method !== 'S256') {
       return reply.status(400).send({ error: 'Requisição OAuth inválida. Desafio PKCE (code_challenge com S256) é obrigatório.' });
     }
 
-    const userId = Number(user_id) || 1;
+    // Bind strictly to authenticated session user ID (do not accept arbitrary query user_id)
+    const userId = session.userId;
     const authCode = crypto.randomBytes(16).toString('hex');
 
     OAUTH_CODES.set(authCode, {
@@ -209,7 +271,7 @@ async function bootstrap() {
     const user = await getUserById(session.userId);
     return {
       success: true,
-      user,
+      user: user ? sanitizeUser(user) : null,
       csrfToken
     };
   });
@@ -238,7 +300,7 @@ async function bootstrap() {
 
       return {
         success: true,
-        user,
+        user: sanitizeUser(user),
         csrfToken
       };
     } catch (err: any) {
@@ -260,11 +322,17 @@ async function bootstrap() {
     }
 
     const user = await getUserById(session.userId);
+    if (!user) {
+      destroySession(sessionId);
+      reply.clearCookie('session_id', { path: '/' });
+      return reply.status(401).send({ authenticated: false });
+    }
+
     const csrfToken = reply.generateCsrf();
 
     return {
       authenticated: true,
-      user,
+      user: sanitizeUser(user),
       csrfToken
     };
   });
@@ -287,96 +355,95 @@ async function bootstrap() {
   // =======================================================
 
   // Unidades
-  fastify.get('/api/unidades', async () => {
+  fastify.get('/api/unidades', { preHandler: [authenticate] }, async () => {
     return await dataStore.getUnidades();
   });
 
-  fastify.post('/api/unidades', { preHandler: [authenticate] }, async (req, reply) => {
+  fastify.post('/api/unidades', { preHandler: [requireRoles(['ADMINISTRADOR'])] }, async (req, reply) => {
     const { nome, tipo } = req.body as any;
     try {
       const nova = await dataStore.addUnidade(nome, tipo);
       return nova;
     } catch (err: any) {
-      return reply.status(400).send({ error: err.message });
+      return sendClientError(reply, err);
     }
   });
 
-  fastify.put('/api/unidades/:id', { preHandler: [authenticate] }, async (req, reply) => {
+  fastify.put('/api/unidades/:id', { preHandler: [requireRoles(['ADMINISTRADOR'])] }, async (req, reply) => {
     const { id } = req.params as any;
     const { nome, tipo } = req.body as any;
     try {
       const u = await dataStore.updateUnidade(Number(id), nome, tipo);
       return u;
     } catch (err: any) {
-      return reply.status(400).send({ error: err.message });
+      return sendClientError(reply, err);
     }
   });
 
-  fastify.delete('/api/unidades/:id', { preHandler: [authenticate] }, async (req, reply) => {
+  fastify.delete('/api/unidades/:id', { preHandler: [requireRoles(['ADMINISTRADOR'])] }, async (req, reply) => {
     const { id } = req.params as any;
     try {
       await dataStore.deleteUnidade(Number(id));
       return { success: true };
     } catch (err: any) {
-      return reply.status(400).send({ error: err.message });
+      return sendClientError(reply, err);
     }
   });
 
   // Materiais
-  fastify.get('/api/materiais', async () => {
+  fastify.get('/api/materiais', { preHandler: [authenticate] }, async () => {
     return await dataStore.getMateriais();
   });
 
-  fastify.post('/api/materiais', { preHandler: [authenticate] }, async (req, reply) => {
+  fastify.post('/api/materiais', { preHandler: [requireRoles(['ADMINISTRADOR', 'GESTOR'])] }, async (req, reply) => {
     const { descricao, unidade_medida, valor_estimado, qtd_estoque, limite_max_pedido, fornecedor } = req.body as any;
     try {
       const novo = await dataStore.addMaterial(descricao, unidade_medida, valor_estimado, qtd_estoque, limite_max_pedido, fornecedor);
       return novo;
     } catch (err: any) {
-      return reply.status(400).send({ error: err.message });
+      return sendClientError(reply, err);
     }
   });
 
-  fastify.put('/api/materiais/:id', { preHandler: [authenticate] }, async (req, reply) => {
+  fastify.put('/api/materiais/:id', { preHandler: [requireRoles(['ADMINISTRADOR', 'GESTOR'])] }, async (req, reply) => {
     const { id } = req.params as any;
     try {
       const mat = await dataStore.updateMaterial(Number(id), req.body as any);
       return mat;
     } catch (err: any) {
-      return reply.status(400).send({ error: err.message });
+      return sendClientError(reply, err);
     }
   });
 
-  fastify.patch('/api/materiais/:id/estoque', { preHandler: [authenticate] }, async (req, reply) => {
+  fastify.patch('/api/materiais/:id/estoque', { preHandler: [requireRoles(['ADMINISTRADOR', 'GESTOR'])] }, async (req, reply) => {
     const { id } = req.params as any;
     const { qtd_estoque } = req.body as any;
     try {
       const mat = await dataStore.atualizarEstoqueMaterial(Number(id), Number(qtd_estoque));
       return mat;
     } catch (err: any) {
-      return reply.status(400).send({ error: err.message });
+      return sendClientError(reply, err);
     }
   });
 
-  fastify.delete('/api/materiais/:id', { preHandler: [authenticate] }, async (req, reply) => {
+  fastify.delete('/api/materiais/:id', { preHandler: [requireRoles(['ADMINISTRADOR', 'GESTOR'])] }, async (req, reply) => {
     const { id } = req.params as any;
     try {
       await dataStore.deleteMaterial(Number(id));
       return { success: true };
     } catch (err: any) {
-      return reply.status(400).send({ error: err.message });
+      return sendClientError(reply, err);
     }
   });
 
   // Pedidos
-  fastify.get('/api/pedidos', async (req, reply) => {
-    const sessionId = req.cookies.session_id;
-    const session = sessionId ? getSession(sessionId) : undefined;
+  fastify.get('/api/pedidos', { preHandler: [authenticate] }, async (req) => {
+    const session = req.userSession!;
     const { unidade_id } = req.query as any;
     let pedidos = await dataStore.getPedidos();
 
-    // Se a requisição pertencer a um SOLICITANTE autenticado, filtra estritamente pela sua unidade
-    if (session?.perfil === 'SOLICITANTE') {
+    // Se o perfil for SOLICITANTE, filtra estritamente pela sua unidade vinculada
+    if (session.perfil === 'SOLICITANTE') {
       const user = await getUserById(session.userId);
       if (user?.unidade_id) {
         return pedidos.filter(p => p.unidade_emitente_id === user.unidade_id);
@@ -392,19 +459,20 @@ async function bootstrap() {
 
   fastify.post('/api/pedidos', { preHandler: [authenticate] }, async (req, reply) => {
     try {
-      const session = req.userSession;
+      const session = req.userSession!;
       const body = req.body as any;
-      if (session?.perfil === 'SOLICITANTE') {
+      if (session.perfil === 'SOLICITANTE') {
         const user = await getUserById(session.userId);
-        if (user?.unidade_id) {
-          // Garante integridade: o solicitante só pode emitir para a sua própria unidade
-          body.unidade_emitente_id = user.unidade_id;
+        if (!user?.unidade_id) {
+          return reply.status(403).send({ error: 'Usuário solicitante não está vinculado a nenhuma unidade de saúde.' });
         }
+        // Garante integridade: o solicitante só pode emitir para a sua própria unidade
+        body.unidade_emitente_id = user.unidade_id;
       }
       const novo = await dataStore.salvarPedido(body);
       return novo;
     } catch (err: any) {
-      return reply.status(400).send({ error: err.message });
+      return sendClientError(reply, err);
     }
   });
 
@@ -415,7 +483,7 @@ async function bootstrap() {
       const ped = await dataStore.confirmarRecebimento(Number(id), apontador_recebimento_nome, data_recebimento);
       return ped;
     } catch (err: any) {
-      return reply.status(400).send({ error: err.message });
+      return sendClientError(reply, err);
     }
   });
 
@@ -426,7 +494,7 @@ async function bootstrap() {
       const ped = await dataStore.atenderPedido(Number(id), itensAtendidos);
       return ped;
     } catch (err: any) {
-      return reply.status(400).send({ error: err.message });
+      return sendClientError(reply, err);
     }
   });
 
@@ -437,31 +505,36 @@ async function bootstrap() {
       const ped = await dataStore.confirmarEnvio(Number(id), apontador_envio_nome, data_envio);
       return ped;
     } catch (err: any) {
-      return reply.status(400).send({ error: err.message });
+      return sendClientError(reply, err);
     }
   });
 
-  fastify.put('/api/pedidos/:id/cancelar', { preHandler: [authenticate] }, async (req, reply) => {
+  fastify.put('/api/pedidos/:id/cancelar', { preHandler: [requireRoles(['SOLICITANTE', 'ADMINISTRADOR', 'GESTOR'])] }, async (req, reply) => {
     const { id } = req.params as any;
-    const session = req.userSession;
+    const session = req.userSession!;
     try {
-      if (session?.perfil === 'SOLICITANTE') {
+      const pedidos = await dataStore.getPedidos();
+      const pedido = pedidos.find(p => p.id === Number(id));
+      if (!pedido) {
+        return reply.status(404).send({ error: 'Pedido não encontrado.' });
+      }
+
+      if (session.perfil === 'SOLICITANTE') {
         const user = await getUserById(session.userId);
-        const pedidos = await dataStore.getPedidos();
-        const pedido = pedidos.find(p => p.id === Number(id));
-        if (pedido && user?.unidade_id && pedido.unidade_emitente_id !== user.unidade_id) {
+        if (!user?.unidade_id || pedido.unidade_emitente_id !== user.unidade_id) {
           return reply.status(403).send({ error: 'Acesso negado. Você só pode cancelar pedidos da sua unidade.' });
         }
       }
+
       const ped = await dataStore.cancelarPedido(Number(id));
       return ped;
     } catch (err: any) {
-      return reply.status(400).send({ error: err.message });
+      return sendClientError(reply, err);
     }
   });
 
   // Honorários & Salários Odontológicos
-  fastify.get('/api/honorarios', async () => {
+  fastify.get('/api/honorarios', { preHandler: [authenticate] }, async () => {
     return await dataStore.getHonorarios();
   });
 
@@ -469,7 +542,7 @@ async function bootstrap() {
     try {
       return await dataStore.addHonorario(req.body as any);
     } catch (err: any) {
-      return reply.status(400).send({ error: err.message });
+      return sendClientError(reply, err);
     }
   });
 
@@ -478,7 +551,7 @@ async function bootstrap() {
     try {
       return await dataStore.updateHonorario(Number(id), req.body as any);
     } catch (err: any) {
-      return reply.status(400).send({ error: err.message });
+      return sendClientError(reply, err);
     }
   });
 
@@ -488,52 +561,61 @@ async function bootstrap() {
       await dataStore.deleteHonorario(Number(id));
       return { success: true };
     } catch (err: any) {
-      return reply.status(400).send({ error: err.message });
+      return sendClientError(reply, err);
     }
   });
 
   // Equipamentos
-  fastify.get('/api/equipamentos', async () => {
+  fastify.get('/api/equipamentos', { preHandler: [authenticate] }, async () => {
     return await dataStore.getEquipamentos();
   });
 
-  fastify.post('/api/equipamentos', { preHandler: [authenticate] }, async (req, reply) => {
+  fastify.post('/api/equipamentos', { preHandler: [requireRoles(['ADMINISTRADOR', 'GESTOR'])] }, async (req, reply) => {
     try {
       return await dataStore.addEquipamento(req.body as any);
     } catch (err: any) {
-      return reply.status(400).send({ error: err.message });
+      return sendClientError(reply, err);
     }
   });
 
-  fastify.put('/api/equipamentos/:id', { preHandler: [authenticate] }, async (req, reply) => {
+  fastify.put('/api/equipamentos/:id', { preHandler: [requireRoles(['ADMINISTRADOR', 'GESTOR'])] }, async (req, reply) => {
     try {
       const { id } = req.params as { id: string };
       return await dataStore.updateEquipamento(Number(id), req.body as any);
     } catch (err: any) {
-      return reply.status(400).send({ error: err.message });
+      return sendClientError(reply, err);
     }
   });
 
   // Chamados de Manutenção Corretiva & Preventiva
-  fastify.get('/api/chamados', async () => {
+  fastify.get('/api/chamados', { preHandler: [authenticate] }, async () => {
     return await dataStore.getChamados();
   });
 
   fastify.post('/api/chamados', { preHandler: [authenticate] }, async (req, reply) => {
     try {
-      return await dataStore.addChamado(req.body as any);
+      const session = req.userSession!;
+      const body = req.body as any;
+      if (session.perfil === 'SOLICITANTE') {
+        const user = await getUserById(session.userId);
+        if (!user?.unidade_id) {
+          return reply.status(403).send({ error: 'Usuário solicitante não está vinculado a uma unidade.' });
+        }
+        body.unidade_id = user.unidade_id;
+      }
+      return await dataStore.addChamado(body);
     } catch (err: any) {
-      return reply.status(400).send({ error: err.message });
+      return sendClientError(reply, err);
     }
   });
 
-  fastify.patch('/api/chamados/:id/status', { preHandler: [authenticate] }, async (req, reply) => {
+  fastify.patch('/api/chamados/:id/status', { preHandler: [requireRoles(['ADMINISTRADOR', 'GESTOR', 'TECNICO'])] }, async (req, reply) => {
     const { id } = req.params as any;
     const { status, custo_reparo } = req.body as any;
     try {
       return await dataStore.updateStatusChamado(Number(id), status, custo_reparo);
     } catch (err: any) {
-      return reply.status(400).send({ error: err.message });
+      return sendClientError(reply, err);
     }
   });
 
@@ -543,65 +625,65 @@ async function bootstrap() {
     try {
       return await dataStore.aprovarChamadoManutencao(Number(id), aprovar !== false);
     } catch (err: any) {
-      return reply.status(400).send({ error: err.message });
+      return sendClientError(reply, err);
     }
   });
 
   // Regra Automatizada de Alertas de Manutenção Preventiva
-  fastify.get('/api/manutencao/alertas-preventiva', async () => {
+  fastify.get('/api/manutencao/alertas-preventiva', { preHandler: [authenticate] }, async () => {
     return dataStore.verificarAlertasPreventiva();
   });
 
   // Consolidação Financeira Multiclínica
-  fastify.get('/api/financeiro/consolidacao', async () => {
+  fastify.get('/api/financeiro/consolidacao', { preHandler: [authenticate] }, async () => {
     return dataStore.getConsolidacaoFinanceiraMulticlinica();
   });
 
   // Entradas & Aportes Financeiros
-  fastify.get('/api/entradas', async () => {
+  fastify.get('/api/entradas', { preHandler: [authenticate] }, async () => {
     return await dataStore.getEntradas();
   });
 
-  fastify.post('/api/entradas', { preHandler: [authenticate] }, async (req, reply) => {
+  fastify.post('/api/entradas', { preHandler: [requireRoles(['ADMINISTRADOR'])] }, async (req, reply) => {
     try {
       return await dataStore.addEntrada(req.body as any);
     } catch (err: any) {
-      return reply.status(400).send({ error: err.message });
+      return sendClientError(reply, err);
     }
   });
 
-  fastify.delete('/api/entradas/:id', { preHandler: [authenticate] }, async (req, reply) => {
+  fastify.delete('/api/entradas/:id', { preHandler: [requireRoles(['ADMINISTRADOR'])] }, async (req, reply) => {
     const { id } = req.params as any;
     try {
       await dataStore.deleteEntrada(Number(id));
       return { success: true };
     } catch (err: any) {
-      return reply.status(400).send({ error: err.message });
+      return sendClientError(reply, err);
     }
   });
+
   // Gerenciamento de Usuários (Administrador e Gestor para consulta de profissionais)
   fastify.get('/api/usuarios', { preHandler: [requireRoles(['ADMINISTRADOR', 'GESTOR'])] }, async () => {
     const users = await getAllUsers();
-    return users.map(u => {
-      const { senha, ...rest } = u;
-      return rest;
-    });
+    return users.map(u => sanitizeUser(u));
   });
 
   fastify.post('/api/usuarios', { preHandler: [requireRoles(['ADMINISTRADOR'])] }, async (req, reply) => {
     try {
-      return await addUser(req.body as any);
+      const u = await addUser(req.body as any);
+      return sanitizeUser(u);
     } catch (err: any) {
-      return reply.status(400).send({ error: err.message });
+      return sendClientError(reply, err);
     }
   });
 
   fastify.put('/api/usuarios/:id', { preHandler: [requireRoles(['ADMINISTRADOR'])] }, async (req, reply) => {
     const { id } = req.params as any;
     try {
-      return await updateUser(Number(id), req.body as any);
+      const u = await updateUser(Number(id), req.body as any);
+      return sanitizeUser(u);
     } catch (err: any) {
-      return reply.status(400).send({ error: err.message });
+      return sendClientError(reply, err);
     }
   });
 
@@ -611,15 +693,12 @@ async function bootstrap() {
       await deleteUser(Number(id));
       return { success: true };
     } catch (err: any) {
-      return reply.status(400).send({ error: err.message });
+      return sendClientError(reply, err);
     }
   });
 
   // Exportar DUMP SQL (Exclusivo Administrador)
-  fastify.get('/api/export/sql', { preHandler: [authenticate] }, async (req, reply) => {
-    if (req.userSession?.perfil !== 'ADMINISTRADOR') {
-      return reply.status(403).send({ error: 'Acesso negado. Apenas administradores podem exportar o dump SQL do banco de dados.' });
-    }
+  fastify.get('/api/export/sql', { preHandler: [requireRoles(['ADMINISTRADOR'])] }, async (req, reply) => {
     const sql = await dataStore.exportarSQL();
     reply.header('Content-Type', 'text/sql');
     reply.header('Content-Disposition', `attachment; filename=almoxarifado_saude_dump_${new Date().toISOString().substring(0, 10)}.sql`);
@@ -651,3 +730,6 @@ async function bootstrap() {
 }
 
 bootstrap();
+
+
+

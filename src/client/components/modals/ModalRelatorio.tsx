@@ -109,6 +109,27 @@ export const ModalRelatorio: React.FC<Props> = ({
     chamadosFiltrados
   );
 
+  // Helper to escape formula characters in CSV exports (CWE-1236 / CSV Injection mitigation)
+  const sanitizeCsvCell = (val: string | number | null | undefined): string => {
+    if (val === null || val === undefined) return '';
+    let str = String(val);
+    if (/^[=+\-@\t\r]/.test(str)) {
+      str = "'" + str;
+    }
+    return str.replace(/"/g, '""');
+  };
+
+  // Helper to escape HTML characters before document.write (DOM XSS mitigation)
+  const escapeHtml = (val: any): string => {
+    if (val === null || val === undefined) return '';
+    return String(val)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  };
+
   // Export to Excel (CSV with UTF-8 BOM)
   const handleExportarExcel = () => {
     let csvLines: string[] = [];
@@ -120,7 +141,7 @@ export const ModalRelatorio: React.FC<Props> = ({
 
     if (tipoRelatorio === 'FINANCEIRO' || tipoRelatorio === 'COMPLETO') {
       csvLines.push(`"RELATÓRIO DE FLUXO FINANCEIRO E CONSOLIDAÇÃO MULTICLÍNICA"`);
-      csvLines.push(`"Período: ${nomeMes}";"Data de Emissão: ${dataEmissao}"`);
+      csvLines.push(`"Período: ${sanitizeCsvCell(nomeMes)}";"Data de Emissão: ${sanitizeCsvCell(dataEmissao)}"`);
       csvLines.push(``);
       csvLines.push(`"Estabelecimento de Saúde";"Tipo";"Gastos em Insumos (R$)";"Salários / Honorários Dentistas (R$)";"Manutenção Equipamentos (R$)";"CUSTO TOTAL GERAL (R$)"`);
 
@@ -135,7 +156,7 @@ export const ModalRelatorio: React.FC<Props> = ({
         totalManutencao += item.custoManutencaoEquipamentos;
         totalGeral += item.custoTotalGeral;
 
-        csvLines.push(`"${item.nome}";"${item.tipo}";"${item.custoInsumosAtendidos.toFixed(2).replace('.', ',')}";"${item.custoHonorariosDentistas.toFixed(2).replace('.', ',')}";"${item.custoManutencaoEquipamentos.toFixed(2).replace('.', ',')}";"${item.custoTotalGeral.toFixed(2).replace('.', ',')}"`);
+        csvLines.push(`"${sanitizeCsvCell(item.nome)}";"${sanitizeCsvCell(item.tipo)}";"${item.custoInsumosAtendidos.toFixed(2).replace('.', ',')}";"${item.custoHonorariosDentistas.toFixed(2).replace('.', ',')}";"${item.custoManutencaoEquipamentos.toFixed(2).replace('.', ',')}";"${item.custoTotalGeral.toFixed(2).replace('.', ',')}"`);
       });
 
       csvLines.push(`"TOTAL GERAL MULTICLÍNICA";"";"${totalInsumos.toFixed(2).replace('.', ',')}";"${totalHonorarios.toFixed(2).replace('.', ',')}";"${totalManutencao.toFixed(2).replace('.', ',')}";"${totalGeral.toFixed(2).replace('.', ',')}"`);
@@ -144,7 +165,7 @@ export const ModalRelatorio: React.FC<Props> = ({
 
     if (tipoRelatorio === 'INSUMOS' || tipoRelatorio === 'COMPLETO') {
       csvLines.push(`"RELATÓRIO DE GESTÃO DE INSUMOS & ESTOQUE DE MATERIAIS"`);
-      csvLines.push(`"Período: ${nomeMes}";"Data de Emissão: ${dataEmissao}"`);
+      csvLines.push(`"Período: ${sanitizeCsvCell(nomeMes)}";"Data de Emissão: ${sanitizeCsvCell(dataEmissao)}"`);
       csvLines.push(``);
       csvLines.push(`"ID";"Insumo / Material";"Unidade Medida";"Fornecedor";"Estoque Atual";"Limite Máx. Pedido";"Valor Estimado (R$)";"Valor Total Estoque (R$)";"Status Estoque"`);
 
@@ -153,7 +174,7 @@ export const ModalRelatorio: React.FC<Props> = ({
         const totalVal = est * (m.valor_estimado || 0);
         const status = est <= 0 ? 'ESGOTADO' : (est < 20 ? 'ESTOQUE BAIXO' : 'OK');
 
-        csvLines.push(`"${m.id}";"${m.descricao}";"${m.unidade_medida}";"${m.fornecedor || 'Não Informado'}";"${est}";"${m.limite_max_pedido || 'Sem limite'}";"${(m.valor_estimado || 0).toFixed(2).replace('.', ',')}";"${totalVal.toFixed(2).replace('.', ',')}";"${status}"`);
+        csvLines.push(`"${m.id}";"${sanitizeCsvCell(m.descricao)}";"${sanitizeCsvCell(m.unidade_medida)}";"${sanitizeCsvCell(m.fornecedor || 'Não Informado')}";"${est}";"${sanitizeCsvCell(m.limite_max_pedido || 'Sem limite')}";"${(m.valor_estimado || 0).toFixed(2).replace('.', ',')}";"${totalVal.toFixed(2).replace('.', ',')}";"${status}"`);
       });
 
       csvLines.push(``);
@@ -161,7 +182,7 @@ export const ModalRelatorio: React.FC<Props> = ({
 
     if (tipoRelatorio === 'MANUTENCAO' || tipoRelatorio === 'COMPLETO') {
       csvLines.push(`"RELATÓRIO DE GESTÃO DE EQUIPAMENTOS & MANUTENÇÃO"`);
-      csvLines.push(`"Período: ${nomeMes}";"Data de Emissão: ${dataEmissao}"`);
+      csvLines.push(`"Período: ${sanitizeCsvCell(nomeMes)}";"Data de Emissão: ${sanitizeCsvCell(dataEmissao)}"`);
       csvLines.push(``);
       csvLines.push(`"ID Chamado";"Unidade de Saúde";"Equipamento";"Número de Patrimônio";"Tipo Chamado";"Descrição do Defeito / Serviço";"Data Abertura";"Custo Reparo (R$)";"Status"`);
 
@@ -169,7 +190,7 @@ export const ModalRelatorio: React.FC<Props> = ({
         const uni = unidades.find(u => u.id === c.unidade_id);
         const eq = equipamentos.find(e => e.id === c.equipamento_id);
 
-        csvLines.push(`"#${c.id}";"${uni?.nome || 'N/D'}";"${eq?.nome || 'N/D'}";"${eq?.numero_serie || 'N/D'}";"${c.tipo}";"${c.descricao_defeito.replace(/"/g, '""')}";"${c.data_abertura}";"${(c.custo_reparo || 0).toFixed(2).replace('.', ',')}";"${c.status}"`);
+        csvLines.push(`"#${c.id}";"${sanitizeCsvCell(uni?.nome || 'N/D')}";"${sanitizeCsvCell(eq?.nome || 'N/D')}";"${sanitizeCsvCell(eq?.numero_serie || 'N/D')}";"${sanitizeCsvCell(c.tipo)}";"${sanitizeCsvCell(c.descricao_defeito)}";"${c.data_abertura}";"${(c.custo_reparo || 0).toFixed(2).replace('.', ',')}";"${c.status}"`);
       });
     }
 
@@ -208,62 +229,41 @@ export const ModalRelatorio: React.FC<Props> = ({
           .header h1 { margin: 0; font-size: 20px; color: #0284c7; text-transform: uppercase; }
           .header h2 { margin: 4px 0 0 0; font-size: 14px; font-weight: normal; color: #64748b; }
           .meta-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px 15px; border-radius: 6px; margin-bottom: 20px; display: flex; justify-content: space-between; }
-          .meta-item { display: flex; flex-direction: column; }
-          .meta-item span { font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: bold; }
-          .meta-item strong { font-size: 13px; color: #0f172a; }
-          table { width: 100%; border-collapse: collapse; margin-top: 15px; margin-bottom: 25px; }
-          th, td { border: 1px solid #cbd5e1; padding: 8px 10px; text-align: left; font-size: 11px; }
-          th { background: #0f172a; color: #ffffff; font-weight: 600; text-transform: uppercase; font-size: 10px; }
-          tr:nth-child(even) { background: #f8fafc; }
+          .meta-item { font-size: 12px; }
+          .meta-item strong { color: #0f172a; }
+          .section-title { font-size: 14px; font-weight: bold; color: #0369a1; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; margin-top: 25px; margin-bottom: 12px; text-transform: uppercase; }
+          table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+          th { background: #f1f5f9; color: #334155; font-weight: 600; text-align: left; padding: 6px 8px; border: 1px solid #cbd5e1; font-size: 11px; text-transform: uppercase; }
+          td { padding: 6px 8px; border: 1px solid #e2e8f0; font-size: 11px; }
+          tr:nth-child(even) { background-color: #f8fafc; }
           .text-right { text-align: right; }
           .text-center { text-align: center; }
-          .section-title { font-size: 15px; font-weight: bold; color: #0f172a; border-left: 4px solid #0284c7; padding-left: 8px; margin-top: 25px; margin-bottom: 10px; }
-          .total-row { background: #e0f2fe !important; font-weight: bold; font-size: 12px; }
-          .footer-signatures { margin-top: 50px; display: flex; justify-content: space-between; gap: 40px; page-break-inside: avoid; }
-          .sig-box { flex: 1; text-align: center; border-top: 1px solid #0f172a; padding-top: 6px; font-size: 11px; }
-          @media print {
-            body { padding: 0; }
-            .no-print { display: none; }
-          }
+          .total-row { font-weight: bold; background: #e0f2fe !important; }
+          .footer-signatures { margin-top: 40px; display: flex; justify-content: space-between; page-break-inside: avoid; }
+          .sig-box { width: 45%; text-align: center; border-top: 1px solid #94a3b8; padding-top: 5px; font-size: 11px; color: #475569; }
         </style>
       </head>
       <body>
-        <div class="no-print" style="margin-bottom: 15px; text-align: right;">
-          <button onclick="window.print()" style="background: #0284c7; color: #fff; border: none; padding: 8px 16px; font-weight: bold; border-radius: 4px; cursor: pointer;">
-            Imprimir ou Salvar PDF
-          </button>
-        </div>
-
         <div class="header">
-          <h1>ODONTOGEST — SISTEMA DE GESTÃO</h1>
-          <h2>RELATÓRIO GERENCIAL DE FLUXO FINANCEIRO & GESTÃO OPERACIONAL</h2>
+          <h1>PREFEITURA MUNICIPAL DE ALENQUER</h1>
+          <h2>SECRETARIA MUNICIPAL DE SAÚDE - COORDENAÇÃO DE SAÚDE BUCAL</h2>
         </div>
 
         <div class="meta-box">
-          <div class="meta-item">
-            <span>Tipo de Relatório</span>
-            <strong>${tipoRelatorio === 'FINANCEIRO' ? 'Fluxo Financeiro & Consolidação Multiclínica' : (tipoRelatorio === 'INSUMOS' ? 'Gestão de Insumos & Estoque' : (tipoRelatorio === 'MANUTENCAO' ? 'Manutenção de Equipamentos' : 'Relatório Geral Consolidado'))}</strong>
-          </div>
-          <div class="meta-item">
-            <span>Período de Referência</span>
-            <strong>${nomeMes}</strong>
-          </div>
-          <div class="meta-item">
-            <span>Data de Emissão</span>
-            <strong>${dataEmissao}</strong>
-          </div>
-          <div class="meta-item">
-            <span>Filtro de Unidade</span>
-            <strong>${unidadeFiltro === 'TODAS' ? 'Todas as Unidades' : (unidades.find(u => u.id === unidadeFiltro)?.nome || 'Unidade Especificada')}</strong>
-          </div>
+          <div class="meta-item">Relatório: <strong>${escapeHtml(tipoRelatorio)}</strong></div>
+          <div class="meta-item">Período de Referência: <strong>${escapeHtml(nomeMes)}</strong></div>
+          <div class="meta-item">Data de Emissão: <strong>${escapeHtml(dataEmissao)}</strong></div>
         </div>
     `;
 
     if (tipoRelatorio === 'FINANCEIRO' || tipoRelatorio === 'COMPLETO') {
-      let tInsumos = 0, tHonorarios = 0, tManutencao = 0, tGeral = 0;
+      let tInsumos = 0;
+      let tHonorarios = 0;
+      let tManutencao = 0;
+      let tGeral = 0;
 
       conteudoHTML += `
-        <div class="section-title">1. Consolidação Financeira Multiclínica por Unidade de Saúde</div>
+        <div class="section-title">1. Consolidação Financeira Multiclínica</div>
         <table>
           <thead>
             <tr>
@@ -286,8 +286,8 @@ export const ModalRelatorio: React.FC<Props> = ({
 
         conteudoHTML += `
           <tr>
-            <td><strong>${item.nome}</strong></td>
-            <td class="text-center">${item.tipo}</td>
+            <td><strong>${escapeHtml(item.nome)}</strong></td>
+            <td class="text-center">${escapeHtml(item.tipo)}</td>
             <td class="text-right">${formatarMoeda(item.custoInsumosAtendidos)}</td>
             <td class="text-right">${formatarMoeda(item.custoHonorariosDentistas)}</td>
             <td class="text-right">${formatarMoeda(item.custoManutencaoEquipamentos)}</td>
@@ -338,9 +338,9 @@ export const ModalRelatorio: React.FC<Props> = ({
         conteudoHTML += `
           <tr>
             <td>#${m.id}</td>
-            <td><strong>${m.descricao}</strong></td>
-            <td class="text-center">${m.unidade_medida}</td>
-            <td>${m.fornecedor || 'Não Informado'}</td>
+            <td><strong>${escapeHtml(m.descricao)}</strong></td>
+            <td class="text-center">${escapeHtml(m.unidade_medida)}</td>
+            <td>${escapeHtml(m.fornecedor || 'Não Informado')}</td>
             <td class="text-center"><strong>${est}</strong></td>
             <td class="text-right">${formatarMoeda(m.valor_estimado || 0)}</td>
             <td class="text-right">${formatarMoeda(totalVal)}</td>
@@ -383,13 +383,13 @@ export const ModalRelatorio: React.FC<Props> = ({
         conteudoHTML += `
           <tr>
             <td>#${c.id}</td>
-            <td><strong>${uni?.nome || 'N/D'}</strong></td>
-            <td>${eq?.nome || 'N/D'}</td>
-            <td>${c.tipo}</td>
-            <td>${c.descricao_defeito}</td>
+            <td><strong>${escapeHtml(uni?.nome || 'N/D')}</strong></td>
+            <td>${escapeHtml(eq?.nome || 'N/D')}</td>
+            <td>${escapeHtml(c.tipo)}</td>
+            <td>${escapeHtml(c.descricao_defeito)}</td>
             <td class="text-center">${formatarData(c.data_abertura)}</td>
             <td class="text-right"><strong>${formatarMoeda(c.custo_reparo || 0)}</strong></td>
-            <td class="text-center">${c.status}</td>
+            <td class="text-center">${escapeHtml(c.status)}</td>
           </tr>
         `;
       });
@@ -448,7 +448,7 @@ export const ModalRelatorio: React.FC<Props> = ({
               Tipo de Relatório *
             </label>
             <select 
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
               value={tipoRelatorio}
               onChange={e => setTipoRelatorio(e.target.value as TipoRelatorio)}
             >
@@ -467,7 +467,7 @@ export const ModalRelatorio: React.FC<Props> = ({
                 Período / Mês *
               </label>
               <select 
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
                 value={mesFiltro}
                 onChange={e => setMesFiltro(e.target.value)}
               >
@@ -485,7 +485,7 @@ export const ModalRelatorio: React.FC<Props> = ({
                 Unidade de Saúde *
               </label>
               <select 
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-100"
                 value={unidadeFiltro}
                 onChange={e => setUnidadeFiltro(e.target.value === 'TODAS' ? 'TODAS' : Number(e.target.value))}
               >

@@ -9,10 +9,12 @@ CREATE TABLE IF NOT EXISTS unidades_saude (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(150) NOT NULL UNIQUE,
     tipo VARCHAR(50) DEFAULT 'USF', -- Ex: USF, PAM, SMS
+    orcamento_custeio DECIMAL(12,2) DEFAULT 100000.00,
+    orcamento_investimento DECIMAL(12,2) DEFAULT 50000.00,
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
--- 2. Tabela de Usuários e Perfis (Solicitante / Gestor)
+-- 2. Tabela de Usuários e Perfis (Solicitante / Gestor / Administrador / Técnico)
 CREATE TABLE IF NOT EXISTS usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(150) NOT NULL UNIQUE,
@@ -20,7 +22,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     nome VARCHAR(150) NOT NULL,
     funcao VARCHAR(100) NULL, -- Ex: Cirurgiã Dentista / Gestor
     registro VARCHAR(50) NULL, -- Ex: CRO/PA 0592
-    perfil ENUM('SOLICITANTE', 'GESTOR') NOT NULL DEFAULT 'SOLICITANTE',
+    perfil ENUM('SOLICITANTE', 'GESTOR', 'ADMINISTRADOR', 'TECNICO') NOT NULL DEFAULT 'SOLICITANTE',
     unidade_id INT NULL,
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -34,6 +36,9 @@ CREATE TABLE IF NOT EXISTS materiais (
     unidade_medida VARCHAR(20) NOT NULL, -- cx, un, pot, pct, etc.
     valor_estimado DECIMAL(10,2) DEFAULT 0.00,
     qtd_estoque INT NOT NULL DEFAULT 100,
+    limite_max_pedido INT NULL,
+    fornecedor VARCHAR(150) NULL,
+    natureza ENUM('CUSTEIO', 'INVESTIMENTO') DEFAULT 'CUSTEIO',
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
@@ -90,6 +95,66 @@ CREATE TABLE IF NOT EXISTS itens_pedido_pbs (
     
     FOREIGN KEY (pedido_id) REFERENCES pedidos_pbs(id) ON DELETE CASCADE,
     FOREIGN KEY (material_id) REFERENCES materiais(id)
+) ENGINE=InnoDB;
+
+-- 6. Honorários & Salários Odontológicos
+CREATE TABLE IF NOT EXISTS honorarios_odontologos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    unidade_id INT NOT NULL,
+    nome_dentista VARCHAR(150) NOT NULL,
+    cro VARCHAR(50) NOT NULL,
+    tipo_contrato VARCHAR(50) NOT NULL,
+    mes_referencia VARCHAR(10) NOT NULL,
+    valor_fixo DECIMAL(10,2) DEFAULT 0.00,
+    valor_comissao DECIMAL(10,2) DEFAULT 0.00,
+    valor_total DECIMAL(10,2) DEFAULT 0.00,
+    observacoes TEXT NULL,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (unidade_id) REFERENCES unidades_saude(id)
+) ENGINE=InnoDB;
+
+-- 7. Equipamentos Odontológicos
+CREATE TABLE IF NOT EXISTS equipamentos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    unidade_id INT NOT NULL,
+    nome VARCHAR(150) NOT NULL,
+    numero_serie VARCHAR(100) NOT NULL,
+    categoria VARCHAR(100) NOT NULL,
+    data_ultima_preventiva DATE NULL,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (unidade_id) REFERENCES unidades_saude(id)
+) ENGINE=InnoDB;
+
+-- 8. Chamados de Manutenção
+CREATE TABLE IF NOT EXISTS chamados_manutencao (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    unidade_id INT NOT NULL,
+    equipamento_id INT NOT NULL,
+    tipo VARCHAR(20) DEFAULT 'CORRETIVA',
+    descricao_defeito TEXT NOT NULL,
+    custo_reparo DECIMAL(10,2) DEFAULT 0.00,
+    status VARCHAR(20) DEFAULT 'ABERTO',
+    data_abertura TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    data_conclusao DATE NULL,
+    observacoes TEXT NULL,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (unidade_id) REFERENCES unidades_saude(id),
+    FOREIGN KEY (equipamento_id) REFERENCES equipamentos(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- 9. Entradas e Aportes Financeiros
+CREATE TABLE IF NOT EXISTS entradas_recursos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    unidade_id INT NULL,
+    natureza ENUM('CUSTEIO', 'INVESTIMENTO') DEFAULT 'CUSTEIO',
+    tipo_recorrencia ENUM('RECORRENTE', 'PARCELA_UNICA') DEFAULT 'RECORRENTE',
+    descricao VARCHAR(255) NOT NULL,
+    valor DECIMAL(12,2) DEFAULT 0.00,
+    data_credito TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    mes_referencia VARCHAR(10) NOT NULL,
+    observacoes TEXT NULL,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (unidade_id) REFERENCES unidades_saude(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 

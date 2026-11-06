@@ -27,5 +27,9 @@ EXPOSE 3001
 ENV NODE_ENV=production
 ENV PORT=3001
 
+# Executar como usuário não-root node
+RUN chown -R node:node /app
+USER node
+
 # Comando de inicialização do backend
 CMD ["npx", "tsx", "src/server/server.ts"]

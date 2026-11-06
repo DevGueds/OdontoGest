@@ -9,7 +9,38 @@ export interface User {
   funcao: string;
   registro: string;
   perfil: 'SOLICITANTE' | 'GESTOR' | 'ADMINISTRADOR' | 'TECNICO';
-  unidade_id: number;
+  unidade_id: number | null;
+}
+
+export type SafeUser = Omit<User, 'senha'>;
+
+export function sanitizeUser(u: User): SafeUser {
+  const { senha, ...rest } = u;
+  return rest;
+}
+
+export function hashPassword(password: string): string {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.scryptSync(password, salt, 64).toString('hex');
+  return `scrypt:${salt}:${hash}`;
+}
+
+export function verifyPassword(password: string, storedHashOrPlaintext?: string): boolean {
+  if (!storedHashOrPlaintext) return false;
+  if (storedHashOrPlaintext.startsWith('scrypt:')) {
+    const parts = storedHashOrPlaintext.split(':');
+    if (parts.length !== 3) return false;
+    const [, salt, expectedHashHex] = parts;
+    const computedHash = crypto.scryptSync(password, salt, 64);
+    const expectedBuffer = Buffer.from(expectedHashHex, 'hex');
+    if (computedHash.length !== expectedBuffer.length) return false;
+    return crypto.timingSafeEqual(computedHash, expectedBuffer);
+  }
+  // Legacy plaintext support with constant-time comparison
+  const a = Buffer.from(password);
+  const b = Buffer.from(storedHashOrPlaintext);
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(a, b);
 }
 
 export interface Session {
@@ -29,11 +60,13 @@ export interface OAuthAuthCode {
   expiresAt: number;
 }
 
+const DEFAULT_ADMIN_HASH = hashPassword('123456');
+
 export const USERS_SEED: User[] = [
   {
     id: 1,
     email: "admin@saude.gov.br",
-    senha: "123456",
+    senha: DEFAULT_ADMIN_HASH,
     nome: "Dr. Roberto Sotillo (Administrador)",
     funcao: "Administrador Geral SMS",
     registro: "ADM/PA 001",
@@ -46,6 +79,20 @@ let inMemoryUsers: User[] = [...USERS_SEED];
 
 export const SESSIONS = new Map<string, Session>();
 export const OAUTH_CODES = new Map<string, OAuthAuthCode>();
+
+const MAX_SESSIONS = 5000;
+const MAX_OAUTH_CODES = 1000;
+
+// Periodic cleanup of expired sessions and oauth codes to prevent heap exhaustion
+setInterval(() => {
+  const now = Date.now();
+  for (const [code, entry] of OAUTH_CODES.entries()) {
+    if (now > entry.expiresAt) OAUTH_CODES.delete(code);
+  }
+  for (const [sid, sess] of SESSIONS.entries()) {
+    if (now > sess.expiresAt) SESSIONS.delete(sid);
+  }
+}, 60_000).unref();
 
 export async function getAllUsers(): Promise<User[]> {
   try {
@@ -61,7 +108,7 @@ export async function getAllUsers(): Promise<User[]> {
       const admin = await prisma.usuario.create({
         data: {
           email: "admin@saude.gov.br",
-          senhaHash: "123456",
+          senhaHash: DEFAULT_ADMIN_HASH,
           nome: "Dr. Roberto Sotillo (Administrador)",
           funcao: "Administrador Geral SMS",
           registro: "ADM/PA 001",
@@ -80,7 +127,7 @@ export async function getAllUsers(): Promise<User[]> {
       funcao: u.funcao || '',
       registro: u.registro || '',
       perfil: u.perfil as any,
-      unidade_id: u.unidadeId || 1
+      unidade_id: u.unidadeId ?? null
     }));
   } catch (err) {}
   return inMemoryUsers;
@@ -92,16 +139,18 @@ export async function addUser(dados: Omit<User, 'id'>): Promise<User> {
     throw new Error(`E-mail "${dados.email}" já está cadastrado.`);
   }
 
+  const senhaHashed = dados.senha ? (dados.senha.startsWith('scrypt:') ? dados.senha : hashPassword(dados.senha)) : DEFAULT_ADMIN_HASH;
+
   try {
     const u = await prisma.usuario.create({
       data: {
         email: emailNorm,
-        senhaHash: dados.senha || '123456',
+        senhaHash: senhaHashed,
         nome: dados.nome,
         funcao: dados.funcao || 'Profissional de Saúde',
         registro: dados.registro || '',
         perfil: dados.perfil as any,
-        unidadeId: dados.unidade_id
+        unidadeId: dados.unidade_id ?? null
       }
     });
 
@@ -113,7 +162,7 @@ export async function addUser(dados: Omit<User, 'id'>): Promise<User> {
       funcao: u.funcao || '',
       registro: u.registro || '',
       perfil: u.perfil as any,
-      unidade_id: u.unidadeId || 1
+      unidade_id: u.unidadeId ?? null
     };
     inMemoryUsers.push(novo);
     return novo;
@@ -122,12 +171,12 @@ export async function addUser(dados: Omit<User, 'id'>): Promise<User> {
     const novo: User = {
       id: nextId,
       email: emailNorm,
-      senha: dados.senha || '123456',
+      senha: senhaHashed,
       nome: dados.nome,
       funcao: dados.funcao || 'Profissional de Saúde',
       registro: dados.registro || '',
       perfil: dados.perfil,
-      unidade_id: dados.unidade_id
+      unidade_id: dados.unidade_id ?? null
     };
     inMemoryUsers.push(novo);
     return novo;
@@ -135,17 +184,19 @@ export async function addUser(dados: Omit<User, 'id'>): Promise<User> {
 }
 
 export async function updateUser(id: number, dados: Partial<User>): Promise<User> {
+  const senhaHashed = dados.senha ? (dados.senha.startsWith('scrypt:') ? dados.senha : hashPassword(dados.senha)) : undefined;
+
   try {
     const u = await prisma.usuario.update({
       where: { id: Number(id) },
       data: {
         ...(dados.nome && { nome: dados.nome }),
         ...(dados.email && { email: dados.email.trim().toLowerCase() }),
-        ...(dados.senha && { senhaHash: dados.senha }),
+        ...(senhaHashed && { senhaHash: senhaHashed }),
         ...(dados.registro !== undefined && { registro: dados.registro }),
         ...(dados.funcao !== undefined && { funcao: dados.funcao }),
         ...(dados.perfil && { perfil: dados.perfil as any }),
-        ...(dados.unidade_id && { unidadeId: dados.unidade_id })
+        ...(dados.unidade_id !== undefined && { unidadeId: dados.unidade_id })
       }
     });
     const idx = inMemoryUsers.findIndex(u => u.id === Number(id));
@@ -157,7 +208,7 @@ export async function updateUser(id: number, dados: Partial<User>): Promise<User
       funcao: u.funcao || '',
       registro: u.registro || '',
       perfil: u.perfil as any,
-      unidade_id: u.unidadeId || 1
+      unidade_id: u.unidadeId ?? null
     };
     if (idx !== -1) inMemoryUsers[idx] = alt;
     return alt;
@@ -167,19 +218,30 @@ export async function updateUser(id: number, dados: Partial<User>): Promise<User
 
     inMemoryUsers[idx] = {
       ...inMemoryUsers[idx],
-      ...dados
+      ...dados,
+      ...(senhaHashed && { senha: senhaHashed }),
+      unidade_id: dados.unidade_id !== undefined ? dados.unidade_id : inMemoryUsers[idx].unidade_id
     };
     return inMemoryUsers[idx];
   }
 }
 
 export async function deleteUser(id: number): Promise<void> {
+  const numId = Number(id);
   try {
     await prisma.usuario.delete({
-      where: { id: Number(id) }
+      where: { id: numId }
     });
   } catch (err) {}
-  inMemoryUsers = inMemoryUsers.filter(u => u.id !== Number(id));
+
+  inMemoryUsers = inMemoryUsers.filter(u => u.id !== numId);
+
+  // Invalidate any active sessions for the deleted user immediately
+  for (const [sessionId, session] of SESSIONS.entries()) {
+    if (session.userId === numId) {
+      SESSIONS.delete(sessionId);
+    }
+  }
 }
 
 export async function getUserById(userId: number): Promise<User | null> {
@@ -196,7 +258,7 @@ export async function getUserById(userId: number): Promise<User | null> {
         funcao: u.funcao || '',
         registro: u.registro || '',
         perfil: u.perfil as any,
-        unidade_id: u.unidadeId || 1
+        unidade_id: u.unidadeId ?? null
       };
     }
   } catch (err) {
@@ -214,8 +276,17 @@ export async function authenticateUser(email: string, senha?: string): Promise<U
     });
 
     if (u) {
-      if (senha && u.senhaHash !== senha) {
+      if (!senha || !verifyPassword(senha, u.senhaHash)) {
         throw new Error("E-mail ou senha incorretos.");
+      }
+
+      // Upgrade legacy plaintext password to secure scrypt hash transparently
+      if (!u.senhaHash.startsWith('scrypt:')) {
+        const upgradedHash = hashPassword(senha);
+        await prisma.usuario.update({
+          where: { id: u.id },
+          data: { senhaHash: upgradedHash }
+        }).catch(() => {});
       }
 
       return {
@@ -226,7 +297,7 @@ export async function authenticateUser(email: string, senha?: string): Promise<U
         funcao: u.funcao || '',
         registro: u.registro || '',
         perfil: u.perfil as any,
-        unidade_id: u.unidadeId || 1
+        unidade_id: u.unidadeId ?? null
       };
     }
   } catch (err: any) {
@@ -239,7 +310,7 @@ export async function authenticateUser(email: string, senha?: string): Promise<U
     throw new Error("E-mail ou senha incorretos.");
   }
 
-  if (senha && user.senha && user.senha !== senha) {
+  if (!senha || !verifyPassword(senha, user.senha)) {
     throw new Error("E-mail ou senha incorretos.");
   }
 
@@ -261,6 +332,12 @@ export async function createSession(userId: number): Promise<Session> {
     createdAt: now,
     expiresAt
   };
+
+  // Prevent unbounded heap growth
+  if (SESSIONS.size >= MAX_SESSIONS) {
+    const oldestKey = SESSIONS.keys().next().value;
+    if (oldestKey) SESSIONS.delete(oldestKey);
+  }
 
   SESSIONS.set(sessionId, session);
   return session;

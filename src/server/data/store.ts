@@ -395,11 +395,13 @@ class DataStore {
   }
 
   // Pedidos
-  async getPedidos(): Promise<PedidoPBS[]> {
+  async getPedidos(unidadeEmitenteId?: number): Promise<PedidoPBS[]> {
     try {
       const list = await prisma.pedidoPBS.findMany({
+        where: unidadeEmitenteId ? { unidadeEmitenteId } : undefined,
         include: { itens: true },
-        orderBy: { id: 'desc' }
+        orderBy: { id: 'desc' },
+        take: 300
       });
       if (list) {
         return list.map(p => ({
@@ -434,6 +436,9 @@ class DataStore {
     } catch (err) {
       // Fallback
     }
+    if (unidadeEmitenteId) {
+      return this.inMemoryPedidos.filter(p => p.unidade_emitente_id === unidadeEmitenteId);
+    }
     return this.inMemoryPedidos;
   }
 
@@ -447,29 +452,61 @@ class DataStore {
     elemento_despesa?: string;
     observacoes?: string;
     numero_pbs?: string;
-    itens: { material_id: number; qtd_pedida: number; valor_unitario: number }[];
+    itens: { material_id: number; qtd_pedida: number; valor_unitario?: number }[];
   }): Promise<PedidoPBS> {
-    try {
-      const count = await prisma.pedidoPBS.count();
-      const nextId = count + 1;
-      const anoAtual = new Date().getFullYear();
-      const numeroPbs = dados.numero_pbs || `PBS-${anoAtual}/${String(nextId).padStart(4, '0')}`;
+    if (!Array.isArray(dados.itens) || dados.itens.length === 0 || dados.itens.length > 100) {
+      throw new Error("O pedido deve conter entre 1 e 100 itens.");
+    }
 
+    try {
+      // Validar cada material a partir do catálogo do servidor (evita manipulação de preço pelo cliente)
       let valorTotalEstimado = 0;
-      const itensCreate = (dados.itens || []).map((item, index) => {
-        const vUnit = Number(item.valor_unitario) || 0;
-        const qPed = Number(item.qtd_pedida) || 1;
+      const itensCreate: {
+        numeroItem: number;
+        materialId: number;
+        qtdPedida: number;
+        qtdAtendida: number;
+        valorUnitario: number;
+        valorTotal: number;
+      }[] = [];
+
+      for (let i = 0; i < dados.itens.length; i++) {
+        const item = dados.itens[i];
+        const qPed = Math.floor(Number(item.qtd_pedida));
+        if (!Number.isFinite(qPed) || qPed <= 0) {
+          throw new Error(`Quantidade inválida para o item #${i + 1}. Deve ser um número inteiro positivo.`);
+        }
+
+        let mat = await prisma.material.findUnique({ where: { id: Number(item.material_id) } }).catch(() => null);
+        if (!mat) {
+          mat = this.inMemoryMateriais.find(m => m.id === Number(item.material_id)) as any;
+        }
+        if (!mat) {
+          throw new Error(`Material #${item.material_id} não encontrado no catálogo.`);
+        }
+
+        if (mat.limiteMaxPedido && mat.limiteMaxPedido > 0 && qPed > mat.limiteMaxPedido) {
+          throw new Error(`Quantidade solicitada (${qPed}) excede o limite máximo permitido (${mat.limiteMaxPedido}) para o material "${mat.descricao}".`);
+        }
+
+        const vUnit = Number(mat.valorEstimado ?? (mat as any).valor_estimado ?? 0);
         const vTot = vUnit * qPed;
         valorTotalEstimado += vTot;
-        return {
-          numeroItem: index + 1,
+
+        itensCreate.push({
+          numeroItem: i + 1,
           materialId: Number(item.material_id),
           qtdPedida: qPed,
           qtdAtendida: 0,
           valorUnitario: vUnit,
           valorTotal: vTot
-        };
-      });
+        });
+      }
+
+      const count = await prisma.pedidoPBS.count();
+      const nextId = count + 1;
+      const anoAtual = new Date().getFullYear();
+      const numeroPbs = `PBS-${anoAtual}/${String(nextId).padStart(4, '0')}`;
 
       const p = await prisma.pedidoPBS.create({
         data: {
@@ -521,29 +558,39 @@ class DataStore {
       };
 
       this.inMemoryPedidos.unshift(res);
+      if (this.inMemoryPedidos.length > 200) this.inMemoryPedidos.pop();
       return res;
-    } catch (err) {
+    } catch (err: any) {
+      if (err.code === 'P2003' || err.code === 'P2002' || err.message?.includes('não encontrado') || err.message?.includes('excede') || err.message?.includes('inválida')) {
+        throw err;
+      }
+
       const nextId = this.inMemoryPedidos.length ? Math.max(...this.inMemoryPedidos.map(p => p.id)) + 1 : 1;
       const anoAtual = new Date().getFullYear();
-      const numeroPbs = dados.numero_pbs || `PBS-${anoAtual}/${String(nextId).padStart(4, '0')}`;
+      const numeroPbs = `PBS-${anoAtual}/${String(nextId).padStart(4, '0')}`;
 
       let valorTotalEstimado = 0;
-      const itensCompletos: ItemPedido[] = (dados.itens || []).map((item, index) => {
-        const vUnit = Number(item.valor_unitario) || 0;
-        const qPed = Number(item.qtd_pedida) || 1;
+      const itensCompletos: ItemPedido[] = [];
+
+      for (let i = 0; i < dados.itens.length; i++) {
+        const item = dados.itens[i];
+        const qPed = Math.max(1, Math.floor(Number(item.qtd_pedida) || 1));
+        const mat = this.inMemoryMateriais.find(m => m.id === Number(item.material_id));
+        const vUnit = Number(mat?.valor_estimado || 0);
         const vTot = vUnit * qPed;
         valorTotalEstimado += vTot;
-        return {
-          id: Date.now() + index,
+
+        itensCompletos.push({
+          id: Date.now() + i,
           pedido_id: nextId,
-          numero_item: index + 1,
+          numero_item: i + 1,
           material_id: Number(item.material_id),
           qtd_pedida: qPed,
           qtd_atendida: 0,
           valor_unitario: vUnit,
           valor_total: vTot
-        };
-      });
+        });
+      }
 
       const novoPedido: PedidoPBS = {
         id: nextId,
@@ -568,6 +615,7 @@ class DataStore {
       };
 
       this.inMemoryPedidos.unshift(novoPedido);
+      if (this.inMemoryPedidos.length > 200) this.inMemoryPedidos.pop();
       return novoPedido;
     }
   }
@@ -633,31 +681,53 @@ class DataStore {
       });
       if (!pedidoAtual) throw new Error("Pedido não encontrado.");
 
+      if (['CANCELADO', 'ENVIADO', 'ATENDIDO_TOTAL'].includes(pedidoAtual.status)) {
+        throw new Error(`Pedido com status "${pedidoAtual.status}" não pode ser atendido.`);
+      }
+
+      if (!Array.isArray(itensAtendidos) || itensAtendidos.length === 0) {
+        throw new Error("Nenhum item informado para atendimento.");
+      }
+
+      // Validar limites e estoque antes de persistir
+      const itemUpdates: { itemId: number; materialId: number; diferenca: number; qNova: number }[] = [];
       let todosAtendidos100 = true;
       let algumAtendido = false;
 
       for (const item of pedidoAtual.itens) {
         const matAtualizacao = itensAtendidos.find(i => i.item_id === item.id || i.material_id === item.materialId);
+        let qAtendidaNova = Number(item.qtdAtendida) || 0;
+
         if (matAtualizacao) {
-          const qAtendidaAntiga = Number(item.qtdAtendida) || 0;
-          const qAtendidaNova = Number(matAtualizacao.qtd_atendida) || 0;
-          const diferenca = qAtendidaNova - qAtendidaAntiga;
-
-          if (diferenca !== 0) {
-            await prisma.material.update({
-              where: { id: item.materialId },
-              data: { qtdEstoque: { decrement: diferenca } }
-            }).catch(() => {});
+          const informed = Math.floor(Number(matAtualizacao.qtd_atendida));
+          if (!Number.isFinite(informed) || informed < 0) {
+            throw new Error("Quantidade atendida deve ser um número não negativo.");
           }
-
-          await prisma.itemPedidoPBS.update({
-            where: { id: item.id },
-            data: { qtdAtendida: qAtendidaNova }
-          });
-
-          if (qAtendidaNova > 0) algumAtendido = true;
-          if (qAtendidaNova < item.qtdPedida) todosAtendidos100 = false;
+          if (informed > item.qtdPedida) {
+            throw new Error(`Quantidade atendida (${informed}) não pode exceder a quantidade solicitada (${item.qtdPedida}).`);
+          }
+          qAtendidaNova = informed;
         }
+
+        const qAtendidaAntiga = Number(item.qtdAtendida) || 0;
+        const diferenca = qAtendidaNova - qAtendidaAntiga;
+
+        if (diferenca > 0) {
+          const mat = await prisma.material.findUnique({ where: { id: item.materialId } });
+          if (mat && mat.qtdEstoque < diferenca) {
+            throw new Error(`Estoque insuficiente para o material "${mat.descricao}". Disponível: ${mat.qtdEstoque}, requerido adicional: ${diferenca}.`);
+          }
+        }
+
+        itemUpdates.push({
+          itemId: item.id,
+          materialId: item.materialId,
+          diferenca,
+          qNova: qAtendidaNova
+        });
+
+        if (qAtendidaNova > 0) algumAtendido = true;
+        if (qAtendidaNova < item.qtdPedida) todosAtendidos100 = false;
       }
 
       let novoStatus: any = pedidoAtual.status;
@@ -667,10 +737,26 @@ class DataStore {
         novoStatus = "ATENDIDO_PARCIAL";
       }
 
-      const p = await prisma.pedidoPBS.update({
-        where: { id: Number(pedidoId) },
-        data: { status: novoStatus },
-        include: { itens: true }
+      // Execução transacional atômica
+      const p = await prisma.$transaction(async (tx) => {
+        for (const update of itemUpdates) {
+          if (update.diferenca !== 0) {
+            await tx.material.update({
+              where: { id: update.materialId },
+              data: { qtdEstoque: { decrement: update.diferenca } }
+            });
+          }
+          await tx.itemPedidoPBS.update({
+            where: { id: update.itemId },
+            data: { qtdAtendida: update.qNova }
+          });
+        }
+
+        return await tx.pedidoPBS.update({
+          where: { id: Number(pedidoId) },
+          data: { status: novoStatus },
+          include: { itens: true }
+        });
       });
 
       return {
@@ -701,42 +787,60 @@ class DataStore {
           valor_total: Number(it.valorTotal || 0)
         }))
       };
-    } catch (err) {
+    } catch (err: any) {
+      if (err.message && (err.message.includes('Estoque') || err.message.includes('Quantidade') || err.message.includes('Pedido') || err.message.includes('status'))) {
+        throw err;
+      }
+
       const pIndex = this.inMemoryPedidos.findIndex(p => p.id === Number(pedidoId));
       if (pIndex === -1) throw new Error("Pedido não encontrado.");
+
+      const pedidoMem = this.inMemoryPedidos[pIndex];
+      if (['CANCELADO', 'ENVIADO', 'ATENDIDO_TOTAL'].includes(pedidoMem.status)) {
+        throw new Error(`Pedido com status "${pedidoMem.status}" não pode ser atendido.`);
+      }
 
       let todosAtendidos100 = true;
       let algumAtendido = false;
 
-      this.inMemoryPedidos[pIndex].itens = this.inMemoryPedidos[pIndex].itens.map(item => {
+      for (const item of pedidoMem.itens) {
         const matAtualizacao = itensAtendidos.find(i => i.item_id === item.id || i.material_id === item.material_id);
         if (matAtualizacao) {
+          const informed = Math.floor(Number(matAtualizacao.qtd_atendida));
+          if (!Number.isFinite(informed) || informed < 0) throw new Error("Quantidade atendida deve ser não negativa.");
+          if (informed > item.qtd_pedida) throw new Error("Quantidade atendida excede quantidade pedida.");
+
           const qAtendidaAntiga = Number(item.qtd_atendida) || 0;
-          const qAtendidaNova = Number(matAtualizacao.qtd_atendida) || 0;
-          
-          const diferenca = qAtendidaNova - qAtendidaAntiga;
-          if (diferenca !== 0) {
+          const diferenca = informed - qAtendidaAntiga;
+          if (diferenca > 0) {
+            const matObj = this.inMemoryMateriais.find(m => m.id === item.material_id);
+            if (matObj && (matObj.qtd_estoque || 0) < diferenca) {
+              throw new Error(`Estoque insuficiente para o material "${matObj.descricao}".`);
+            }
+            if (matObj) {
+              matObj.qtd_estoque = Math.max(0, (matObj.qtd_estoque || 0) - diferenca);
+            }
+          } else if (diferenca < 0) {
             const matObj = this.inMemoryMateriais.find(m => m.id === item.material_id);
             if (matObj) {
-              matObj.qtd_estoque = Math.max(0, (Number(matObj.qtd_estoque) || 0) - diferenca);
+              matObj.qtd_estoque = (matObj.qtd_estoque || 0) - diferenca;
             }
           }
 
-          item.qtd_atendida = qAtendidaNova;
-          if (qAtendidaNova > 0) algumAtendido = true;
-          if (qAtendidaNova < item.qtd_pedida) todosAtendidos100 = false;
+          item.qtd_atendida = informed;
+          if (informed > 0) algumAtendido = true;
+          if (informed < item.qtd_pedida) todosAtendidos100 = false;
         }
-        return item;
-      });
-
-      if (todosAtendidos100 && algumAtendido) {
-        this.inMemoryPedidos[pIndex].status = "ATENDIDO_TOTAL";
-      } else if (algumAtendido) {
-        this.inMemoryPedidos[pIndex].status = "ATENDIDO_PARCIAL";
       }
 
-      this.inMemoryPedidos[pIndex].atualizado_em = new Date().toISOString();
-      return this.inMemoryPedidos[pIndex];
+      if (todosAtendidos100 && algumAtendido) {
+        pedidoMem.status = "ATENDIDO_TOTAL";
+      } else if (algumAtendido) {
+        pedidoMem.status = "ATENDIDO_PARCIAL";
+      }
+
+      pedidoMem.atualizado_em = new Date().toISOString();
+      return pedidoMem;
     }
   }
 
@@ -795,12 +899,34 @@ class DataStore {
 
   async cancelarPedido(pedidoId: number): Promise<PedidoPBS> {
     try {
-      const p = await prisma.pedidoPBS.update({
+      const pedidoAtual = await prisma.pedidoPBS.findUnique({
         where: { id: Number(pedidoId) },
-        data: {
-          status: 'CANCELADO'
-        },
         include: { itens: true }
+      });
+      if (!pedidoAtual) throw new Error("Pedido não encontrado.");
+
+      if (pedidoAtual.status === 'ATENDIDO_TOTAL' || pedidoAtual.status === 'ENVIADO') {
+        throw new Error(`Não é permitido cancelar pedidos com status "${pedidoAtual.status}".`);
+      }
+
+      const p = await prisma.$transaction(async (tx) => {
+        // Restaurar estoque se já houve atendimento parcial
+        if (pedidoAtual.status === 'ATENDIDO_PARCIAL') {
+          for (const item of pedidoAtual.itens) {
+            if (item.qtdAtendida > 0) {
+              await tx.material.update({
+                where: { id: item.materialId },
+                data: { qtdEstoque: { increment: item.qtdAtendida } }
+              });
+            }
+          }
+        }
+
+        return await tx.pedidoPBS.update({
+          where: { id: Number(pedidoId) },
+          data: { status: 'CANCELADO' },
+          include: { itens: true }
+        });
       });
 
       return {
@@ -831,14 +957,31 @@ class DataStore {
           valor_total: Number(it.valorTotal || 0)
         }))
       };
-    } catch (err) {
+    } catch (err: any) {
+      if (err.message && (err.message.includes('Não é permitido') || err.message.includes('Pedido'))) {
+        throw err;
+      }
       const pIndex = this.inMemoryPedidos.findIndex(p => p.id === Number(pedidoId));
       if (pIndex === -1) throw new Error("Pedido não encontrado.");
 
-      this.inMemoryPedidos[pIndex].status = "CANCELADO";
-      this.inMemoryPedidos[pIndex].atualizado_em = new Date().toISOString();
+      const pedidoMem = this.inMemoryPedidos[pIndex];
+      if (pedidoMem.status === 'ATENDIDO_TOTAL' || pedidoMem.status === 'ENVIADO') {
+        throw new Error(`Não é permitido cancelar pedidos com status "${pedidoMem.status}".`);
+      }
 
-      return this.inMemoryPedidos[pIndex];
+      if (pedidoMem.status === 'ATENDIDO_PARCIAL') {
+        pedidoMem.itens.forEach(it => {
+          if (it.qtd_atendida > 0) {
+            const mat = this.inMemoryMateriais.find(m => m.id === it.material_id);
+            if (mat) mat.qtd_estoque = (mat.qtd_estoque || 0) + it.qtd_atendida;
+          }
+        });
+      }
+
+      pedidoMem.status = "CANCELADO";
+      pedidoMem.atualizado_em = new Date().toISOString();
+
+      return pedidoMem;
     }
   }
 
@@ -1167,6 +1310,17 @@ class DataStore {
   }
 
   async addChamado(dados: Omit<ChamadoManutencao, 'id'>): Promise<ChamadoManutencao> {
+    const custoReparo = Math.max(0, Number(dados.custo_reparo || 0));
+
+    // Validar se o equipamento pertence à unidade indicada
+    if (dados.equipamento_id) {
+      const eq = await (prisma as any).equipamento.findUnique({ where: { id: Number(dados.equipamento_id) } }).catch(() => null)
+        || this.inMemoryEquipamentos.find(e => e.id === Number(dados.equipamento_id));
+      if (eq && Number(eq.unidadeId || (eq as any).unidade_id) !== Number(dados.unidade_id)) {
+        throw new Error("O equipamento informado não pertence à unidade indicada.");
+      }
+    }
+
     try {
       const c = await (prisma as any).chamadoManutencao.create({
         data: {
@@ -1174,8 +1328,8 @@ class DataStore {
           equipamentoId: Number(dados.equipamento_id),
           tipo: dados.tipo || 'CORRETIVA',
           descricaoDefeito: dados.descricao_defeito,
-          custoReparo: Number(dados.custo_reparo || 0),
-          status: dados.status || 'ABERTO',
+          custoReparo,
+          status: 'ABERTO', // Sempre força status inicial como ABERTO
           dataAbertura: dados.data_abertura ? new Date(dados.data_abertura) : new Date(),
           observacoes: dados.observacoes
         }
@@ -1193,10 +1347,13 @@ class DataStore {
       };
       this.inMemoryChamados.push(novo);
       return novo;
-    } catch (err) {
+    } catch (err: any) {
+      if (err.message?.includes('não pertence')) throw err;
       const novo: ChamadoManutencao = {
         id: this.inMemoryChamados.length ? Math.max(...this.inMemoryChamados.map(c => c.id)) + 1 : 1,
-        ...dados
+        ...dados,
+        custo_reparo: custoReparo,
+        status: 'ABERTO'
       };
       this.inMemoryChamados.push(novo);
       return novo;
@@ -1204,13 +1361,29 @@ class DataStore {
   }
 
   async updateStatusChamado(chamadoId: number, status: StatusChamado, custoReparo?: number): Promise<ChamadoManutencao> {
+    if (custoReparo !== undefined && custoReparo < 0) {
+      throw new Error("O custo de reparo não pode ser negativo.");
+    }
+
+    // Buscar chamado para verificar máquina de estados
+    let chamadoAtual = await (prisma as any).chamadoManutencao.findUnique({ where: { id: Number(chamadoId) } }).catch(() => null);
+    if (!chamadoAtual) {
+      chamadoAtual = this.inMemoryChamados.find(c => c.id === Number(chamadoId));
+    }
+    if (!chamadoAtual) throw new Error("Chamado não encontrado.");
+
+    const statusAtual = chamadoAtual.status;
+    if ((statusAtual === 'ABERTO' || statusAtual === 'RECUSADO') && (status === 'EM_ANDAMENTO' || status === 'CONCLUIDO')) {
+      throw new Error(`Chamados com status "${statusAtual}" requerem aprovação da gestão antes da execução.`);
+    }
+
     const dataConc = status === 'CONCLUIDO' ? new Date().toISOString().substring(0, 10) : null;
     try {
       const c = await (prisma as any).chamadoManutencao.update({
         where: { id: Number(chamadoId) },
         data: {
           status,
-          ...(custoReparo !== undefined && { custoReparo }),
+          ...(custoReparo !== undefined && { custoReparo: Math.max(0, custoReparo) }),
           ...(status === 'CONCLUIDO' && { dataConclusao: new Date() })
         }
       });
@@ -1225,11 +1398,12 @@ class DataStore {
         data_abertura: c.dataAbertura.toISOString().substring(0, 10),
         data_conclusao: c.dataConclusao ? c.dataConclusao.toISOString().substring(0, 10) : null
       };
-    } catch (err) {
+    } catch (err: any) {
+      if (err.message?.includes('requerem aprovação') || err.message?.includes('não encontrado')) throw err;
       const index = this.inMemoryChamados.findIndex(c => c.id === Number(chamadoId));
       if (index === -1) throw new Error("Chamado não encontrado.");
       this.inMemoryChamados[index].status = status;
-      if (custoReparo !== undefined) this.inMemoryChamados[index].custo_reparo = custoReparo;
+      if (custoReparo !== undefined) this.inMemoryChamados[index].custo_reparo = Math.max(0, custoReparo);
       if (status === 'CONCLUIDO') this.inMemoryChamados[index].data_conclusao = dataConc;
       return this.inMemoryChamados[index];
     }
@@ -1274,58 +1448,125 @@ class DataStore {
   }
 
   // Regra Automatizada de Manutenção Preventiva
-  verificarAlertasPreventiva(): { equipamento: Equipamento; unidade: UnidadeSaude; mensagem: string }[] {
-    const alertas: { equipamento: Equipamento; unidade: UnidadeSaude; mensagem: string }[] = [];
-    const chamadosAbertos = this.inMemoryChamados.filter(c => c.status === 'ABERTO' || c.status === 'EM_ANDAMENTO');
+  async verificarAlertasPreventiva(): Promise<{ equipamento: Equipamento; unidade: UnidadeSaude; mensagem: string }[]> {
+    try {
+      const equipamentos = await (prisma as any).equipamento.findMany();
+      const chamadosAbertos = await (prisma as any).chamadoManutencao.findMany({
+        where: { status: { in: ['ABERTO', 'EM_ANDAMENTO', 'APROVADO_ADM'] } }
+      });
+      const unidades = await prisma.unidadeSaude.findMany();
 
-    this.inMemoryEquipamentos.forEach(eq => {
-      const temChamadoPendente = chamadosAbertos.some(c => c.equipamento_id === eq.id);
-      if (!temChamadoPendente) {
-        const uni = this.inMemoryUnidades.find(u => u.id === eq.unidade_id);
-        const nomeUni = uni ? uni.nome : `Unidade #${eq.unidade_id}`;
-        alertas.push({
-          equipamento: eq,
-          unidade: uni || { id: eq.unidade_id, nome: nomeUni, tipo: 'USF' },
-          mensagem: `O equipamento ${eq.nome} (${eq.numero_serie}) na ${nomeUni} não possui chamados de reparo/defeito pendentes. Recomenda-se agendar a Manutenção Preventiva periódica para garantir o bom funcionamento.`
-        });
-      }
-    });
+      const alertas: { equipamento: Equipamento; unidade: UnidadeSaude; mensagem: string }[] = [];
+      equipamentos.forEach((eq: any) => {
+        const temChamadoPendente = chamadosAbertos.some((c: any) => c.equipamentoId === eq.id);
+        if (!temChamadoPendente) {
+          const uni = unidades.find(u => u.id === eq.unidadeId);
+          const nomeUni = uni ? uni.nome : `Unidade #${eq.unidadeId}`;
+          alertas.push({
+            equipamento: {
+              id: eq.id,
+              unidade_id: eq.unidadeId,
+              nome: eq.nome,
+              numero_serie: eq.numeroSerie,
+              categoria: eq.categoria,
+              data_ultima_preventiva: eq.dataUltimaPreventiva ? eq.dataUltimaPreventiva.toISOString().substring(0, 10) : undefined
+            },
+            unidade: uni ? { id: uni.id, nome: uni.nome, tipo: uni.tipo } : { id: eq.unidadeId, nome: nomeUni, tipo: 'USF' },
+            mensagem: `O equipamento ${eq.nome} (${eq.numeroSerie}) na ${nomeUni} não possui chamados de reparo/defeito pendentes. Recomenda-se agendar a Manutenção Preventiva periódica para garantir o bom funcionamento.`
+          });
+        }
+      });
+      return alertas;
+    } catch (err) {
+      const alertas: { equipamento: Equipamento; unidade: UnidadeSaude; mensagem: string }[] = [];
+      const chamadosAbertos = this.inMemoryChamados.filter(c => c.status === 'ABERTO' || c.status === 'EM_ANDAMENTO' || c.status === 'APROVADO_ADM');
 
-    return alertas;
-  }
-
-  // Consolidação Financeira Multiclínica por Unidade de Saúde
-  getConsolidacaoFinanceiraMulticlinica(): UnidadeConsolidacaoFinanceira[] {
-    return this.inMemoryUnidades.map(u => {
-      // 1. Insumos Atendidos (PBS)
-      const pedidosUnidade = this.inMemoryPedidos.filter(p => p.unidade_emitente_id === u.id && p.status !== 'CANCELADO');
-      let custoInsumos = 0;
-      pedidosUnidade.forEach(p => {
-        (p.itens || []).forEach(it => {
-          custoInsumos += (Number(it.qtd_atendida || 0) * Number(it.valor_unitario || 0));
-        });
+      this.inMemoryEquipamentos.forEach(eq => {
+        const temChamadoPendente = chamadosAbertos.some(c => c.equipamento_id === eq.id);
+        if (!temChamadoPendente) {
+          const uni = this.inMemoryUnidades.find(u => u.id === eq.unidade_id);
+          const nomeUni = uni ? uni.nome : `Unidade #${eq.unidade_id}`;
+          alertas.push({
+            equipamento: eq,
+            unidade: uni || { id: eq.unidade_id, nome: nomeUni, tipo: 'USF' },
+            mensagem: `O equipamento ${eq.nome} (${eq.numero_serie}) na ${nomeUni} não possui chamados de reparo/defeito pendentes. Recomenda-se agendar a Manutenção Preventiva periódica para garantir o bom funcionamento.`
+          });
+        }
       });
 
-      // 2. Honorários Odontólogos
-      const honorariosUnidade = this.inMemoryHonorarios.filter(h => h.unidade_id === u.id);
-      const custoHonorarios = honorariosUnidade.reduce((acc, h) => acc + Number(h.valor_total || 0), 0);
+      return alertas;
+    }
+  }
 
-      // 3. Manutenção de Equipamentos
-      const chamadosUnidade = this.inMemoryChamados.filter(c => c.unidade_id === u.id);
-      const custoManutencao = chamadosUnidade.reduce((acc, c) => acc + Number(c.custo_reparo || 0), 0);
+  // Consolidação Financeira Multiclínica por Unidade de Saúde (com consulta prioritária ao MySQL)
+  async getConsolidacaoFinanceiraMulticlinica(): Promise<UnidadeConsolidacaoFinanceira[]> {
+    try {
+      const unidades = await prisma.unidadeSaude.findMany();
+      const pedidos = await prisma.pedidoPBS.findMany({
+        where: { status: { not: 'CANCELADO' } },
+        include: { itens: true }
+      });
+      const honorarios = await (prisma as any).honorarioOdontologo.findMany();
+      const chamados = await (prisma as any).chamadoManutencao.findMany({
+        where: { status: { in: ['APROVADO_ADM', 'EM_ANDAMENTO', 'CONCLUIDO'] } }
+      });
 
-      const custoTotalGeral = custoInsumos + custoHonorarios + custoManutencao;
+      return unidades.map(u => {
+        const pedidosUnidade = pedidos.filter(p => p.unidadeEmitenteId === u.id);
+        let custoInsumos = 0;
+        pedidosUnidade.forEach(p => {
+          (p.itens || []).forEach(it => {
+            custoInsumos += (Number(it.qtdAtendida || 0) * Number(it.valorUnitario || 0));
+          });
+        });
 
-      return {
-        unidadeId: u.id,
-        nome: u.nome,
-        tipo: u.tipo,
-        custoInsumosAtendidos: custoInsumos,
-        custoHonorariosDentistas: custoHonorarios,
-        custoManutencaoEquipamentos: custoManutencao,
-        custoTotalGeral
-      };
-    });
+        const honorariosUnidade = honorarios.filter((h: any) => h.unidadeId === u.id);
+        const custoHonorarios = honorariosUnidade.reduce((acc: number, h: any) => acc + Number(h.valorTotal || 0), 0);
+
+        const chamadosUnidade = chamados.filter((c: any) => c.unidadeId === u.id);
+        const custoManutencao = chamadosUnidade.reduce((acc: number, c: any) => acc + Math.max(0, Number(c.custoReparo || 0)), 0);
+
+        const custoTotalGeral = custoInsumos + custoHonorarios + custoManutencao;
+
+        return {
+          unidadeId: u.id,
+          nome: u.nome,
+          tipo: u.tipo,
+          custoInsumosAtendidos: custoInsumos,
+          custoHonorariosDentistas: custoHonorarios,
+          custoManutencaoEquipamentos: custoManutencao,
+          custoTotalGeral
+        };
+      });
+    } catch (err) {
+      return this.inMemoryUnidades.map(u => {
+        const pedidosUnidade = this.inMemoryPedidos.filter(p => p.unidade_emitente_id === u.id && p.status !== 'CANCELADO');
+        let custoInsumos = 0;
+        pedidosUnidade.forEach(p => {
+          (p.itens || []).forEach(it => {
+            custoInsumos += (Number(it.qtd_atendida || 0) * Number(it.valor_unitario || 0));
+          });
+        });
+
+        const honorariosUnidade = this.inMemoryHonorarios.filter(h => h.unidade_id === u.id);
+        const custoHonorarios = honorariosUnidade.reduce((acc, h) => acc + Number(h.valor_total || 0), 0);
+
+        const chamadosUnidade = this.inMemoryChamados.filter(c => c.unidade_id === u.id && ['APROVADO_ADM', 'EM_ANDAMENTO', 'CONCLUIDO'].includes(c.status));
+        const custoManutencao = chamadosUnidade.reduce((acc, c) => acc + Math.max(0, Number(c.custo_reparo || 0)), 0);
+
+        const custoTotalGeral = custoInsumos + custoHonorarios + custoManutencao;
+
+        return {
+          unidadeId: u.id,
+          nome: u.nome,
+          tipo: u.tipo,
+          custoInsumosAtendidos: custoInsumos,
+          custoHonorariosDentistas: custoHonorarios,
+          custoManutencaoEquipamentos: custoManutencao,
+          custoTotalGeral
+        };
+      });
+    }
   }
 
   // Entradas e Aportes Financeiros
@@ -1400,6 +1641,11 @@ class DataStore {
   }
 
   async exportarSQL(): Promise<string> {
+    const escapeSql = (val: any): string => {
+      if (val === null || val === undefined) return 'NULL';
+      return "'" + String(val).replace(/\\/g, '\\\\').replace(/'/g, "''") + "'";
+    };
+
     const unidades = await this.getUnidades();
     const materiais = await this.getMateriais();
     const pedidos = await this.getPedidos();
@@ -1413,35 +1659,35 @@ class DataStore {
 
     sql += `-- 1. Unidades de Saúde\n`;
     unidades.forEach(u => {
-      sql += `INSERT INTO unidades_saude (id, nome, tipo) VALUES (${u.id}, '${u.nome.replace(/'/g, "''")}', '${u.tipo}') ON DUPLICATE KEY UPDATE nome=VALUES(nome);\n`;
+      sql += `INSERT INTO unidades_saude (id, nome, tipo) VALUES (${u.id}, ${escapeSql(u.nome)}, ${escapeSql(u.tipo)}) ON DUPLICATE KEY UPDATE nome=VALUES(nome);\n`;
     });
 
     sql += `\n-- 2. Materiais do Catálogo\n`;
     materiais.forEach(m => {
-      sql += `INSERT INTO materiais (id, descricao, unidade_medida, qtd_estoque) VALUES (${m.id}, '${m.descricao.replace(/'/g, "''")}', '${m.unidade_medida}', ${m.qtd_estoque || 0}) ON DUPLICATE KEY UPDATE descricao=VALUES(descricao), qtd_estoque=VALUES(qtd_estoque);\n`;
+      sql += `INSERT INTO materiais (id, descricao, unidade_medida, qtd_estoque) VALUES (${m.id}, ${escapeSql(m.descricao)}, ${escapeSql(m.unidade_medida)}, ${m.qtd_estoque || 0}) ON DUPLICATE KEY UPDATE descricao=VALUES(descricao), qtd_estoque=VALUES(qtd_estoque);\n`;
     });
 
     sql += `\n-- 3. Pedidos PBS\n`;
     pedidos.forEach(p => {
-      const apEnv = p.apontador_envio_nome ? `'${p.apontador_envio_nome.replace(/'/g, "''")}'` : 'NULL';
-      const dtEnv = p.data_envio ? `'${p.data_envio}'` : 'NULL';
-      const apRec = p.apontador_recebimento_nome ? `'${p.apontador_recebimento_nome.replace(/'/g, "''")}'` : 'NULL';
-      const dtRec = p.data_recebimento ? `'${p.data_recebimento}'` : 'NULL';
-      const obs = p.observacoes ? `'${p.observacoes.replace(/'/g, "''")}'` : 'NULL';
+      const apEnv = escapeSql(p.apontador_envio_nome);
+      const dtEnv = escapeSql(p.data_envio);
+      const apRec = escapeSql(p.apontador_recebimento_nome);
+      const dtRec = escapeSql(p.data_recebimento);
+      const obs = escapeSql(p.observacoes);
 
       sql += `INSERT INTO pedidos_pbs (\n`;
       sql += `    id, numero_pbs, unidade_emitente_id, data_pedido, responsavel_nome, responsavel_funcao, responsavel_registro,\n`;
       sql += `    atividade_programa, elemento_despesa, observacoes, status, valor_total_estimado,\n`;
       sql += `    apontador_envio_nome, data_envio, apontador_recebimento_nome, data_recebimento\n`;
       sql += `) VALUES (\n`;
-      sql += `    ${p.id}, '${p.numero_pbs}', ${p.unidade_emitente_id}, '${p.data_pedido}', '${p.responsavel_nome.replace(/'/g, "''")}', '${(p.responsavel_funcao || '').replace(/'/g, "''")}', '${(p.responsavel_registro || '').replace(/'/g, "''")}',\n`;
-      sql += `    '${(p.atividade_programa||'').replace(/'/g, "''")}', '${(p.elemento_despesa||'').replace(/'/g, "''")}', ${obs}, '${p.status}', ${p.valor_total_estimado.toFixed(2)},\n`;
+      sql += `    ${p.id}, ${escapeSql(p.numero_pbs)}, ${p.unidade_emitente_id}, ${escapeSql(p.data_pedido)}, ${escapeSql(p.responsavel_nome)}, ${escapeSql(p.responsavel_funcao || '')}, ${escapeSql(p.responsavel_registro || '')},\n`;
+      sql += `    ${escapeSql(p.atividade_programa || '')}, ${escapeSql(p.elemento_despesa || '')}, ${obs}, ${escapeSql(p.status)}, ${Number(p.valor_total_estimado || 0).toFixed(2)},\n`;
       sql += `    ${apEnv}, ${dtEnv}, ${apRec}, ${dtRec}\n`;
       sql += `) ON DUPLICATE KEY UPDATE status=VALUES(status), apontador_recebimento_nome=VALUES(apontador_recebimento_nome), data_recebimento=VALUES(data_recebimento), apontador_envio_nome=VALUES(apontador_envio_nome), data_envio=VALUES(data_envio);\n`;
 
       sql += `-- Itens do Pedido ${p.numero_pbs}\n`;
       (p.itens || []).forEach(it => {
-        sql += `INSERT INTO itens_pedido_pbs (id, pedido_id, numero_item, material_id, qtd_pedida, qtd_atendida, valor_unitario, valor_total) VALUES (${it.id}, ${p.id}, ${it.numero_item}, ${it.material_id}, ${it.qtd_pedida}, ${it.qtd_atendida}, ${it.valor_unitario.toFixed(2)}, ${it.valor_total.toFixed(2)});\n`;
+        sql += `INSERT INTO itens_pedido_pbs (id, pedido_id, numero_item, material_id, qtd_pedida, qtd_atendida, valor_unitario, valor_total) VALUES (${it.id}, ${p.id}, ${it.numero_item}, ${it.material_id}, ${it.qtd_pedida}, ${it.qtd_atendida}, ${Number(it.valor_unitario || 0).toFixed(2)}, ${Number(it.valor_total || 0).toFixed(2)});\n`;
       });
       sql += `\n`;
     });
