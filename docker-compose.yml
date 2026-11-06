@@ -46,7 +46,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.local
     container_name: odontogest-app
     restart: unless-stopped
     ports:

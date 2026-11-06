@@ -11,14 +11,28 @@ Construído com conformidade **OWASP Top 10**, autenticação segura via **OAuth
 - **Frontend**: [React 19](https://react.dev/), [TypeScript](https://www.typescriptlang.org/), [Vite](https://vitejs.dev/)
 - **Backend**: [Fastify 5](https://fastify.dev/) com TypeScript e execução via [TSX](https://github.com/privatenumber/tsx)
 - **Banco de Dados & ORM**: [MySQL 8.0](https://www.mysql.com/) e [Prisma ORM 6](https://www.prisma.io/)
-- **Containerização**: [Docker](https://www.docker.com/) & Docker Compose
+- **Containerização Local**: [Docker](https://www.docker.com/) & Docker Compose (`Dockerfile.local`)
+- **Deploy em Nuvem**: [Railway](https://railway.com/) via integração nativa Git (Nixpacks / Node.js)
 - **Design System & Segurança**: Vanilla CSS, Glassmorphism moderno, Proteção Anti-CSRF (Double-Submit), Sessions Seguras.
 
 ---
 
-## 🚀 Inicialização Rápida com Docker
+## 🚀 Deploy em Produção (Railway)
 
-O projeto já possui `docker-compose.yml` e `Dockerfile` configurados e prontos.
+O projeto está configurado para deploy automático na **Railway** via integração com o GitHub:
+
+1. Ao enviar commits para a branch principal (`git push`), a Railway detecta as alterações e realiza o build nativo com **Nixpacks** (sem Docker na nuvem).
+2. O arquivo [railway.json](file:///railway.json) define explicitamente o builder como `NIXPACKS` e os comandos `npm run build` e `npm run start`.
+3. Variáveis de ambiente configuradas na Railway:
+   - `DATABASE_URL`: URL de conexão do MySQL na Railway (ex: `${{MySQL.DATABASE_URL}}`).
+   - `COOKIE_SECRET`: Chave secreta para criptografia de cookies e CSRF.
+   - `NODE_ENV`: `production`
+
+---
+
+## 🐳 Inicialização Rápida com Docker (Para Computador de Testes Locais)
+
+O projeto possui `docker-compose.yml` utilizando `Dockerfile.local` exclusivamente para testes locais:
 
 ### 1. Iniciar Banco de Dados MySQL e phpMyAdmin (Recomendado para Dev Local)
 

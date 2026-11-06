@@ -15,9 +15,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const isLanMode = process.env.HOST === '0.0.0.0' || process.argv.includes('--lan') || process.argv.includes('--host');
-const HOST = process.env.HOST || (process.env.NODE_ENV === 'production' ? '0.0.0.0' : (isLanMode ? '0.0.0.0' : '127.0.0.1'));
+const isCloudOrProduction = process.env.NODE_ENV === 'production' || Boolean(process.env.RAILWAY_ENVIRONMENT) || Boolean(process.env.PORT && process.env.PORT !== '3001');
+const HOST = process.env.HOST || (isCloudOrProduction ? '0.0.0.0' : (isLanMode ? '0.0.0.0' : '127.0.0.1'));
 
 const fastify = Fastify({
+  trustProxy: true,
   logger: {
     level: process.env.LOG_LEVEL || (process.env.NODE_ENV === 'production' ? 'info' : 'warn'),
     base: undefined // Remove hostname, pid e metadados internos do log
@@ -52,6 +54,25 @@ if (process.env.APP_URL) {
     ALLOWED_ORIGINS.add(new URL(process.env.APP_URL).origin);
   } catch {}
 }
+if (process.env.RAILWAY_PUBLIC_DOMAIN) {
+  ALLOWED_ORIGINS.add(`https://${process.env.RAILWAY_PUBLIC_DOMAIN}`);
+  ALLOWED_ORIGINS.add(`http://${process.env.RAILWAY_PUBLIC_DOMAIN}`);
+}
+if (process.env.RAILWAY_STATIC_URL) {
+  ALLOWED_ORIGINS.add(`https://${process.env.RAILWAY_STATIC_URL}`);
+  ALLOWED_ORIGINS.add(`http://${process.env.RAILWAY_STATIC_URL}`);
+}
+
+// Verifica se a origem pertence a um domínio gerenciado na Railway
+function isRailwayOrigin(origin: string): boolean {
+  try {
+    const url = new URL(origin);
+    const host = url.hostname;
+    return host.endsWith('.railway.app') || host.endsWith('.up.railway.app');
+  } catch {
+    return false;
+  }
+}
 
 // Verifica se a origem é um IP de rede local privada (RFC 1918)
 function isLanOrigin(origin: string): boolean {
@@ -71,11 +92,22 @@ function isLanOrigin(origin: string): boolean {
 }
 
 async function bootstrap() {
+  // Executa migrações pendentes do Prisma se estiver rodando em produção/Railway
+  if (process.env.DATABASE_URL && (process.env.NODE_ENV === 'production' || process.env.RAILWAY_ENVIRONMENT)) {
+    try {
+      const { execSync } = await import('child_process');
+      fastify.log.info('Verificando migrações do banco de dados no Prisma...');
+      execSync('npx prisma migrate deploy', { stdio: 'inherit' });
+    } catch (err: any) {
+      fastify.log.warn({ msg: 'Aviso ao executar migrações do Prisma no bootstrap:', err: err?.message || err });
+    }
+  }
+
   // 1. CORS plugin with explicit origin allowlist
   await fastify.register(fastifyCors, {
     origin: (origin, cb) => {
       // Allow requests with no origin (like mobile apps, curl, or same-origin)
-      if (!origin || ALLOWED_ORIGINS.has(origin)) {
+      if (!origin || ALLOWED_ORIGINS.has(origin) || isRailwayOrigin(origin)) {
         return cb(null, true);
       }
       // Se o servidor estiver escutando na rede local (0.0.0.0), permite requisições de IPs privados

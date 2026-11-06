@@ -8,11 +8,14 @@
     "dev": "concurrently \"vite\" \"tsx watch src/server/server.ts\"",
     "dev:lan": "concurrently \"vite --host\" \"tsx watch src/server/server.ts --lan\"",
     "db:migrate": "prisma migrate deploy || (prisma migrate resolve --applied 0_init && prisma migrate deploy)",
-    "build": "prisma generate && npm run db:migrate && tsc && vite build",
+    "build": "prisma generate && (npm run db:migrate || node -e \"console.log('Aviso: migracao de banco diferida')\") && tsc && vite build",
     "start": "tsx src/server/server.ts",
     "serve": "tsx src/server/server.ts",
     "prisma:generate": "prisma generate",
     "prisma:db-push": "prisma db push"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   },
   "keywords": [
     "almoxarifado",
@@ -45,9 +48,11 @@
     "clsx": "^2.1.1",
     "fastify": "^5.2.0",
     "lucide-react": "^1.61.0",
+    "prisma": "^6.3.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "tailwind-merge": "^3.7.0"
+    "tailwind-merge": "^3.7.0",
+    "tsx": "^4.23.12"
   },
   "devDependencies": {
     "@types/node": "^22.10.10",
@@ -57,9 +62,7 @@
     "autoprefixer": "^10.6.1",
     "concurrently": "^9.1.2",
     "postcss": "^8.5.31",
-    "prisma": "^6.3.0",
     "tailwindcss": "^3.4.19",
-    "tsx": "^4.23.12",
     "typescript": "^5.7.3",
     "vite": "^6.0.11"
   }
