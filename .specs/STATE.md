@@ -70,21 +70,25 @@
 - **Date**: 2026-10-24
 - **Status**: active
 
+### AD-010
+- **Decision**: Reestruturar e rebrandear a tela de autenticação (`LoginModal.tsx`) integrando o wallpaper fotográfico oficial de consultório e almoxarifado como background responsivo full-viewport com overlay de luminosidade suave e card central com Glassmorphism clínico (`backdrop-blur-xl bg-white/92 border-white/60 rounded-2xl`), aplicando rigorosamente as 16 Leis de UX de Jon Yablonski (Fitts's Law com alvos táteis de 44px, Hick's Law e Parkinson's Law com atalhos de preenchimento rápido para homologação, Jakob's Law com alternador de revelação de senha, Von Restorff Effect com botão primário em gradiente azul clínico, e Doherty Threshold com transições e desativação em loading).
+- **Reason**: Atender à solicitação explícita do usuário de modernização estética imersiva com o novo wallpaper odontológico, garantindo contraste WCAG AAA, acessibilidade, confiança institucional e agilidade nos testes.
+- **Trade-off**: A imagem de fundo oficial é empacotada em `public/login-wallpaper.jpg` (78 KB) e servida estaticamente sem sobrecarga de carregamento.
+- **Scope**: `src/client/components/LoginModal.tsx`, `public/login-wallpaper.jpg`, `tests/login-screen-rebrand.test.ts`.
+- **Date**: 2026-11-06
+- **Status**: active
+
 ## Handoff
 
-- **Feature**: .specs/features/padronizacao-botoes-acoes-formularios
+- **Feature**: .specs/features/login-rebrand-wallpaper-ux
 - **Phase / Task**: Verified / Complete
 - **Completed**:
-  - `confirm-dialog.tsx`: Botões Cancelar e Excluir padronizados com ícones (`X` e `Trash2`), cores semânticas, hover suave e tooltips.
-  - `LoginModal.tsx`: Botão Entrar no Sistema padronizado com elevação, sombra no hover e tooltips.
-  - Modais de Catálogo (`ModalUnidade.tsx`, `ModalEditarUnidade.tsx`, `ModalMaterial.tsx`, `ModalEditarMaterial.tsx`, `ModalAjusteEstoque.tsx`): Botões Cancelar e Salvar/Cadastrar/Estoque padronizados com ícones (`X`, `Plus`, `Save`, `Check`), hover suave e tooltips.
-  - Modais de Workflow (`ModalEnvio.tsx`, `ModalRecebimento.tsx`, `ModalAtendimento.tsx`, `ModalRelatorio.tsx`, `ModalFichaPbs.tsx`): Botões de despacho, recebimento, atendimento, exportação Excel/PDF e impressão padronizados.
-  - `UsuariosTab.tsx` e `HonorariosTab.tsx`: Modais de cadastro/edição com Cancelar (`X` + hover rose) e Salvar (`Save` + hover glow + tooltips).
-  - `EquipamentosTab.tsx`: Todos os 4 modais (Novo Equipamento, Editar Equipamento, Abrir Chamado, Atualizar Status) padronizados com ícones semânticos e tooltips.
-  - `NovoPedidoTab.tsx` e `OrcamentoTab.tsx`: Botões de formulário (Adicionar Insumo, Remover Linha, Cancelar, Emitir PBS, Limpar e Registrar Entrada) padronizados.
+  - `LoginModal.tsx`: Rebrand completo da tela de login com o wallpaper oficial de consultório e almoxarifado OdontoGest, overlay suave para garantia de contraste WCAG AAA, card com Glassmorphism clínico (`backdrop-blur-xl bg-white/92 dark:bg-slate-900/92 border-white/60 rounded-2xl`), tipografia refinada e selo de segurança institucional do SUS.
+  - Aplicação das 16 Leis de UX: alvos táteis de 44px (Fitts), inputs padronizados com ícones `Mail` e `KeyRound` (Similarity e Proximity), alternador de revelação de senha acessível com `aria-label` (Jakob), botão primário com gradiente vibrante em azul clínico (Von Restorff), estado loading animado imediato com prevenção contra duplo-clique (Doherty e Peak-End), e atalhos rápidos de teste (Admin, Solicitante, Gestor) para preenchimento em 1 clique (Hick e Parkinson).
+  - Teste automatizado `tests/login-screen-rebrand.test.ts` criado e aprovado (4/4 suítes).
   - Todos os gates determinísticos aprovados: `npx tsc --noEmit` (exit 0), `npx vite build` (exit 0), `validate_spec.py` (exit 0), `validate_tasks.py` (exit 0) e `validate_state.py` (exit 0).
 - **In-progress**: None
-- **Next step**: Homologação do usuário na interface
+- **Next step**: Visualização e homologação pelo usuário no navegador
 - **Blockers**: None
-- **Uncommitted files**: none
+- **Uncommitted files**: `src/client/components/LoginModal.tsx`, `public/login-wallpaper.jpg`, `tests/login-screen-rebrand.test.ts`, `.specs/features/login-rebrand-wallpaper-ux/`
 - **Branch**: main
