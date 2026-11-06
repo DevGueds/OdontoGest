@@ -13,8 +13,8 @@ Além disso, faltam alinhamentos com as **16 Leis de UI-UX** (Laws of UX de Jon 
 
 ## Goals
 
-- [ ] Integrar o wallpaper oficial do OdontoGest como plano de fundo responsivo, nítido e otimizado com cobertura total da viewport.
-- [ ] Implementar um card de login com acabamento em Glassmorphism clínico (vidro fosco, bordas translúcidas e sombras suaves) garantindo legibilidade perfeita sobre o wallpaper.
+- [ ] Integrar o wallpaper oficial do OdontoGest como plano de fundo responsivo, nítido e com qualidade 100% original (sem blur e sem filtros escuros).
+- [ ] Implementar um card de login com acabamento sólido e limpo (bg-white, borda nítida e sombra suave, sem efeito glassmorphism), posicionado de forma ergonômica à direita no desktop para não cobrir a identidade visual do wallpaper.
 - [ ] Aplicar rigorosamente as 16 Leis de UX: alvos táteis ergonômicos (Fitts), agrupamento semântico por proximidade (Proximity), inputs padronizados (Similarity), foco nos dados essenciais (Hick/Occam/Miller) e botão CTA com destaque vibrante em azul clínico (Von Restorff).
 - [ ] Incluir um seletor rápido expansível de credenciais de teste (Administrador, Solicitante e Gestor) com preenchimento instantâneo em 1 clique para acelerar os testes.
 - [ ] Fornecer feedback visual instantâneo em menos de 100ms com transições táteis, loading spinner com desativação do botão contra duplo-clique (Doherty Threshold & Peak-End Rule) e suporte a tecla Enter.
@@ -37,7 +37,7 @@ Explicitamente excluído para prevenir desvios de escopo:
 | --- | --- | --- | --- |
 | Posicionamento do card de login no Desktop | Alinhado ao centro/direita com suporte a visualização equilibrada do wallpaper | No desktop, o wallpaper possui a cadeira odontológica à esquerda e o armazém à direita. O card semi-translúcido no centro/direita mantém a harmonia e a visibilidade de toda a composição. | y |
 | Resolução do wallpaper | Armazenado em `src/client/assets/login-wallpaper.jpg` e `public/login-wallpaper.jpg` (78 KB) | O arquivo é leve, carrega instantaneamente sem travar a renderização inicial e funciona perfeitamente em dev e produção (Vite). | y |
-| Acessibilidade e Contraste | Fundo do card com `backdrop-blur-xl bg-white/90` (e `dark:bg-slate-950/90`) com bordas em `border-white/60` | Garante contraste WCAG AAA para todos os textos e inputs, independente da imagem de fundo. | y |
+| Acessibilidade e Contraste | Fundo do card sólido com `bg-white` (e `dark:bg-zinc-900`) com bordas em `border-slate-200` | Garante contraste WCAG AAA para todos os textos e inputs, eliminando transparências e efeito de vidro fosco. | y |
 | Credenciais Rápidas de Teste | Accordion/popover discreto e colapsável "Contas de Teste (Ambiente Homologação)" | Atende ao Hick's Law evitando poluição visual, mas oferecendo produtividade imediata para quem for testar. | y |
 
 **Open questions:** none - all resolved or logged above.
@@ -55,7 +55,7 @@ Explicitamente excluído para prevenir desvios de escopo:
 **Acceptance Criteria** (EARS notation):
 
 1. The system SHALL display the OdontoGest dental clinic and warehouse wallpaper as a responsive full-viewport background with `background-size: cover` and `background-position: center`. <!-- ubiquitous -->
-2. The system SHALL render the authentication form inside an elevated glassmorphic card with `backdrop-blur-xl`, rounded borders (`rounded-2xl`), and high-contrast typography satisfying WCAG AAA standards. <!-- ubiquitous -->
+2. The system SHALL render the authentication form inside an elevated solid card with `bg-white dark:bg-zinc-900`, rounded borders (`rounded-xl`), and high-contrast typography satisfying WCAG AAA standards. <!-- ubiquitous -->
 3. WHEN the screen is viewed on mobile devices (width < 640px) THEN the system SHALL adjust the card padding and margins ensuring the form remains fully visible without horizontal scrolling. <!-- event-driven -->
 
 **Independent Test**: Carregar a tela de login deslogado e verificar o wallpaper preenchendo a tela e o card de vidro fosco centralizado com textos legíveis.

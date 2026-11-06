@@ -71,9 +71,9 @@
 - **Status**: active
 
 ### AD-010
-- **Decision**: Reestruturar e rebrandear a tela de autenticação (`LoginModal.tsx`) integrando o wallpaper fotográfico oficial de consultório e almoxarifado como background responsivo full-viewport com overlay de luminosidade suave e card central com Glassmorphism clínico (`backdrop-blur-xl bg-white/92 border-white/60 rounded-2xl`), aplicando rigorosamente as 16 Leis de UX de Jon Yablonski (Fitts's Law com alvos táteis de 44px, Hick's Law e Parkinson's Law com atalhos de preenchimento rápido para homologação, Jakob's Law com alternador de revelação de senha, Von Restorff Effect com botão primário em gradiente azul clínico, e Doherty Threshold com transições e desativação em loading).
-- **Reason**: Atender à solicitação explícita do usuário de modernização estética imersiva com o novo wallpaper odontológico, garantindo contraste WCAG AAA, acessibilidade, confiança institucional e agilidade nos testes.
-- **Trade-off**: A imagem de fundo oficial é empacotada em `public/login-wallpaper.jpg` (78 KB) e servida estaticamente sem sobrecarga de carregamento.
+- **Decision**: Reestruturar e rebrandear a tela de autenticação (`LoginModal.tsx`) integrando o wallpaper fotográfico oficial de consultório e almoxarifado como background com 100% de nitidez original (sem blur e sem filtros escuros) e card de login sólido (`bg-white dark:bg-zinc-900 border-slate-200 rounded-xl shadow-2xl` - sem glassmorphism), posicionado à direita no desktop para deixar a arte e logotipo do wallpaper totalmente visíveis e nítidos, aplicando as Leis de UX de Jon Yablonski (Fitts's Law com alvos táteis de 44px, Hick's Law e Parkinson's Law com atalhos de preenchimento rápido para homologação, Jakob's Law com alternador de revelação de senha, Von Restorff Effect com botão primário em azul clínico e Doherty Threshold com resposta imediata e desativação em loading).
+- **Reason**: Atender à solicitação explícita do usuário de manter a nitidez total da imagem de fundo e eliminar o efeito de vidro fosco (glassmorphism), garantindo interface sólida, clara e limpa.
+- **Trade-off**: A imagem de fundo oficial é servida estaticamente em `/login-wallpaper.jpg`.
 - **Scope**: `src/client/components/LoginModal.tsx`, `public/login-wallpaper.jpg`, `tests/login-screen-rebrand.test.ts`.
 - **Date**: 2026-11-06
 - **Status**: active

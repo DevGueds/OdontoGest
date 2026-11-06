@@ -10,16 +10,16 @@ const html = renderToStaticMarkup(
   React.createElement(AuthProvider, null, React.createElement(LoginModal, null))
 );
 
-// 1. LOGIN-01 & LOGIN-02: Fundo Imersivo com Wallpaper e Glassmorphism Clínico
-console.log('1. Testando presença do wallpaper, glassmorphism e identidade de marca...');
+// 1. LOGIN-01 & LOGIN-02: Fundo Imersivo com Wallpaper Nítido e Card Sólido
+console.log('1. Testando presença do wallpaper nítido, card sólido e identidade de marca...');
 assert.ok(html.includes('bg-cover'), 'O plano de fundo deve utilizar classe bg-cover para o wallpaper');
 assert.ok(html.includes('bg-center'), 'O plano de fundo deve utilizar classe bg-center para alinhamento da imagem');
-assert.ok(html.includes('backdrop-blur-xl'), 'O card deve aplicar efeito de vidro fosco (backdrop-blur-xl)');
-assert.ok(html.includes('rounded-2xl'), 'O card deve possuir cantos arredondados modernos (rounded-2xl)');
+assert.ok(html.includes('bg-white'), 'O card deve ser sólido e limpo (bg-white), sem efeito de vidro fosco');
+assert.ok(html.includes('rounded-xl'), 'O card deve possuir cantos arredondados modernos (rounded-xl)');
 assert.ok(html.includes('OdontoGest'), 'O título da marca OdontoGest deve estar visível');
 assert.ok(html.includes('Almoxarifado &amp; Gestão Odontológica') || html.includes('Almoxarifado & Gestão Odontológica'), 'O subtítulo oficial deve ser renderizado');
 assert.ok(html.includes('Ambiente SUS • Acesso Seguro'), 'O selo de segurança institucional deve ser exibido');
-console.log('✓ Wallpaper e estrutura Glassmorphism validados com sucesso.');
+console.log('✓ Wallpaper nítido e estrutura sólida validados com sucesso.');
 
 // 2. LOGIN-03: Ergonomia dos Inputs (Fitts, Similarity, Proximity, Jakob)
 console.log('2. Testando ergonomia dos campos de e-mail e senha...');
@@ -32,8 +32,7 @@ console.log('✓ Ergonomia de inputs e acessibilidade validadas com sucesso.');
 
 // 3. LOGIN-04: Botão de Ação Primária (Von Restorff Effect & Doherty Threshold)
 console.log('3. Testando botão de ação primária com destaque azul clínico...');
-assert.ok(html.includes('from-sky-600'), 'Botão primário deve utilizar gradiente azul clínico (from-sky-600)');
-assert.ok(html.includes('to-blue-700'), 'Botão primário deve finalizar no azul real (to-blue-700)');
+assert.ok(html.includes('bg-sky-600'), 'Botão primário deve utilizar azul clínico (bg-sky-600)');
 assert.ok(html.includes('Entrar no Sistema'), 'Botão de submissão deve conter texto descritivo Entrar no Sistema');
 assert.ok(html.includes('type="submit"'), 'Botão deve ter type=submit para permitir envio por tecla Enter');
 console.log('✓ Botão de ação primária validado com sucesso.');

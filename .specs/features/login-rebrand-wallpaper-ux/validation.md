@@ -20,9 +20,9 @@ Todos os requisitos de rebrand da tela de login com o wallpaper oficial do Odont
 
 ## Verification Summary
 
-1. **Wallpaper Oficial & Glassmorphism Clínico (LOGIN-01, LOGIN-02)**:
-   - O wallpaper de consultório odontológico e almoxarifado foi integrado com `background-size: cover` e overlay de luminosidade em degradê para preservar contraste visual WCAG AAA (`src/client/components/LoginModal.tsx:47`).
-   - Card com acabamento em vidro fosco (`backdrop-blur-xl bg-white/92 dark:bg-slate-900/92`), cantos arredondados `rounded-2xl` e borda translúcida `border-white/60` (*Aesthetic-Usability Effect*, *Law of Common Region*, *Law of Prägnanz*).
+1. **Wallpaper Oficial Nítido & Card Sólido Limpo (LOGIN-01, LOGIN-02)**:
+   - O wallpaper foi configurado com 100% de nitidez original, sem filtros escuros e sem `backdrop-blur` (`src/client/components/LoginModal.tsx:47`).
+   - Card 100% sólido em branco (`bg-white dark:bg-zinc-900 border-slate-200 rounded-xl shadow-2xl`), eliminando completamente efeito de vidro fosco (glassmorphism) e posicionado ergonomicamente à direita no desktop para manter a composição da arte limpa e desobstruída.
    - Identidade da marca OdontoGest com badge institucional do SUS e ícone `ToothIcon`.
 
 2. **Ergonomia dos Inputs e Ações (LOGIN-03, LOGIN-04)**:
@@ -41,3 +41,4 @@ Todos os requisitos de rebrand da tela de login com o wallpaper oficial do Odont
    - `npx tsx tests/login-screen-rebrand.test.ts`: 4/4 suítes aprovadas.
    - `npx tsc --noEmit`: Código 0 (sem erros de compilação).
    - `npx vite build`: Código 0 (bundle de produção gerado com sucesso).
+

@@ -32,9 +32,9 @@ T1 → T2 → T3 → T4
 
 ## Task Breakdown
 
-### T1: Integrar o Wallpaper e Estrutura Glassmorphism na Tela de Login
+### T1: Integrar o Wallpaper e Estrutura Sólida na Tela de Login
 
-**What**: Configurar o wallpaper oficial odontológico como plano de fundo full viewport responsivo e criar o card de autenticação com acabamento em Glassmorphism clínico (`backdrop-blur-xl bg-white/90 dark:bg-slate-950/90 shadow-2xl border border-white/60 rounded-2xl`).
+**What**: Configurar o wallpaper oficial odontológico com nitidez original (sem blur e sem filtros escuros) e criar o card de autenticação com acabamento sólido e limpo (`bg-white dark:bg-zinc-900 shadow-2xl border border-slate-200 rounded-xl`).
 **Where**: `src/client/components/LoginModal.tsx`
 **Depends on**: None
 **Requirement**: LOGIN-01, LOGIN-02
@@ -43,8 +43,8 @@ T1 → T2 → T3 → T4
 - Skill: NONE
 
 **Done when**:
-- [x] O wallpaper `login-wallpaper.jpg` é importado e aplicado no plano de fundo com `bg-cover bg-center` e overlay suave
-- [x] O card de login utiliza `backdrop-blur-xl`, cantos arredondados `rounded-2xl` e bordas translúcidas
+- [x] O wallpaper `login-wallpaper.jpg` é aplicado com 100% de nitidez (sem backdrop-blur e sem overlay escuro)
+- [x] O card de login é 100% sólido (`bg-white`), com cantos arredondados `rounded-xl` e borda limpa (sem glassmorphism)
 - [x] Tipografia e ícones possuem contraste nítido em conformidade com WCAG AAA
 - [x] `npx tsc --noEmit` passa sem erros
 
