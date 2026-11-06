@@ -92,17 +92,6 @@ function isLanOrigin(origin: string): boolean {
 }
 
 async function bootstrap() {
-  // Executa migrações pendentes do Prisma se estiver rodando em produção/Railway
-  if (process.env.DATABASE_URL && (process.env.NODE_ENV === 'production' || process.env.RAILWAY_ENVIRONMENT)) {
-    try {
-      const { execSync } = await import('child_process');
-      fastify.log.info('Verificando migrações do banco de dados no Prisma...');
-      execSync('npx prisma migrate deploy', { stdio: 'inherit' });
-    } catch (err: any) {
-      fastify.log.warn({ msg: 'Aviso ao executar migrações do Prisma no bootstrap:', err: err?.message || err });
-    }
-  }
-
   // 1. CORS plugin with explicit origin allowlist
   await fastify.register(fastifyCors, {
     origin: (origin, cb) => {
