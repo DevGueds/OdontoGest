@@ -31,8 +31,9 @@ Todos os requisitos de rebrand da tela de login com o wallpaper oficial do Odont
    - Botão de submissão destacado com gradiente azul clínico (`from-sky-600 to-blue-700`), sombra suave e hover táctil (*Von Restorff Effect*).
    - Feedback instantâneo com desativação do botão e spinner animado no loading (*Doherty Threshold* e *Peak-End Rule*).
 
-3. **Acelerador de Teste para Ambientes de Homologação (LOGIN-05)**:
-   - Seletor rápido de credenciais (Admin, Solicitante e Gestor) com preenchimento em 1 clique (*Hick's Law* e *Parkinson's Law*).
+3. **Layout Split 60/40 e Purga de Ruídos Visuais (LOGIN-05)**:
+   - Layout desktop dividido com exatidão em 60% para a arte fotográfica e 40% para o formulário de login (`lg:w-[60%]` e `lg:w-[40%]`).
+   - Removidos selos secundários (Ambiente SUS) e atalhos de teste, proporcionando visual limpo, moderno e direto.
    - Teste automatizado dedicado `tests/login-screen-rebrand.test.ts` aprovado com 100% de sucesso.
 
 4. **Gates Determinísticos Aprovados**:

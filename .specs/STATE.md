@@ -71,8 +71,8 @@
 - **Status**: active
 
 ### AD-010
-- **Decision**: Reestruturar e rebrandear a tela de autenticação (`LoginModal.tsx`) integrando o wallpaper fotográfico oficial de consultório e almoxarifado como background com 100% de nitidez original (sem blur e sem filtros escuros) e card de login sólido (`bg-white dark:bg-zinc-900 border-slate-200 rounded-xl shadow-2xl` - sem glassmorphism), posicionado à direita no desktop para deixar a arte e logotipo do wallpaper totalmente visíveis e nítidos, aplicando as Leis de UX de Jon Yablonski (Fitts's Law com alvos táteis de 44px, Hick's Law e Parkinson's Law com atalhos de preenchimento rápido para homologação, Jakob's Law com alternador de revelação de senha, Von Restorff Effect com botão primário em azul clínico e Doherty Threshold com resposta imediata e desativação em loading).
-- **Reason**: Atender à solicitação explícita do usuário de manter a nitidez total da imagem de fundo e eliminar o efeito de vidro fosco (glassmorphism), garantindo interface sólida, clara e limpa.
+- **Decision**: Reestruturar a tela de autenticação (`LoginModal.tsx`) em layout split 60/40 no desktop (60% dedicado ao wallpaper odontológico com 100% de nitidez original e 40% dedicado ao formulário de login limpo e sólido em `bg-white dark:bg-zinc-900`), eliminando qualquer ruído visual, selos secundários ou atalhos de teste, e mantendo ergonomia de inputs (44px), alternador de senha e botão CTA em azul clínico.
+- **Reason**: Atender à solicitação de layout split equilibrado e interface limpa, preservando a identidade visual sem cobrir a imagem.
 - **Trade-off**: A imagem de fundo oficial é servida estaticamente em `/login-wallpaper.jpg`.
 - **Scope**: `src/client/components/LoginModal.tsx`, `public/login-wallpaper.jpg`, `tests/login-screen-rebrand.test.ts`.
 - **Date**: 2026-11-06

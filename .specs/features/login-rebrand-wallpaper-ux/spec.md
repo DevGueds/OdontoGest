@@ -13,10 +13,9 @@ Além disso, faltam alinhamentos com as **16 Leis de UI-UX** (Laws of UX de Jon 
 
 ## Goals
 
-- [ ] Integrar o wallpaper oficial do OdontoGest como plano de fundo responsivo, nítido e com qualidade 100% original (sem blur e sem filtros escuros).
-- [ ] Implementar um card de login com acabamento sólido e limpo (bg-white, borda nítida e sombra suave, sem efeito glassmorphism), posicionado de forma ergonômica à direita no desktop para não cobrir a identidade visual do wallpaper.
-- [ ] Aplicar rigorosamente as 16 Leis de UX: alvos táteis ergonômicos (Fitts), agrupamento semântico por proximidade (Proximity), inputs padronizados (Similarity), foco nos dados essenciais (Hick/Occam/Miller) e botão CTA com destaque vibrante em azul clínico (Von Restorff).
-- [ ] Incluir um seletor rápido expansível de credenciais de teste (Administrador, Solicitante e Gestor) com preenchimento instantâneo em 1 clique para acelerar os testes.
+- [ ] Estruturar a tela de login em layout split 60/40 no desktop: 60% dedicado à imagem com 100% de nitidez original e 40% dedicado ao formulário de autenticação.
+- [ ] Implementar painel de login sólido, limpo e direto (bg-white / dark:bg-zinc-900) sem elementos poluentes como badges secundários ou atalhos de teste.
+- [ ] Aplicar rigorosamente as 16 Leis de UX: alvos táteis ergonômicos de 44px (Fitts), agrupamento semântico por proximidade (Proximity), inputs padronizados (Similarity), foco estrito nos dados essenciais (Hick/Occam/Miller) e botão CTA em azul clínico (Von Restorff).
 - [ ] Fornecer feedback visual instantâneo em menos de 100ms com transições táteis, loading spinner com desativação do botão contra duplo-clique (Doherty Threshold & Peak-End Rule) e suporte a tecla Enter.
 
 ## Out of Scope
@@ -35,10 +34,10 @@ Explicitamente excluído para prevenir desvios de escopo:
 
 | Assumption / decision | Chosen default | Rationale | Confirmed? |
 | --- | --- | --- | --- |
-| Posicionamento do card de login no Desktop | Alinhado ao centro/direita com suporte a visualização equilibrada do wallpaper | No desktop, o wallpaper possui a cadeira odontológica à esquerda e o armazém à direita. O card semi-translúcido no centro/direita mantém a harmonia e a visibilidade de toda a composição. | y |
+| Estrutura do Layout Desktop | Split 60/40 (60% imagem à esquerda, 40% login à direita) | Permite que a arte do wallpaper seja exibida com máxima nitidez e proporção, enquanto o formulário de login tem espaço próprio e limpo. | y |
 | Resolução do wallpaper | Armazenado em `src/client/assets/login-wallpaper.jpg` e `public/login-wallpaper.jpg` (78 KB) | O arquivo é leve, carrega instantaneamente sem travar a renderização inicial e funciona perfeitamente em dev e produção (Vite). | y |
-| Acessibilidade e Contraste | Fundo do card sólido com `bg-white` (e `dark:bg-zinc-900`) com bordas em `border-slate-200` | Garante contraste WCAG AAA para todos os textos e inputs, eliminando transparências e efeito de vidro fosco. | y |
-| Credenciais Rápidas de Teste | Accordion/popover discreto e colapsável "Contas de Teste (Ambiente Homologação)" | Atende ao Hick's Law evitando poluição visual, mas oferecendo produtividade imediata para quem for testar. | y |
+| Acessibilidade e Contraste | Painel de login com `bg-white` (e `dark:bg-zinc-900`) e bordas nítidas | Garante contraste WCAG AAA para todos os textos e inputs, eliminando transparências e efeito de vidro fosco. | y |
+| Remoção de Elementos Excedentes | Omissão de selos de ambiente SUS e atalhos rápidos de teste | Mantém a interface focada, profissional e sem ruídos cognitivos (Hick's Law e Occam's Razor). | y |
 
 **Open questions:** none - all resolved or logged above.
 
@@ -80,18 +79,18 @@ Explicitamente excluído para prevenir desvios de escopo:
 
 ---
 
-### P3: Acelerador de Teste para Ambientes de Homologação
+### P3: Layout Split 60/40 e Interface Limpa sem Ruídos
 
-**User Story**: Como avaliador ou testador do sistema, quero poder clicar em um atalho de perfil de teste (Administrador, Solicitante ou Gestor) para preencher instantaneamente e-mail e senha sem precisar digitá-los manualmente.
+**User Story**: Como usuário do OdontoGest, quero visualizar o sistema em uma divisão elegante de 60% para a imagem e 40% para o login, sem selos redundantes ou atalhos de teste na tela de produção, para ter uma experiência institucional sóbria e focada.
 
-**Why P3**: Reduz a complexidade de decisão e o tempo desnecessário de digitação (*Hick's Law* e *Parkinson's Law*).
+**Why P3**: Atende ao *Occam's Razor*, à *Law of Common Region* e à clareza do *Hick's Law*.
 
 **Acceptance Criteria** (EARS notation):
 
-1. The system SHALL display a collapsible testing helper section titled "Acesso Rápido para Testes" below the form. <!-- ubiquitous -->
-2. WHEN the user clicks any test profile badge (Admin, Solicitante, Gestor) THEN the system SHALL immediately populate the email and password fields with the matching credentials. <!-- event-driven -->
+1. The system SHALL structure the desktop layout with 60% dedicated to the wallpaper image pane (`lg:w-[60%]`) and 40% dedicated to the solid login form (`lg:w-[40%]`). <!-- ubiquitous -->
+2. The system SHALL exclude testing quick-fill buttons and secondary environment badges from the login view ensuring visual simplicity. <!-- ubiquitous -->
 
-**Independent Test**: Clicar em cada um dos 3 atalhos de teste e verificar os campos sendo preenchidos automaticamente com as credenciais correspondentes.
+**Independent Test**: Verificar o layout dividido em 60/40 no desktop e a ausência do selo Ambiente SUS e de botões de atalho de teste.
 
 ---
 
@@ -103,7 +102,7 @@ Explicitamente excluído para prevenir desvios de escopo:
 | LOGIN-02 | P1: Rebrand Estético e Fundo Imersivo com Wallpaper | Execute | Verified |
 | LOGIN-03 | P2: Ergonomia de Interação Conforme as 16 Leis de UX | Execute | Verified |
 | LOGIN-04 | P2: Ergonomia de Interação Conforme as 16 Leis de UX | Execute | Verified |
-| LOGIN-05 | P3: Acelerador de Teste para Ambientes de Homologação | Execute | Verified |
+| LOGIN-05 | P3: Layout Split 60/40 e Interface Limpa sem Ruídos | Execute | Verified |
 
 **Coverage:** 5 total, 5 mapped to tasks, 0 unmapped.
 

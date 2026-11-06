@@ -74,9 +74,9 @@ T1 → T2 → T3 → T4
 
 ---
 
-### T3: Implementar Acelerador de Teste para Ambientes de Homologação
+### T3: Implementar Layout Split 60/40 e Purga de Ruídos Visuais
 
-**What**: Implementar seletor rápido expansível com os 3 perfis de teste (Administrador, Solicitante e Gestor) permitindo autopreenchimento imediato em 1 clique (Hick's Law e Parkinson's Law) e criar teste automatizado em `tests/login-screen-rebrand.test.ts`.
+**What**: Estruturar o layout split 60% imagem e 40% formulário no desktop, remover selo de Ambiente SUS e atalhos rápidos de teste, e atualizar teste automatizado em `tests/login-screen-rebrand.test.ts`.
 **Where**: `tests/login-screen-rebrand.test.ts`
 **Depends on**: T2
 **Requirement**: LOGIN-05
@@ -85,9 +85,9 @@ T1 → T2 → T3 → T4
 - Skill: NONE
 
 **Done when**:
-- [x] Seção colapsável de acesso rápido exibe badges para Administrador, Solicitante e Gestor
-- [x] Clicar em qualquer perfil preenche os campos `email` e `senha` instantaneamente
-- [x] Teste automatizado valida a renderização e o comportamento de autopreenchimento e conformidade das 16 leis
+- [x] Layout desktop é dividido em 60% para imagem e 40% para o formulário
+- [x] Selo de Ambiente SUS e atalhos de teste são purgados da tela de login
+- [x] Teste automatizado valida a divisão 60/40 e a remoção dos elementos excedentes
 - [x] Teste passa com sucesso via `npx tsx tests/login-screen-rebrand.test.ts`
 
 **Tests**: integration
