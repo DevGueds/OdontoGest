@@ -26,6 +26,7 @@ EXPOSE 3001
 # Variável de ambiente padrão
 ENV NODE_ENV=production
 ENV PORT=3001
+ENV HOST=0.0.0.0
 
 # Executar como usuário não-root node
 RUN chown -R node:node /app

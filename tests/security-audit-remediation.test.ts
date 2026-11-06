@@ -154,3 +154,4 @@ runSecurityRemediationTests().catch(err => {
   console.error('Falha nos testes de remediação:', err);
   process.exit(1);
 });
+

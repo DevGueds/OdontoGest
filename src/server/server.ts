@@ -14,8 +14,14 @@ import { dataStore } from './data/store.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const isLanMode = process.env.HOST === '0.0.0.0' || process.argv.includes('--lan') || process.argv.includes('--host');
+const HOST = process.env.HOST || (process.env.NODE_ENV === 'production' ? '0.0.0.0' : (isLanMode ? '0.0.0.0' : '127.0.0.1'));
+
 const fastify = Fastify({
-  logger: true
+  logger: {
+    level: process.env.LOG_LEVEL || (process.env.NODE_ENV === 'production' ? 'info' : 'warn'),
+    base: undefined // Remove hostname, pid e metadados internos do log
+  }
 });
 
 const PORT = Number(process.env.PORT) || 3001;
@@ -47,12 +53,33 @@ if (process.env.APP_URL) {
   } catch {}
 }
 
+// Verifica se a origem é um IP de rede local privada (RFC 1918)
+function isLanOrigin(origin: string): boolean {
+  try {
+    const url = new URL(origin);
+    const host = url.hostname;
+    return (
+      host === 'localhost' ||
+      host === '127.0.0.1' ||
+      /^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(host) ||
+      /^192\.168\.\d{1,3}\.\d{1,3}$/.test(host) ||
+      /^172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}$/.test(host)
+    );
+  } catch {
+    return false;
+  }
+}
+
 async function bootstrap() {
   // 1. CORS plugin with explicit origin allowlist
   await fastify.register(fastifyCors, {
     origin: (origin, cb) => {
       // Allow requests with no origin (like mobile apps, curl, or same-origin)
       if (!origin || ALLOWED_ORIGINS.has(origin)) {
+        return cb(null, true);
+      }
+      // Se o servidor estiver escutando na rede local (0.0.0.0), permite requisições de IPs privados
+      if (HOST === '0.0.0.0' && isLanOrigin(origin)) {
         return cb(null, true);
       }
       cb(new Error('Origem não permitida pela política CORS'), false);
@@ -717,12 +744,16 @@ async function bootstrap() {
   });
 
   try {
-    await fastify.listen({ port: PORT, host: '0.0.0.0' });
-    console.log(`=============================================================`);
-    console.log(`🔒 SEGURANÇA OWASP TOP 10 & FASTIFY ATIVOS!`);
-    console.log(`🛡️ HttpOnly Cookies + Anti-CSRF + OAuth 2.0 PKCE`);
-    console.log(`🌐 Backend: http://localhost:${PORT}`);
-    console.log(`=============================================================`);
+    await fastify.listen({ port: PORT, host: HOST });
+    const isLocalOnly = HOST === '127.0.0.1';
+    console.log(`\n🚀 OdontoGest Backend rodando em http://${isLocalOnly ? 'localhost' : HOST}:${PORT}`);
+    if (isLocalOnly) {
+      console.log(`🔒 Modo Seguro Ativo: acessível apenas nesta máquina (127.0.0.1).`);
+      console.log(`💡 Para permitir acesso de outras pessoas na mesma rede Wi-Fi, use: npm run dev:lan\n`);
+    } else {
+      console.log(`🌐 Modo Rede Local (LAN) Ativo: acessível por dispositivos na mesma rede.`);
+      console.log(`⚠️ Certifique-se de estar conectado em uma rede Wi-Fi confiável.\n`);
+    }
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);

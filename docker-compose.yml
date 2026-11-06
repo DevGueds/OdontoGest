@@ -54,6 +54,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3001
+      - HOST=0.0.0.0
       - DATABASE_URL=mysql://root:root@db:3306/almoxarifado_saude_db
       - COOKIE_SECRET=super-secret-key-pbs-saude-owasp-2026
       - DEBUG_PRISMA=false
